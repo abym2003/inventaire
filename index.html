@@ -21,7 +21,6 @@
             overflow-x: hidden;
         }
 
-        /* Header */
         .header {
             background: #1e1e1e;
             padding: 16px 20px;
@@ -43,14 +42,12 @@
             margin-top: 4px;
         }
 
-        /* Main Container */
         .container {
             padding: 20px;
             padding-bottom: 90px;
             min-height: calc(100vh - 140px);
         }
 
-        /* Dashboard Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -64,6 +61,13 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
         }
 
         .stat-value {
@@ -78,7 +82,6 @@
             color: #aaa;
         }
 
-        /* Quick Actions */
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -112,7 +115,6 @@
             box-shadow: 0 4px 12px rgba(3, 218, 198, 0.3);
         }
 
-        /* Search Bar */
         .search-container {
             margin-bottom: 20px;
         }
@@ -132,7 +134,6 @@
             border-color: #bb86fc;
         }
 
-        /* Filters */
         .filters {
             display: flex;
             gap: 8px;
@@ -158,7 +159,6 @@
             border-color: #bb86fc;
         }
 
-        /* Article List */
         .article-list {
             display: flex;
             flex-direction: column;
@@ -223,7 +223,6 @@
             border: 1px solid #333;
         }
 
-        /* Floating Action Button */
         .fab {
             position: fixed;
             bottom: 80px;
@@ -248,7 +247,6 @@
             transform: scale(0.9);
         }
 
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -295,7 +293,6 @@
             color: #bb86fc;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -353,7 +350,6 @@
             justify-content: center;
         }
 
-        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
         }
@@ -427,7 +423,6 @@
             color: #fff;
         }
 
-        /* Scanner */
         .scanner-container {
             position: relative;
             width: 100%;
@@ -463,7 +458,6 @@
             box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
         }
 
-        /* Detail Page */
         .detail-header {
             background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
             padding: 24px;
@@ -521,7 +515,6 @@
             color: #bb86fc;
         }
 
-        /* History */
         .history-item {
             display: flex;
             gap: 12px;
@@ -558,7 +551,6 @@
             color: #888;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -575,7 +567,6 @@
             color: #888;
         }
 
-        /* Location List */
         .location-list-item {
             display: flex;
             justify-content: space-between;
@@ -585,6 +576,12 @@
             border-radius: 12px;
             margin-bottom: 12px;
             border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .location-list-item:hover {
+            background: #252525;
         }
 
         .location-info {
@@ -626,7 +623,6 @@
             background: #333;
         }
 
-        /* Multi Select */
         .location-select {
             display: flex;
             flex-direction: column;
@@ -660,7 +656,6 @@
             flex: 1;
         }
 
-        /* Import/Export Page */
         .export-section {
             background: #1e1e1e;
             padding: 20px;
@@ -708,10 +703,34 @@
         .hidden {
             display: none !important;
         }
+
+        .detail-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .detail-info-item {
+            background: #121212;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .detail-info-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .detail-info-value {
+            font-size: 15px;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <!-- Dashboard Page -->
     <div id="dashboard-page" class="page">
         <div class="header">
             <h1>📦 Gestion d'Inventaire</h1>
@@ -719,19 +738,11 @@
         </div>
         <div class="container">
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="total-articles">0</div>
-                    <div class="stat-label">Articles</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="total-quantity">0</div>
-                    <div class="stat-label">Quantité totale</div>
-                </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="navigateTo('locations')">
                     <div class="stat-value" id="total-locations">0</div>
                     <div class="stat-label">Emplacements</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showLowStock()">
                     <div class="stat-value" id="low-stock">0</div>
                     <div class="stat-label">Stock faible</div>
                 </div>
@@ -753,7 +764,6 @@
         </div>
     </div>
 
-    <!-- Inventory Page -->
     <div id="inventory-page" class="page hidden">
         <div class="header">
             <h1>📋 Inventaire</h1>
@@ -771,7 +781,6 @@
         <button class="fab" onclick="showAddArticleModal()">+</button>
     </div>
 
-    <!-- Scan Page -->
     <div id="scan-page" class="page hidden">
         <div class="header">
             <h1>📷 Scanner</h1>
@@ -797,7 +806,6 @@
         </div>
     </div>
 
-    <!-- Detail Page -->
     <div id="detail-page" class="page hidden">
         <div class="header">
             <h1>📦 Détails</h1>
@@ -806,7 +814,6 @@
         <div class="container" id="detail-container"></div>
     </div>
 
-    <!-- Locations Page -->
     <div id="locations-page" class="page hidden">
         <div class="header">
             <h1>📍 Emplacements</h1>
@@ -818,14 +825,12 @@
         <button class="fab" onclick="showAddLocationModal()">+</button>
     </div>
 
-    <!-- Import/Export Page -->
     <div id="import-export-page" class="page hidden">
         <div class="header">
             <h1>📊 Import/Export</h1>
             <div class="header-subtitle">Gestion des données</div>
         </div>
         <div class="container">
-            <!-- Export Section -->
             <div class="export-section">
                 <div class="export-icon">📤</div>
                 <div class="section-title">Exporter l'inventaire</div>
@@ -837,7 +842,6 @@
                 <button class="btn-secondary" onclick="downloadExcel()">💾 Télécharger Excel</button>
             </div>
 
-            <!-- Import Section -->
             <div class="export-section">
                 <div class="export-icon">📥</div>
                 <div class="section-title">Importer l'inventaire</div>
@@ -852,7 +856,6 @@
                 </div>
             </div>
 
-            <!-- Backup Section -->
             <div class="export-section">
                 <div class="section-title">💾 Sauvegarde locale</div>
                 <button class="btn-secondary" onclick="backupData()">Créer une sauvegarde</button>
@@ -861,7 +864,6 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="navigateTo('dashboard')">
             <div class="nav-icon">🏠</div>
@@ -885,7 +887,6 @@
         </div>
     </nav>
 
-    <!-- Add Article Modal -->
     <div id="add-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -902,19 +903,42 @@
                     <input type="text" class="form-input" id="article-barcode">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-textarea" id="article-description"></textarea>
+                    <label class="form-label">Famille *</label>
+                    <input type="text" class="form-input" id="article-famille" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Emplacements et quantités</label>
-                    <div id="locations-checkboxes" class="location-select"></div>
+                    <label class="form-label">Catégorie *</label>
+                    <input type="text" class="form-input" id="article-categorie" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Taille</label>
+                    <input type="text" class="form-input" id="article-taille">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Longueur</label>
+                    <input type="text" class="form-input" id="article-longueur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Conditionnement *</label>
+                    <input type="number" class="form-input" id="article-conditionnement" required min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fournisseur</label>
+                    <input type="text" class="form-input" id="article-fournisseur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lieu de stockage *</label>
+                    <select class="form-select" id="article-location" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre *</label>
+                    <input type="number" class="form-input" id="article-nombre" required min="0" value="1">
                 </div>
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
     </div>
 
-    <!-- Add Location Modal -->
     <div id="add-location-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -935,7 +959,6 @@
         </div>
     </div>
 
-    <!-- Move Article Modal -->
     <div id="move-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -952,7 +975,7 @@
                     <select class="form-select" id="move-to" required></select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Quantité</label>
+                    <label class="form-label">Nombre</label>
                     <input type="number" class="form-input" id="move-quantity" min="1" required>
                 </div>
                 <button type="submit" class="btn-primary">Déplacer</button>
@@ -960,7 +983,6 @@
         </div>
     </div>
 
-    <!-- Stock Action Modal -->
     <div id="stock-action-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -973,7 +995,7 @@
                     <select class="form-select" id="stock-location" required></select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Quantité</label>
+                    <label class="form-label">Nombre</label>
                     <input type="number" class="form-input" id="stock-quantity" min="1" required>
                 </div>
                 <button type="submit" class="btn-primary" id="stock-action-btn">Confirmer</button>
@@ -984,7 +1006,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Data Storage
         let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
         let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
         let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
@@ -992,7 +1013,6 @@
         let currentStockAction = null;
         let html5QrCode = null;
 
-        // Initialize default locations if empty
         if (locations.length === 0) {
             locations = [
                 { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
@@ -1002,7 +1022,6 @@
             saveToStorage();
         }
 
-        // Navigation
         function navigateTo(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById(`${page}-page`).classList.remove('hidden');
@@ -1016,14 +1035,12 @@
             if (page === 'locations') loadLocations();
         }
 
-        // Save to localStorage
         function saveToStorage() {
             localStorage.setItem('inventory_articles', JSON.stringify(articles));
             localStorage.setItem('inventory_locations', JSON.stringify(locations));
             localStorage.setItem('inventory_history', JSON.stringify(history));
         }
 
-        // Add to history
         function addHistory(action, articleName, details = '') {
             history.unshift({
                 id: Date.now(),
@@ -1036,17 +1053,13 @@
             saveToStorage();
         }
 
-        // Load Dashboard
         function loadDashboard() {
-            const totalArticles = articles.length;
-            const totalQuantity = articles.reduce((sum, art) => 
-                sum + Object.values(art.quantities || {}).reduce((s, q) => s + q, 0), 0);
             const totalLocations = locations.length;
-            const lowStock = articles.filter(art => 
-                Object.values(art.quantities || {}).reduce((s, q) => s + q, 0) < 5).length;
+            const lowStock = articles.filter(art => {
+                const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+                return total <= 2;
+            }).length;
 
-            document.getElementById('total-articles').textContent = totalArticles;
-            document.getElementById('total-quantity').textContent = totalQuantity;
             document.getElementById('total-locations').textContent = totalLocations;
             document.getElementById('low-stock').textContent = lowStock;
 
@@ -1063,14 +1076,24 @@
             document.getElementById('recent-activity').innerHTML = activityHtml;
         }
 
-        // Load Inventory
+        function showLowStock() {
+            navigateTo('inventory');
+            const filtered = articles.filter(art => {
+                const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+                return total <= 2;
+            });
+            displayArticles(filtered);
+        }
+
         function loadInventory() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const activeFilter = document.querySelector('.filter-chip.active')?.dataset.location;
 
             let filtered = articles.filter(art => 
                 art.name.toLowerCase().includes(searchTerm) ||
-                (art.barcode && art.barcode.toLowerCase().includes(searchTerm))
+                (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
+                (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
+                (art.categorie && art.categorie.toLowerCase().includes(searchTerm))
             );
 
             if (activeFilter && activeFilter !== 'all') {
@@ -1091,23 +1114,28 @@
             `;
             document.getElementById('location-filters').innerHTML = filtersHtml;
 
+            displayArticles(filtered);
+        }
+
+        function displayArticles(filtered) {
             const listHtml = filtered.map(art => {
-                const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + q, 0);
-                const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q > 0);
+                const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+                const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
                 
                 return `
                     <div class="article-card" onclick="showArticleDetail('${art.id}')">
                         <div class="article-header">
                             <div>
                                 <div class="article-name">${art.name}</div>
-                                ${art.barcode ? `<div class="article-meta">📊 ${art.barcode}</div>` : ''}
+                                ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
                             </div>
                             <div class="article-quantity">${totalQty}</div>
                         </div>
                         <div class="article-locations">
                             ${locs.map(([locId, qty]) => {
                                 const loc = locations.find(l => l.id.toString() === locId);
-                                return loc ? `<span class="location-badge">${loc.name}: ${qty}</span>` : '';
+                                const total = qty.nombre * qty.conditionnement;
+                                return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
                             }).join('')}
                         </div>
                     </div>
@@ -1117,26 +1145,23 @@
             document.getElementById('article-list').innerHTML = listHtml;
         }
 
-        // Filter by location
         function filterByLocation(locationId) {
             document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
             event.currentTarget.classList.add('active');
             loadInventory();
         }
 
-        // Search handler
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('search-input')?.addEventListener('input', loadInventory);
         });
 
-        // Show Article Detail
         function showArticleDetail(articleId) {
             currentArticleId = articleId;
             const article = articles.find(a => a.id.toString() === articleId);
             if (!article) return;
 
-            const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + q, 0);
-            const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q > 0);
+            const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+            const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
 
             const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
 
@@ -1144,17 +1169,47 @@
                 <div class="detail-header">
                     <div class="detail-title">${article.name}</div>
                     ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
-                    ${article.description ? `<div style="margin-top: 12px; color: #aaa; font-size: 14px;">${article.description}</div>` : ''}
+                </div>
+
+                <div class="detail-section">
+                    <div class="section-title">📋 Informations</div>
+                    <div class="detail-info-grid">
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Famille</div>
+                            <div class="detail-info-value">${article.famille || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Catégorie</div>
+                            <div class="detail-info-value">${article.categorie || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Taille</div>
+                            <div class="detail-info-value">${article.taille || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Longueur</div>
+                            <div class="detail-info-value">${article.longueur || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Conditionnement</div>
+                            <div class="detail-info-value">${article.conditionnement || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Fournisseur</div>
+                            <div class="detail-info-value">${article.fournisseur || '-'}</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="detail-section">
                     <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
                     ${locs.map(([locId, qty]) => {
                         const loc = locations.find(l => l.id.toString() === locId);
+                        const total = qty.nombre * qty.conditionnement;
                         return loc ? `
                             <div class="location-item">
-                                <div class="location-name">${loc.name}</div>
-                                <div class="location-qty">${qty} unités</div>
+                                <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
+                                <div class="location-qty">${total} unités</div>
                             </div>
                         ` : '';
                     }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
@@ -1165,7 +1220,6 @@
                     <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
                     <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
                     <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
-                    <button class="btn-secondary" onclick="editArticle('${article.id}')">✏️ Modifier</button>
                     <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
                 </div>
 
@@ -1189,19 +1243,13 @@
             navigateTo('detail');
         }
 
-        // Modals
         function showAddArticleModal() {
             const modal = document.getElementById('add-article-modal');
-            const checkboxesContainer = document.getElementById('locations-checkboxes');
+            const locationSelect = document.getElementById('article-location');
             
-            checkboxesContainer.innerHTML = locations.map(loc => `
-                <div class="location-checkbox">
-                    <input type="checkbox" id="loc-${loc.id}" value="${loc.id}">
-                    <label for="loc-${loc.id}" style="flex: 1; cursor: pointer;">${loc.name}</label>
-                    <input type="number" class="form-input" id="qty-${loc.id}" placeholder="Qté" min="0" value="0" 
-                           style="width: 80px;" onchange="document.getElementById('loc-${loc.id}').checked = this.value > 0">
-                </div>
-            `).join('');
+            locationSelect.innerHTML = locations.map(loc => 
+                `<option value="${loc.id}">${loc.name}</option>`
+            ).join('');
             
             modal.classList.add('active');
         }
@@ -1215,13 +1263,14 @@
             if (!article) return;
 
             const availableLocations = Object.entries(article.quantities || {})
-                .filter(([_, q]) => q > 0)
+                .filter(([_, q]) => q.nombre > 0)
                 .map(([locId]) => locations.find(l => l.id.toString() === locId))
                 .filter(Boolean);
 
-            document.getElementById('move-from').innerHTML = availableLocations.map(loc => 
-                `<option value="${loc.id}">${loc.name} (${article.quantities[loc.id]} unités)</option>`
-            ).join('');
+            document.getElementById('move-from').innerHTML = availableLocations.map(loc => {
+                const qty = article.quantities[loc.id];
+                return `<option value="${loc.id}">${loc.name} (${qty.nombre} × ${qty.conditionnement})</option>`;
+            }).join('');
 
             document.getElementById('move-to').innerHTML = locations.map(loc => 
                 `<option value="${loc.id}">${loc.name}</option>`
@@ -1241,12 +1290,13 @@
                 action === 'add' ? '➕ Ajouter' : '➖ Retirer';
 
             const availableLocations = action === 'remove' 
-                ? Object.entries(article.quantities || {}).filter(([_, q]) => q > 0)
+                ? Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0)
                 : locations.map(l => [l.id.toString(), 0]);
 
             document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
                 const loc = locations.find(l => l.id.toString() === locId);
-                return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' ? ` (${article.quantities[locId]} unités)` : ''}</option>` : '';
+                const qty = article.quantities?.[locId];
+                return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' && qty ? ` (${qty.nombre} × ${qty.conditionnement})` : ''}</option>` : '';
             }).join('');
 
             document.getElementById('stock-action-modal').classList.add('active');
@@ -1254,43 +1304,62 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
-            // Reset forms
             document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
         }
 
-        // Save Article
         function saveArticle(event) {
             event.preventDefault();
             
-            const name = document.getElementById('article-name').value;
-            const barcode = document.getElementById('article-barcode').value;
-            const description = document.getElementById('article-description').value;
-            
-            const quantities = {};
-            locations.forEach(loc => {
-                const qty = parseInt(document.getElementById(`qty-${loc.id}`).value) || 0;
-                if (qty > 0) quantities[loc.id] = qty;
-            });
+            const name = document.getElementById('article-name').value.trim();
+            const barcode = document.getElementById('article-barcode').value.trim();
+            const famille = document.getElementById('article-famille').value.trim();
+            const categorie = document.getElementById('article-categorie').value.trim();
+            const taille = document.getElementById('article-taille').value.trim();
+            const longueur = document.getElementById('article-longueur').value.trim();
+            const conditionnement = parseInt(document.getElementById('article-conditionnement').value);
+            const fournisseur = document.getElementById('article-fournisseur').value.trim();
+            const locationId = document.getElementById('article-location').value;
+            const nombre = parseInt(document.getElementById('article-nombre').value);
 
-            const article = {
-                id: Date.now(),
-                name,
-                barcode,
-                description,
-                quantities,
-                createdAt: new Date().toISOString()
-            };
+            let existingArticle = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
 
-            articles.push(article);
+            if (existingArticle) {
+                if (!existingArticle.quantities) existingArticle.quantities = {};
+                
+                if (existingArticle.quantities[locationId]) {
+                    existingArticle.quantities[locationId].nombre += nombre;
+                } else {
+                    existingArticle.quantities[locationId] = { nombre, conditionnement };
+                }
+
+                addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
+            } else {
+                const article = {
+                    id: Date.now(),
+                    name,
+                    barcode,
+                    famille,
+                    categorie,
+                    taille,
+                    longueur,
+                    conditionnement,
+                    fournisseur,
+                    quantities: {
+                        [locationId]: { nombre, conditionnement }
+                    },
+                    createdAt: new Date().toISOString()
+                };
+
+                articles.push(article);
+                addHistory('Ajout', name, `${nombre * conditionnement} unités`);
+            }
+
             saveToStorage();
-            addHistory('Ajout', name, `Total: ${Object.values(quantities).reduce((s, q) => s + q, 0)} unités`);
-            
             closeModal('add-article-modal');
             loadInventory();
             loadDashboard();
         }
 
-        // Save Location
         function saveLocation(event) {
             event.preventDefault();
             
@@ -1309,7 +1378,6 @@
             loadDashboard();
         }
 
-        // Move Article
         function moveArticle(event) {
             event.preventDefault();
             
@@ -1325,15 +1393,19 @@
                 return;
             }
 
-            if (!article.quantities[fromId] || article.quantities[fromId] < quantity) {
-                alert('Quantité insuffisante dans l\'emplacement source');
+            if (!article.quantities[fromId] || article.quantities[fromId].nombre < quantity) {
+                alert('Nombre insuffisant dans l\'emplacement source');
                 return;
             }
 
-            article.quantities[fromId] -= quantity;
-            if (article.quantities[fromId] === 0) delete article.quantities[fromId];
+            article.quantities[fromId].nombre -= quantity;
+            if (article.quantities[fromId].nombre === 0) delete article.quantities[fromId];
             
-            article.quantities[toId] = (article.quantities[toId] || 0) + quantity;
+            if (!article.quantities[toId]) {
+                article.quantities[toId] = { nombre: quantity, conditionnement: article.conditionnement };
+            } else {
+                article.quantities[toId].nombre += quantity;
+            }
 
             const fromLoc = locations.find(l => l.id.toString() === fromId);
             const toLoc = locations.find(l => l.id.toString() === toId);
@@ -1345,7 +1417,6 @@
             showArticleDetail(currentArticleId);
         }
 
-        // Stock Actions
         function performStockAction(event) {
             event.preventDefault();
             
@@ -1356,15 +1427,19 @@
             const quantity = parseInt(document.getElementById('stock-quantity').value);
 
             if (currentStockAction === 'add') {
-                article.quantities[locationId] = (article.quantities[locationId] || 0) + quantity;
+                if (!article.quantities[locationId]) {
+                    article.quantities[locationId] = { nombre: quantity, conditionnement: article.conditionnement };
+                } else {
+                    article.quantities[locationId].nombre += quantity;
+                }
                 addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
             } else {
-                if (!article.quantities[locationId] || article.quantities[locationId] < quantity) {
-                    alert('Quantité insuffisante');
+                if (!article.quantities[locationId] || article.quantities[locationId].nombre < quantity) {
+                    alert('Nombre insuffisant');
                     return;
                 }
-                article.quantities[locationId] -= quantity;
-                if (article.quantities[locationId] === 0) delete article.quantities[locationId];
+                article.quantities[locationId].nombre -= quantity;
+                if (article.quantities[locationId].nombre === 0) delete article.quantities[locationId];
                 addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
             }
 
@@ -1374,7 +1449,6 @@
             loadDashboard();
         }
 
-        // Delete Article
         function deleteArticle(articleId) {
             if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
             
@@ -1388,27 +1462,21 @@
             loadDashboard();
         }
 
-        // Edit Article (simplified - reuses add modal)
-        function editArticle(articleId) {
-            alert('Fonctionnalité de modification en cours de développement');
-        }
-
-        // Load Locations
         function loadLocations() {
             const listHtml = locations.map(loc => {
                 const articleCount = articles.filter(art => 
-                    art.quantities && art.quantities[loc.id] && art.quantities[loc.id] > 0
+                    art.quantities && art.quantities[loc.id] && art.quantities[loc.id].nombre > 0
                 ).length;
 
                 return `
-                    <div class="location-list-item">
+                    <div class="location-list-item" onclick="showLocationInventory('${loc.id}')">
                         <div class="location-info">
                             <div class="location-title">${loc.name}</div>
                             <div class="location-count">${articleCount} article(s)</div>
                             ${loc.description ? `<div class="location-count">${loc.description}</div>` : ''}
                         </div>
                         <div class="location-actions">
-                            <button class="icon-btn" onclick="deleteLocation('${loc.id}')">🗑️</button>
+                            <button class="icon-btn" onclick="event.stopPropagation(); deleteLocation('${loc.id}')">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1417,10 +1485,21 @@
             document.getElementById('locations-list').innerHTML = listHtml;
         }
 
-        // Delete Location
+        function showLocationInventory(locationId) {
+            navigateTo('inventory');
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                if (chip.dataset.location === locationId) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            });
+            loadInventory();
+        }
+
         function deleteLocation(locationId) {
             const hasArticles = articles.some(art => 
-                art.quantities && art.quantities[locationId] && art.quantities[locationId] > 0
+                art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
             );
 
             if (hasArticles) {
@@ -1436,7 +1515,6 @@
             loadDashboard();
         }
 
-        // Scanner
         function initScanner() {
             if (html5QrCode) return;
 
@@ -1449,9 +1527,7 @@
                     document.getElementById('manual-barcode').value = decodedText;
                     searchByBarcode();
                 },
-                (errorMessage) => {
-                    // Scanning...
-                }
+                (errorMessage) => {}
             ).catch(err => {
                 console.error('Scanner error:', err);
             });
@@ -1485,7 +1561,6 @@
             document.getElementById('article-barcode').value = barcode;
         }
 
-        // Excel Export/Import
         function exportToExcel() {
             const email = document.getElementById('export-email').value.trim();
             if (!email) {
@@ -1503,19 +1578,42 @@
         }
 
         function downloadExcel() {
-            const data = articles.map(art => {
-                const row = {
-                    'Nom': art.name,
-                    'Code-barre': art.barcode || '',
-                    'Description': art.description || '',
-                    'Quantité totale': Object.values(art.quantities || {}).reduce((s, q) => s + q, 0)
-                };
+            const sortedArticles = [...articles].sort((a, b) => {
+                if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
+                return a.categorie.localeCompare(b.categorie);
+            });
 
-                locations.forEach(loc => {
-                    row[loc.name] = art.quantities?.[loc.id] || 0;
+            const data = [];
+            let lastFamille = '';
+            let lastCategorie = '';
+
+            sortedArticles.forEach(art => {
+                if (art.famille !== lastFamille || art.categorie !== lastCategorie) {
+                    if (data.length > 0) {
+                        data.push({});
+                    }
+                    lastFamille = art.famille;
+                    lastCategorie = art.categorie;
+                }
+
+                Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
+                    const loc = locations.find(l => l.id.toString() === locId);
+                    const total = qty.nombre * qty.conditionnement;
+
+                    data.push({
+                        'Nom': art.name,
+                        'Code-barre': art.barcode || '',
+                        'Famille': art.famille || '',
+                        'Catégorie': art.categorie || '',
+                        'Taille': art.taille || '',
+                        'Longueur': art.longueur || '',
+                        'Conditionnement': art.conditionnement || '',
+                        'Nombre': qty.nombre,
+                        'Total': total,
+                        'Fournisseur': art.fournisseur || '',
+                        'Lieu': loc ? loc.name : ''
+                    });
                 });
-
-                return row;
             });
 
             const ws = XLSX.utils.json_to_sheet(data);
@@ -1538,29 +1636,54 @@
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
-                    if (!confirm(`Importer ${jsonData.length} article(s) ? Cela écrasera les données existantes.`)) {
+                    if (!confirm(`Importer ${jsonData.length} ligne(s) ? Cela ajoutera ou mettra à jour les articles existants.`)) {
                         return;
                     }
 
-                    // Import logic (simplified)
-                    articles = jsonData.map((row, index) => {
-                        const quantities = {};
-                        locations.forEach(loc => {
-                            if (row[loc.name]) quantities[loc.id] = parseInt(row[loc.name]) || 0;
-                        });
+                    jsonData.forEach(row => {
+                        if (!row['Nom']) return;
 
-                        return {
-                            id: Date.now() + index,
-                            name: row['Nom'] || `Article ${index + 1}`,
-                            barcode: row['Code-barre'] || '',
-                            description: row['Description'] || '',
-                            quantities,
-                            createdAt: new Date().toISOString()
-                        };
+                        const name = row['Nom'];
+                        const locationName = row['Lieu'];
+                        const location = locations.find(l => l.name === locationName);
+                        if (!location) return;
+
+                        let article = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+
+                        if (article) {
+                            if (!article.quantities[location.id]) {
+                                article.quantities[location.id] = {
+                                    nombre: parseInt(row['Nombre']) || 0,
+                                    conditionnement: parseInt(row['Conditionnement']) || 1
+                                };
+                            } else {
+                                article.quantities[location.id].nombre += parseInt(row['Nombre']) || 0;
+                            }
+                        } else {
+                            article = {
+                                id: Date.now() + Math.random(),
+                                name,
+                                barcode: row['Code-barre'] || '',
+                                famille: row['Famille'] || '',
+                                categorie: row['Catégorie'] || '',
+                                taille: row['Taille'] || '',
+                                longueur: row['Longueur'] || '',
+                                conditionnement: parseInt(row['Conditionnement']) || 1,
+                                fournisseur: row['Fournisseur'] || '',
+                                quantities: {
+                                    [location.id]: {
+                                        nombre: parseInt(row['Nombre']) || 0,
+                                        conditionnement: parseInt(row['Conditionnement']) || 1
+                                    }
+                                },
+                                createdAt: new Date().toISOString()
+                            };
+                            articles.push(article);
+                        }
                     });
 
                     saveToStorage();
-                    addHistory('Import', `${jsonData.length} articles`, 'depuis Excel');
+                    addHistory('Import', `${jsonData.length} lignes`, 'depuis Excel');
                     alert('Import réussi !');
                     loadInventory();
                     loadDashboard();
@@ -1572,7 +1695,6 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // Backup/Restore
         function backupData() {
             const backup = {
                 articles,
@@ -1622,7 +1744,6 @@
             input.click();
         }
 
-        // Utility Functions
         function getActionIcon(action) {
             const icons = {
                 'Ajout': '➕',
@@ -1647,9 +1768,9 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
 
-        // Initialize
         loadDashboard();
     </script>
+
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
@@ -1657,3 +1778,6 @@ if ('serviceWorker' in navigator) {
     .catch(err => console.error('Service Worker error:', err));
 }
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+</body>
+</html>
