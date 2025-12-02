@@ -1518,29 +1518,47 @@
 
         function initScanner() {
     if (html5QrCode) {
-        html5QrCode.resume();
         return;
     }
 
-    html5QrCode = new Html5QrcodeScanner(
-        "scanner-reader",
-        { 
-            fps: 10, 
-            qrbox: { width: 250, height: 150 },
-            aspectRatio: 1.777778
-        }
-    );
-    
-    html5QrCode.render(
-        (decodedText) => {
-            document.getElementById('manual-barcode').value = decodedText;
-            searchByBarcode();
-            html5QrCode.pause();
-        },
-        (errorMessage) => {
-            // Ignore les erreurs de scan continues
-        }
-    );
+    // Demander explicitement la permission caméra
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" } 
+        })
+        .then(function(stream) {
+            // Arrêter le stream temporaire
+            stream.getTracks().forEach(track => track.stop());
+            
+            // Initialiser le scanner
+            html5QrCode = new Html5QrcodeScanner(
+                "scanner-reader",
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 150 },
+                    aspectRatio: 1.0,
+                    rememberLastUsedCamera: true
+                },
+                false
+            );
+            
+            html5QrCode.render(
+                (decodedText) => {
+                    document.getElementById('manual-barcode').value = decodedText;
+                    searchByBarcode();
+                },
+                (errorMessage) => {
+                    // Ignorer les erreurs continues
+                }
+            );
+        })
+        .catch(function(err) {
+            alert("Erreur d'accès à la caméra : " + err.message + "\n\nVeuillez autoriser l'accès à la caméra dans les paramètres de votre navigateur.");
+            console.error("Camera error:", err);
+        });
+    } else {
+        alert("Votre navigateur ne supporte pas l'accès à la caméra");
+    }
 }
 
         function searchByBarcode() {

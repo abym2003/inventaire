@@ -1,5 +1,5 @@
 {
-  "name": "Gestion d'Inventaire",
+  "name": "Inventaire OMC",
   "short_name": "Inventaire",
   "description": "Application de gestion d'inventaire multi-emplacements",
   "start_url": "/",
@@ -19,4 +19,10 @@
       "type": "image/png"
     }
   ]
+  "permissions": [
+    "camera"
+  ],
+  "scope": "/",
+  "start_url": "/",
+  "display": "standalone"
 }
