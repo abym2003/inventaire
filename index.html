@@ -787,12 +787,7 @@
             <div class="header-subtitle">Scanner un code-barre</div>
         </div>
         <div class="container">
-            <div class="scanner-container">
-                <video id="scanner-video" autoplay playsinline></video>
-                <div class="scanner-overlay">
-                    <div class="scanner-frame"></div>
-                </div>
-            </div>
+            <div class="scanner-container" id="scanner-reader"></div>
 
             <div class="detail-section">
                 <div class="section-title">📱 Scanner manuelle</div>
@@ -895,10 +890,6 @@
             </div>
             <form onsubmit="saveArticle(event)">
                 <div class="form-group">
-                    <label class="form-label">Nom de l'article *</label>
-                    <input type="text" class="form-input" id="article-name" required>
-                </div>
-                <div class="form-group">
                     <label class="form-label">Code-barre</label>
                     <input type="text" class="form-input" id="article-barcode">
                 </div>
@@ -909,6 +900,10 @@
                 <div class="form-group">
                     <label class="form-label">Catégorie *</label>
                     <input type="text" class="form-input" id="article-categorie" required>
+                </div>
+				<div class="form-group">
+                    <label class="form-label">Nom de l'article *</label>
+                    <input type="text" class="form-input" id="article-name" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Taille</label>
@@ -1023,6 +1018,12 @@
         }
 
         function navigateTo(page) {
+    // Arrêter le scanner si on quitte la page scan
+    if (html5QrCode && page !== 'scan') {
+        html5QrCode.pause();
+    }
+    
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById(`${page}-page`).classList.remove('hidden');
             
@@ -1516,22 +1517,31 @@
         }
 
         function initScanner() {
-            if (html5QrCode) return;
+    if (html5QrCode) {
+        html5QrCode.resume();
+        return;
+    }
 
-            html5QrCode = new Html5Qrcode("scanner-video");
-            
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 150 } },
-                (decodedText) => {
-                    document.getElementById('manual-barcode').value = decodedText;
-                    searchByBarcode();
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                console.error('Scanner error:', err);
-            });
+    html5QrCode = new Html5QrcodeScanner(
+        "scanner-reader",
+        { 
+            fps: 10, 
+            qrbox: { width: 250, height: 150 },
+            aspectRatio: 1.777778
         }
+    );
+    
+    html5QrCode.render(
+        (decodedText) => {
+            document.getElementById('manual-barcode').value = decodedText;
+            searchByBarcode();
+            html5QrCode.pause();
+        },
+        (errorMessage) => {
+            // Ignore les erreurs de scan continues
+        }
+    );
+}
 
         function searchByBarcode() {
             const barcode = document.getElementById('manual-barcode').value.trim();
