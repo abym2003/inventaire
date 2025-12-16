@@ -702,459 +702,228 @@
     </div>
 
     <script>
-        // Variables globales
-        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
-        let isScanning = false;
-        let scannerActive = false;
+    let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
+    let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
+    let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
+    let currentArticleId = null;
+    let currentStockAction = null;
+    let html5QrCode = null;
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
+    if (locations.length === 0) {
+        locations = [
+            { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
+            { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
+            { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
+        ];
+        saveToStorage();
+    }
 
-        function initializeApp() {
-            // Charger l'inventaire
-            updateInventoryStats();
-            renderInventory();
-            
-            // Événements du scanner
-            document.getElementById('startButton').addEventListener('click', startScanner);
-            document.getElementById('stopButton').addEventListener('click', stopScanner);
-            document.getElementById('manualAdd').addEventListener('click', focusOnBarcode);
-            
-            // Événements du formulaire
-            document.getElementById('productForm').addEventListener('submit', saveProduct);
-            document.getElementById('clearForm').addEventListener('click', clearForm);
-            
-            // Recherche
-            document.getElementById('searchInput').addEventListener('input', filterInventory);
-            
-            // Initialiser Quagga
-            initQuagga();
-            
-            // Démarrer automatiquement le scanner sur mobile
-            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                setTimeout(() => {
-                    startScanner();
-                    showToast('Scanner démarré automatiquement', 'Prêt à scanner', 'success');
-                }, 1000);
-            }
-        }
-
-        function initQuagga() {
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector('#interactive'),
-                    constraints: {
-                        width: { min: 640 },
-                        height: { min: 480 },
-                        facingMode: "environment",
-                        aspectRatio: { min: 1, max: 2 }
-                    }
-                },
-                decoder: {
-                    readers: [
-                        "code_128_reader",
-                        "ean_reader",
-                        "ean_8_reader",
-                        "code_39_reader",
-                        "code_39_vin_reader",
-                        "codabar_reader",
-                        "upc_reader",
-                        "upc_e_reader",
-                        "i2of5_reader"
-                    ]
-                }
-            }, function(err) {
-                if (err) {
-                    console.error(err);
-                    showToast('Erreur d\'initialisation du scanner', err.message, 'error');
-                    return;
-                }
-                console.log("Quagga initialisé avec succès");
-            });
-
-            Quagga.onProcessed(function(result) {
-                const drawingCtx = Quagga.canvas.ctx.overlay;
-                const drawingCanvas = Quagga.canvas.dom.overlay;
-
-                if (result) {
-                    if (result.boxes) {
-                        drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), 
-                            parseInt(drawingCanvas.getAttribute("height")));
-                        result.boxes.filter(function(box) {
-                            return box !== result.box;
-                        }).forEach(function(box) {
-                            Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, 
-                                { color: "green", lineWidth: 2 });
-                        });
-                    }
-
-                    if (result.box) {
-                        Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, 
-                            { color: "#00F", lineWidth: 2 });
-                    }
-
-                    if (result.codeResult && result.codeResult.code) {
-                        Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, 
-                            { color: 'red', lineWidth: 3 });
-                    }
-                }
-            });
-
-            Quagga.onDetected(function(result) {
-                if (result.codeResult && result.codeResult.code) {
-                    const code = result.codeResult.code;
-                    handleBarcodeScanned(code);
-                }
+    function stopScanner() {
+        if (html5QrCode) {
+            return html5QrCode.stop().then(() => {
+                html5QrCode.clear();
+                html5QrCode = null;
+                return true;
+            }).catch(err => {
+                console.log("Erreur arrêt scanner:", err);
+                html5QrCode = null;
+                return false;
             });
         }
+        return Promise.resolve(true);
+    }
 
-        function startScanner() {
-            if (!scannerActive) {
-                Quagga.start();
-                scannerActive = true;
-                document.getElementById('startButton').disabled = true;
-                document.getElementById('stopButton').disabled = false;
-                isScanning = true;
-                showToast('Scanner démarré', 'Pointez la caméra vers un code-barres', 'success');
-            }
-        }
-
-        function stopScanner() {
-            if (scannerActive) {
-                Quagga.stop();
-                scannerActive = false;
-                document.getElementById('startButton').disabled = false;
-                document.getElementById('stopButton').disabled = true;
-                isScanning = false;
-                showToast('Scanner arrêté', '', 'success');
-            }
-        }
-
-        function handleBarcodeScanned(barcode) {
+    function navigateTo(page) {
+        // Arrêter proprement le scanner si on quitte la page scan
+        if (html5QrCode && page !== 'scan') {
             stopScanner();
-            
-            // Mettre à jour le champ code-barres
-            document.getElementById('barcode').value = barcode;
-            
-            // Vérifier si le produit existe déjà
-            const existingProduct = inventory.find(item => item.barcode === barcode);
-            
-            if (existingProduct) {
-                // Pré-remplir le formulaire avec les infos existantes
-                document.getElementById('name').value = existingProduct.name;
-                document.getElementById('category').value = existingProduct.category;
-                document.getElementById('quantity').value = existingProduct.quantity + 1;
-                document.getElementById('price').value = existingProduct.price || '';
-                document.getElementById('location').value = existingProduct.location || '';
-                document.getElementById('description').value = existingProduct.description || '';
+        }
+        
+        // Masquer toutes les pages
+        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+        
+        // Afficher la page demandée
+        const targetPage = document.getElementById(`${page}-page`);
+        if (targetPage) {
+            targetPage.classList.remove('hidden');
+        }
+        
+        // Mettre à jour la navigation active
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        event.currentTarget?.classList.add('active');
+        
+        // Charger le contenu de la page
+        if (page === 'dashboard') loadDashboard();
+        if (page === 'inventory') loadInventory();
+        if (page === 'scan') {
+            // Démarrer le scanner immédiatement
+            setTimeout(() => {
+                initScanner();
+            }, 100);
+        }
+        if (page === 'search') loadSearchPage();
+        if (page === 'locations') loadLocations();
+    }
+
+    function navigateToWithScanner(page) {
+        if (page !== 'scan' && html5QrCode) {
+            stopScanner().then(() => {
+                navigateTo(page);
+            });
+        } else {
+            navigateTo(page);
+        }
+    }
+
+    function getNavLabelForPage(page) {
+        const pageLabels = {
+            'dashboard': 'Accueil',
+            'inventory': 'Inventaire',
+            'scan': 'Scanner',
+            'search': 'Recherche',
+            'locations': 'Lieux',
+            'import-export': 'Export'
+        };
+        return pageLabels[page] || '';
+    }
+
+    function initScanner() {
+        // Arrêter le scanner s'il est déjà en cours
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                html5QrCode.clear();
+                html5QrCode = null;
+                initFreshScanner();
+            }).catch(() => {
+                html5QrCode = null;
+                initFreshScanner();
+            });
+        } else {
+            initFreshScanner();
+        }
+    }
+
+    function initFreshScanner() {
+        // Vérifier qu'on est bien sur la page scan
+        const scanPage = document.getElementById('scan-page');
+        if (!scanPage || scanPage.classList.contains('hidden')) {
+            console.log("Scanner: page non visible");
+            return;
+        }
+        
+        // Vider le conteneur
+        const scannerContainer = document.getElementById('scanner-reader');
+        scannerContainer.innerHTML = '';
+        
+        // Tester l'accès caméra
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment" } 
+            })
+            .then(function(stream) {
+                stream.getTracks().forEach(track => track.stop());
                 
-                showToast('Produit existant détecté', `"${existingProduct.name}" - Quantité incrémentée`, 'success');
-            } else {
-                // Réinitialiser les autres champs
-                document.getElementById('name').value = '';
-                document.getElementById('category').selectedIndex = 0;
-                document.getElementById('quantity').value = 1;
-                document.getElementById('price').value = '';
-                document.getElementById('location').value = '';
-                document.getElementById('description').value = '';
-                
-                // Tenter de récupérer les infos produit via une API (simulation)
-                fetchProductInfo(barcode);
-                
-                showToast('Nouveau code-barres détecté', barcode, 'success');
-            }
-            
-            // Donner le focus au champ nom
-            document.getElementById('name').focus();
-            
-            // Mettre à jour le dernier scan
-            document.getElementById('last-scan').textContent = barcode;
-            
-            // Mettre à jour les stats
-            updateInventoryStats();
-        }
-
-        function fetchProductInfo(barcode) {
-            // Simulation de récupération d'infos produit
-            // En réalité, vous pouvez utiliser une API comme Open Food Facts pour les produits alimentaires
-            
-            const mockProducts = {
-                '3017620422003': { name: 'Nutella', category: 'alimentaire' },
-                '8000500310427': { name: 'Spaghetti Barilla', category: 'alimentaire' },
-                '8718444952521': { name: 'Piles AA Duracell', category: 'electronique' },
-                '4005900032467': { name: 'Shampoing Head & Shoulders', category: 'sante' },
-                '9782070360022': { name: 'Livre - Le Petit Prince', category: 'autre' }
-            };
-            
-            if (mockProducts[barcode]) {
-                setTimeout(() => {
-                    const product = mockProducts[barcode];
-                    document.getElementById('name').value = product.name;
-                    document.getElementById('category').value = product.category;
-                    showToast('Infos produit récupérées', product.name, 'success');
-                }, 500);
-            }
-        }
-
-        function saveProduct(e) {
-            e.preventDefault();
-            
-            const product = {
-                id: Date.now(),
-                barcode: document.getElementById('barcode').value.trim(),
-                name: document.getElementById('name').value.trim(),
-                category: document.getElementById('category').value,
-                quantity: parseInt(document.getElementById('quantity').value) || 1,
-                price: parseFloat(document.getElementById('price').value) || null,
-                location: document.getElementById('location').value.trim(),
-                description: document.getElementById('description').value.trim(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            
-            // Validation
-            if (!product.barcode || !product.name || !product.category) {
-                showToast('Erreur de validation', 'Veuillez remplir tous les champs obligatoires', 'error');
-                return;
-            }
-            
-            // Vérifier si le produit existe déjà
-            const existingIndex = inventory.findIndex(item => item.barcode === product.barcode);
-            
-            if (existingIndex >= 0) {
-                // Mettre à jour le produit existant
-                inventory[existingIndex] = {
-                    ...inventory[existingIndex],
-                    ...product,
-                    quantity: inventory[existingIndex].quantity + product.quantity,
-                    updatedAt: new Date().toISOString()
-                };
-                showToast('Produit mis à jour', `${product.name} - Quantité: ${inventory[existingIndex].quantity}`, 'success');
-            } else {
-                // Ajouter un nouveau produit
-                inventory.unshift(product);
-                showToast('Produit ajouté', `${product.name} ajouté à l'inventaire`, 'success');
-            }
-            
-            // Sauvegarder dans localStorage
-            saveInventory();
-            
-            // Mettre à jour l'affichage
-            updateInventoryStats();
-            renderInventory();
-            
-            // Réinitialiser le formulaire
-            clearForm();
-            
-            // Redémarrer le scanner
-            if (!isScanning) {
-                setTimeout(startScanner, 500);
-            }
-        }
-
-        function saveInventory() {
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-        }
-
-        function renderInventory(filter = '') {
-            const container = document.getElementById('inventoryItems');
-            
-            let filteredItems = inventory;
-            if (filter) {
-                const searchTerm = filter.toLowerCase();
-                filteredItems = inventory.filter(item => 
-                    item.name.toLowerCase().includes(searchTerm) ||
-                    item.barcode.includes(searchTerm) ||
-                    item.category.toLowerCase().includes(searchTerm) ||
-                    (item.location && item.location.toLowerCase().includes(searchTerm)) ||
-                    (item.description && item.description.toLowerCase().includes(searchTerm))
+                // Initialiser le scanner
+                html5QrCode = new Html5QrcodeScanner(
+                    "scanner-reader",
+                    { 
+                        fps: 10, 
+                        qrbox: { width: 250, height: 150 },
+                        aspectRatio: 1.0
+                    },
+                    false
                 );
-            }
-            
-            if (filteredItems.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-box-open"></i>
-                        <h3>Aucun produit trouvé</h3>
-                        <p>${filter ? 'Aucun résultat pour votre recherche' : 'Scannez votre premier produit pour commencer'}</p>
+                
+                html5QrCode.render(
+                    (decodedText) => {
+                        // Arrêter et traiter
+                        if (html5QrCode) {
+                            html5QrCode.stop().then(() => {
+                                handleBarcodeScan(decodedText);
+                            }).catch(() => {
+                                handleBarcodeScan(decodedText);
+                            });
+                        }
+                    },
+                    (errorMessage) => {
+                        // Ignorer les erreurs normales
+                    }
+                );
+            })
+            .catch(function(err) {
+                console.error("Erreur caméra:", err);
+                scannerContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #888;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📷</div>
+                        <div style="margin-bottom: 16px;">Accès caméra nécessaire</div>
+                        <button class="btn-secondary" onclick="initScanner()">Réessayer</button>
                     </div>
                 `;
-                return;
-            }
-            
-            container.innerHTML = filteredItems.map(item => `
-                <div class="inventory-item" data-id="${item.id}">
-                    <div class="item-info">
-                        <div class="item-header">
-                            <div class="item-name">
-                                ${item.name}
-                                <span class="item-category">${getCategoryLabel(item.category)}</span>
-                            </div>
-                            <div class="item-quantity">${item.quantity}</div>
-                        </div>
-                        <div class="item-details">
-                            <span><i class="fas fa-barcode"></i> ${item.barcode}</span>
-                            ${item.price ? `<span><i class="fas fa-euro-sign"></i> ${item.price.toFixed(2)}€</span>` : ''}
-                            ${item.location ? `<span><i class="fas fa-map-marker-alt"></i> ${item.location}</span>` : ''}
-                            <span><i class="far fa-clock"></i> ${formatDate(item.updatedAt)}</span>
-                        </div>
-                        ${item.description ? `<p class="item-description">${item.description}</p>` : ''}
-                    </div>
-                    <div class="item-actions">
-                        <button class="action-btn" onclick="editProduct(${item.id})" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn" onclick="deleteProduct(${item.id})" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        <button class="action-btn" onclick="increaseQuantity(${item.id})" title="Augmenter quantité">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function getCategoryLabel(category) {
-            const labels = {
-                'alimentaire': 'Alimentaire',
-                'electronique': 'Électronique',
-                'textile': 'Textile',
-                'maison': 'Maison & Jardin',
-                'sante': 'Santé & Beauté',
-                'bureau': 'Bureau',
-                'autre': 'Autre'
-            };
-            return labels[category] || 'Autre';
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
             });
+        } else {
+            scannerContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #888;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
+                    <div>Navigateur incompatible</div>
+                </div>
+            `;
+        }
+    }
+
+    function handleBarcodeScan(barcode) {
+        document.getElementById('manual-barcode').value = barcode;
+        const article = articles.find(a => a.barcode === barcode);
+        
+        if (article) {
+            setTimeout(() => showArticleDetail(article.id), 300);
+        } else {
+            setTimeout(() => createArticleFromBarcode(barcode), 300);
+        }
+    }
+
+    function searchByBarcode() {
+        const barcode = document.getElementById('manual-barcode').value.trim();
+        if (!barcode) {
+            alert('Veuillez entrer un code-barre');
+            return;
         }
 
-        function updateInventoryStats() {
-            const totalItems = inventory.length;
-            const totalQuantity = inventory.reduce((sum, item) => sum + item.quantity, 0);
-            
-            document.getElementById('total-items').textContent = totalItems;
-            document.getElementById('total-quantity').textContent = totalQuantity;
-            
-            if (inventory.length > 0) {
-                const lastItem = inventory[0];
-                document.getElementById('last-scan').textContent = lastItem.barcode;
-            }
+        const article = articles.find(a => a.barcode === barcode);
+        
+        if (article) {
+            showArticleDetail(article.id);
+        } else {
+            createArticleFromBarcode(barcode);
         }
+    }
 
-        function clearForm() {
-            document.getElementById('productForm').reset();
-            document.getElementById('barcode').focus();
-        }
+    function createArticleFromBarcode(barcode) {
+        showAddArticleModal();
+        document.getElementById('article-barcode').value = barcode;
+        document.getElementById('article-famille').value = "boulonnerie";
+        document.getElementById('article-categorie').value = "vis";
+        document.getElementById('article-name').value = "hexa";
+    }
 
-        function focusOnBarcode() {
+    // ... reste des fonctions existantes (saveToStorage, addHistory, loadDashboard, etc.) ...
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (html5QrCode) {
             stopScanner();
-            document.getElementById('barcode').focus();
-            showToast('Saisie manuelle', 'Entrez le code-barres manuellement', 'success');
         }
-
-        function filterInventory(e) {
-            renderInventory(e.target.value);
+        
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', loadInventory);
         }
-
-        function editProduct(id) {
-            const product = inventory.find(item => item.id === id);
-            if (!product) return;
-            
-            // Remplir le formulaire
-            document.getElementById('barcode').value = product.barcode;
-            document.getElementById('name').value = product.name;
-            document.getElementById('category').value = product.category;
-            document.getElementById('quantity').value = product.quantity;
-            document.getElementById('price').value = product.price || '';
-            document.getElementById('location').value = product.location || '';
-            document.getElementById('description').value = product.description || '';
-            
-            // Supprimer le produit de la liste temporairement
-            inventory = inventory.filter(item => item.id !== id);
-            
-            // Mettre à jour l'affichage
-            updateInventoryStats();
-            renderInventory();
-            
-            showToast('Modification', `Modification de "${product.name}"`, 'success');
+        
+        const advancedSearchInput = document.getElementById('advanced-search-input');
+        if (advancedSearchInput) {
+            advancedSearchInput.addEventListener('input', performAdvancedSearch);
         }
-
-        function deleteProduct(id) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
-            
-            const product = inventory.find(item => item.id === id);
-            inventory = inventory.filter(item => item.id !== id);
-            
-            saveInventory();
-            updateInventoryStats();
-            renderInventory();
-            
-            showToast('Produit supprimé', `${product.name} supprimé de l'inventaire`, 'success');
-        }
-
-        function increaseQuantity(id) {
-            const product = inventory.find(item => item.id === id);
-            if (product) {
-                product.quantity += 1;
-                product.updatedAt = new Date().toISOString();
-                
-                saveInventory();
-                updateInventoryStats();
-                renderInventory();
-                
-                showToast('Quantité augmentée', `${product.name}: ${product.quantity} unités`, 'success');
-            }
-        }
-
-        function showToast(message, title = 'Notification', type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastTitle = document.getElementById('toastTitle');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastTitle.textContent = title;
-            toastMessage.textContent = message;
-            
-            toast.className = `toast ${type}`;
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Fonction d'export (optionnelle)
-        function exportInventory() {
-            const dataStr = JSON.stringify(inventory, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `inventory_${new Date().toISOString().slice(0,10)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            
-            showToast('Inventaire exporté', 'Téléchargement du fichier JSON', 'success');
-        }
-
-        // Exporter la fonction pour les boutons
-        window.editProduct = editProduct;
-        window.deleteProduct = deleteProduct;
-        window.increaseQuantity = increaseQuantity;
-        window.exportInventory = exportInventory;
-    </script>
+        
+        loadDashboard();
+    });
+</script>
 </body>
 </html>
