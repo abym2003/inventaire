@@ -778,13 +778,13 @@
             </div>
 
             <div class="quick-actions">
-                <button class="action-btn" onclick="showAddArticleModal()">
-                    ➕ Ajouter article
-                </button>
-                <button class="action-btn secondary" onclick="navigateTo('scan')">
-                    📷 Scanner
-                </button>
-            </div>
+    <button class="action-btn" onclick="showAddArticleModal()">
+        ➕ Ajouter article
+    </button>
+    <button class="action-btn secondary" onclick="navigateToWithScanner('scan')">
+        📷 Scanner
+    </button>
+</div>
 
             <div class="detail-section">
                 <div class="section-title">Activité récente</div>
@@ -811,24 +811,28 @@
     </div>
 
     <div id="scan-page" class="page hidden">
-        <div class="header">
-            <h1>📷 Scanner</h1>
-            <div class="header-subtitle">Scanner un code-barre</div>
+    <div class="header">
+        <h1>📷 Scanner</h1>
+        <div class="header-subtitle">Scanner un code-barre</div>
+    </div>
+    <div class="container">
+        <div class="scanner-container" id="scanner-reader"></div>
+
+        <div style="text-align: center; margin: 16px 0;">
+            <button class="btn-secondary" onclick="stopScanner()" style="width: auto; padding: 8px 16px;">
+                ⏸️ Arrêter le scanner
+            </button>
+            <button class="btn-secondary" onclick="initScanner()" style="width: auto; padding: 8px 16px; margin-left: 8px;">
+                ▶️ Redémarrer
+            </button>
         </div>
-        <div class="container">
-            <div class="scanner-container" id="scanner-reader"></div>
 
-            <div class="detail-section">
-                <div class="section-title">📱 Scanner manuelle</div>
-                <div class="form-group">
-                    <input type="text" class="form-input" id="manual-barcode" placeholder="Entrez le code-barre manuellement">
-                </div>
-                <button class="btn-primary" onclick="searchByBarcode()">Rechercher</button>
-            </div>
-
-            <div id="scan-result"></div>
+        <div class="detail-section">
+            <div class="section-title">📱 Scanner manuelle</div>
+            ...
         </div>
     </div>
+</div>
 	
 	<div id="search-page" class="page hidden">
     <div class="header">
@@ -945,27 +949,27 @@
     </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="navigateTo('dashboard')">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Accueil</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('inventory')">
-            <div class="nav-icon">📋</div>
-            <div class="nav-label">Inventaire</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('search')">  
-			<div class="nav-icon">🔍</div>  
-			<div class="nav-label">Recherche</div>  
+    <div class="nav-item active" onclick="navigateToWithScanner('dashboard')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Accueil</div>
     </div>
-        <div class="nav-item" onclick="navigateTo('locations')">
-            <div class="nav-icon">📍</div>
-            <div class="nav-label">Lieux</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('import-export')">
-            <div class="nav-icon">📊</div>
-            <div class="nav-label">Export</div>
-        </div>
-    </nav>
+    <div class="nav-item" onclick="navigateToWithScanner('inventory')">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">Inventaire</div>
+    </div>
+    <div class="nav-item" onclick="navigateToWithScanner('search')">  
+        <div class="nav-icon">🔍</div>  
+        <div class="nav-label">Recherche</div>  
+    </div>
+    <div class="nav-item" onclick="navigateToWithScanner('locations')">
+        <div class="nav-icon">📍</div>
+        <div class="nav-label">Lieux</div>
+    </div>
+    <div class="nav-item" onclick="navigateToWithScanner('import-export')">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Export</div>
+    </div>
+</nav>
 
     <div id="add-article-modal" class="modal">
         <div class="modal-content">
@@ -1101,26 +1105,87 @@
             ];
             saveToStorage();
         }
+		function stopScanner() {
+    if (html5QrCode) {
+        return html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+            html5QrCode = null;
+            return true;
+        }).catch(err => {
+            console.log("Erreur arrêt scanner:", err);
+            html5QrCode = null;
+            return false;
+        });
+    }
+    return Promise.resolve(true);
+}
 
         function navigateTo(page) {
-    // Arrêter le scanner si on quitte la page scan
+    // Arrêter proprement le scanner si on quitte la page scan
     if (html5QrCode && page !== 'scan') {
-        html5QrCode.pause();
+        html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+            html5QrCode = null;
+        }).catch(() => {
+            html5QrCode = null;
+        });
     }
     
+    // Masquer toutes les pages
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById(`${page}-page`).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget?.classList.add('active');
-
-            if (page === 'dashboard') loadDashboard();
-            if (page === 'inventory') loadInventory();
-            if (page === 'scan') initScanner();
-			if (page === 'search') loadSearchPage();
-            if (page === 'locations') loadLocations();
+    // Afficher la page demandée
+    const targetPage = document.getElementById(`${page}-page`);
+    if (targetPage) {
+        targetPage.classList.remove('hidden');
+    }
+    
+    // Mettre à jour la navigation active
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    
+    // Trouver l'élément de navigation correspondant
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        if (item.textContent.includes(getNavLabelForPage(page))) {
+            item.classList.add('active');
         }
+    });
+    
+    // Charger le contenu de la page
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'inventory') loadInventory();
+    if (page === 'scan') {
+        // Petit délai avant d'initialiser le scanner
+        setTimeout(() => {
+            initScanner();
+        }, 100);
+    }
+    if (page === 'search') loadSearchPage();
+    if (page === 'locations') loadLocations();
+}
+
+function navigateToWithScanner(page) {
+    // Si on est déjà sur la page scan et on veut aller ailleurs
+    if (page !== 'scan' && !document.getElementById('scan-page').classList.contains('hidden')) {
+        stopScanner().then(() => {
+            navigateTo(page);
+        });
+    } else {
+        navigateTo(page);
+    }
+}
+// Fonction utilitaire pour obtenir le label de navigation
+function getNavLabelForPage(page) {
+    const pageLabels = {
+        'dashboard': 'Accueil',
+        'inventory': 'Inventaire',
+        'scan': 'Scanner',
+        'search': 'Recherche',
+        'locations': 'Lieux',
+        'import-export': 'Export'
+    };
+    return pageLabels[page] || '';
+}
 
         function saveToStorage() {
             localStorage.setItem('inventory_articles', JSON.stringify(articles));
@@ -1614,17 +1679,38 @@
         }
 
         function initScanner() {
+    // Arrêter le scanner s'il est déjà en cours
     if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+            html5QrCode = null;
+            initFreshScanner();
+        }).catch(() => {
+            html5QrCode = null;
+            initFreshScanner();
+        });
+    } else {
+        initFreshScanner();
+    }
+}
+
+function initFreshScanner() {
+    // Démarrer le scanner seulement si sur la page scan
+    if (!document.getElementById('scan-page') || !document.getElementById('scan-page').classList.contains('hidden')) {
         return;
     }
 
-    // Demander explicitement la permission caméra
+    // Vider le conteneur du scanner
+    const scannerContainer = document.getElementById('scanner-reader');
+    scannerContainer.innerHTML = '';
+
+    // Demander la permission caméra
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ 
             video: { facingMode: "environment" } 
         })
         .then(function(stream) {
-            // Arrêter le stream temporaire
+            // Arrêter le stream de test
             stream.getTracks().forEach(track => track.stop());
             
             // Initialiser le scanner
@@ -1640,47 +1726,81 @@
             );
             
             html5QrCode.render(
-				(decodedText) => {
-					document.getElementById('manual-barcode').value = decodedText;
-        
-					// Recherche automatique après scan
-					const article = articles.find(a => a.barcode === decodedText);
-					if (article) {
-						// Si l'article existe, ouvrir sa fiche
-						showArticleDetail(article.id);
-					} else {
-						// Si l'article n'existe pas, ouvrir la création
-						createArticleFromBarcode(decodedText);
-					}
-			},
-			(errorMessage) => {
-			// Ignorer les erreurs continues
-			}
-			);
+                (decodedText) => {
+                    // Arrêter le scanner après la détection
+                    html5QrCode.stop().then(() => {
+                        handleBarcodeScan(decodedText);
+                    }).catch(() => {
+                        handleBarcodeScan(decodedText);
+                    });
+                },
+                (errorMessage) => {
+                    // Erreurs normales, pas besoin d'alerte
+                    console.log("Scanner error (normal):", errorMessage);
+                }
+            );
         })
         .catch(function(err) {
-            alert("Erreur d'accès à la caméra : " + err.message + "\n\nVeuillez autoriser l'accès à la caméra dans les paramètres de votre navigateur.");
             console.error("Camera error:", err);
+            // Afficher un message moins intrusif
+            document.getElementById('scanner-reader').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #888;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📷</div>
+                    <div style="margin-bottom: 16px;">Impossible d'accéder à la caméra</div>
+                    <div style="font-size: 14px; margin-bottom: 20px;">Veuillez vérifier les permissions</div>
+                    <button class="btn-secondary" onclick="initScanner()">Réessayer</button>
+                </div>
+            `;
         });
     } else {
-        alert("Votre navigateur ne supporte pas l'accès à la caméra");
+        document.getElementById('scanner-reader').innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #888;">
+                <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
+                <div>Votre navigateur ne supporte pas le scanner</div>
+            </div>
+        `;
+    }
+}
+
+// Nouvelle fonction pour gérer le scan de code-barre
+function handleBarcodeScan(barcode) {
+    // Mettre à jour le champ manuel
+    document.getElementById('manual-barcode').value = barcode;
+    
+    // Rechercher l'article
+    const article = articles.find(a => a.barcode === barcode);
+    
+    if (article) {
+        // Si l'article existe, ouvrir sa fiche
+        setTimeout(() => {
+            showArticleDetail(article.id);
+        }, 500); // Petit délai pour permettre l'arrêt du scanner
+    } else {
+        // Si l'article n'existe pas, ouvrir la création
+        setTimeout(() => {
+            createArticleFromBarcode(barcode);
+        }, 500);
     }
 }
 
         function searchByBarcode() {
-			const barcode = document.getElementById('manual-barcode').value.trim();
-			if (!barcode) return;
+    const barcode = document.getElementById('manual-barcode').value.trim();
+    if (!barcode) {
+        alert('Veuillez entrer un code-barre');
+        return;
+    }
 
-			const article = articles.find(a => a.barcode === barcode);
+    // Rechercher l'article
+    const article = articles.find(a => a.barcode === barcode);
     
-			if (article) {
-				// Si l'article existe, ouvrir automatiquement sa fiche
-				showArticleDetail(article.id);
-			} else {
-				// Si l'article n'existe pas, ouvrir automatiquement la création
-				createArticleFromBarcode(barcode);
-			}
-		}
+    if (article) {
+        // Si l'article existe, ouvrir sa fiche
+        showArticleDetail(article.id);
+    } else {
+        // Si l'article n'existe pas, ouvrir la création
+        createArticleFromBarcode(barcode);
+    }
+}
 
         function createArticleFromBarcode(barcode) {
 			showAddArticleModal();
@@ -2041,14 +2161,28 @@ function filterSearchByLocation(locationId) {
     }
 }
 
-// Écouteur pour la recherche en temps réel
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('advanced-search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', performAdvancedSearch);
-    }
-});
-        loadDashboard();
+        // Écouteur pour la recherche en temps réel
+        document.addEventListener('DOMContentLoaded', () => {
+            // Nettoyer le scanner si présent
+            if (html5QrCode) {
+                stopScanner();
+            }
+            
+            // Initialiser les écouteurs
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', loadInventory);
+            }
+            
+            const advancedSearchInput = document.getElementById('advanced-search-input');
+            if (advancedSearchInput) {
+                advancedSearchInput.addEventListener('input', performAdvancedSearch);
+            }
+            
+            // Charger le dashboard
+            loadDashboard();
+        });
+        // loadDashboard(); // Supprimer cette ligne (déjà dans DOMContentLoaded)
     </script>
 
 <script>
