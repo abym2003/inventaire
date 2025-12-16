@@ -800,6 +800,37 @@
             <div id="scan-result"></div>
         </div>
     </div>
+	
+	<div id="search-page" class="page hidden">  <!-- ID changé -->
+		<div class="header">
+			<h1>🔍 Recherche Avancée</h1>  <!-- Titre changé -->
+			<div class="header-subtitle">Trouver des articles rapidement</div>  <!-- Sous-titre changé -->
+		</div>
+		<div class="container">
+			<div class="search-container">
+				<input type="text" class="search-input" id="advanced-search-input" placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie...">
+			</div>
+
+			<div class="filters">
+				<div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
+					Tous
+				</div>
+				<div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
+					⚠️ Stock faible
+				</div>
+				<div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
+					❌ Rupture
+				</div>
+			</div>
+
+			<div class="detail-section">
+				<div class="section-title">📍 Filtrer par emplacement</div>
+				<div class="filters" id="search-location-filters"></div>
+			</div>
+
+			<div class="article-list" id="search-results"></div>
+		</div>
+	</div>
 
     <div id="detail-page" class="page hidden">
         <div class="header">
@@ -868,10 +899,10 @@
             <div class="nav-icon">📋</div>
             <div class="nav-label">Inventaire</div>
         </div>
-        <div class="nav-item" onclick="navigateTo('scan')">
-            <div class="nav-icon">📷</div>
-            <div class="nav-label">Scanner</div>
-        </div>
+        <div class="nav-item" onclick="navigateTo('search')">  
+			<div class="nav-icon">🔍</div>  
+			<div class="nav-label">Recherche</div>  
+    </div>
         <div class="nav-item" onclick="navigateTo('locations')">
             <div class="nav-icon">📍</div>
             <div class="nav-label">Lieux</div>
@@ -1033,6 +1064,7 @@
             if (page === 'dashboard') loadDashboard();
             if (page === 'inventory') loadInventory();
             if (page === 'scan') initScanner();
+			if (page === 'search') loadSearchPage();
             if (page === 'locations') loadLocations();
         }
 
@@ -1796,6 +1828,129 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
 
+		function loadSearchPage() {
+    const searchInput = document.getElementById('advanced-search-input');
+    searchInput.value = '';
+    searchInput.focus();
+    performAdvancedSearch();
+    
+    // Charger les filtres d'emplacement
+    const filtersHtml = `
+        <div class="filter-chip active" data-location="all" onclick="filterSearchByLocation('all')">
+            Tous les emplacements
+        </div>
+        ${locations.map(loc => `
+            <div class="filter-chip" data-location="${loc.id}" onclick="filterSearchByLocation('${loc.id}')">
+                ${loc.name}
+            </div>
+        `).join('')}
+    `;
+    document.getElementById('search-location-filters').innerHTML = filtersHtml;
+}
+
+// Fonction de recherche avancée
+function performAdvancedSearch() {
+    const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
+    const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
+    const activeLocation = document.querySelector('#search-page .filter-chip[data-location].active')?.dataset.location;
+    
+    let filtered = articles.filter(art => {
+        // Recherche textuelle
+        const matchesText = 
+            art.name.toLowerCase().includes(searchTerm) ||
+            (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
+            (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
+            (art.categorie && art.categorie.toLowerCase().includes(searchTerm)) ||
+            (art.fournisseur && art.fournisseur.toLowerCase().includes(searchTerm));
+        
+        if (!matchesText) return false;
+        
+        // Calcul du stock total
+        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        
+        // Appliquer le filtre stock
+        if (activeFilter === 'low') {
+            if (totalQty > 2 || totalQty === 0) return false;
+        } else if (activeFilter === 'zero') {
+            if (totalQty > 0) return false;
+        }
+        
+        // Appliquer le filtre emplacement
+        if (activeLocation && activeLocation !== 'all') {
+            if (!art.quantities || !art.quantities[activeLocation]) return false;
+        }
+        
+        return true;
+    });
+    
+    displaySearchResults(filtered);
+}
+
+// Afficher les résultats de recherche
+function displaySearchResults(filtered) {
+    const resultsHtml = filtered.map(art => {
+        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
+        
+        let stockStatus = '';
+        if (totalQty === 0) {
+            stockStatus = '<span style="color: #cf6679;">❌ Rupture</span>';
+        } else if (totalQty <= 2) {
+            stockStatus = '<span style="color: #FFA726;">⚠️ Faible</span>';
+        }
+        
+        return `
+            <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                <div class="article-header">
+                    <div>
+                        <div class="article-name">${art.name}</div>
+                        ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
+                        ${art.barcode ? `<div class="article-meta">🏷️ ${art.barcode}</div>` : ''}
+                    </div>
+                    <div>
+                        <div class="article-quantity">${totalQty}</div>
+                        ${stockStatus ? `<div style="text-align: center; margin-top: 4px;">${stockStatus}</div>` : ''}
+                    </div>
+                </div>
+                <div class="article-locations">
+                    ${locs.map(([locId, qty]) => {
+                        const loc = locations.find(l => l.id.toString() === locId);
+                        const total = qty.nombre * qty.conditionnement;
+                        return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }).join('') || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Aucun article trouvé</div></div>';
+
+    document.getElementById('search-results').innerHTML = resultsHtml;
+}
+
+// Filtrer par type (stock faible, rupture, etc.)
+function filterSearchResults(filterType) {
+    document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    performAdvancedSearch();
+}
+
+// Filtrer par emplacement dans la recherche
+function filterSearchByLocation(locationId) {
+    document.querySelectorAll('#search-page .filter-chip[data-location]').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    performAdvancedSearch();
+}
+
+// Écouteur pour la recherche en temps réel
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('advanced-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', performAdvancedSearch);
+    }
+});
         loadDashboard();
     </script>
 
