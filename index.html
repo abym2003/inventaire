@@ -1161,16 +1161,14 @@
     if (page === 'dashboard') loadDashboard();
     if (page === 'inventory') loadInventory();
     if (page === 'scan') {
-    // Arrêter tout scanner existant
-    if (html5QrCode) {
-        html5QrCode.stop().catch(() => {});
-    }
-    
-    // Petit délai avant d'initialiser
-    setTimeout(() => {
+        // Arrêter tout scanner existant
+        if (html5QrCode) {
+            html5QrCode.stop().catch(() => {});
+        }
+        
+        // Démarrer le scanner IMMÉDIATEMENT
         initScanner();
-    }, 300);
-}
+    }
     if (page === 'search') loadSearchPage();
     if (page === 'locations') loadLocations();
 }
