@@ -818,6 +818,7 @@
     <div class="container">
         <div class="scanner-container" id="scanner-reader"></div>
 
+        <!-- BOUTONS DE CONTRÔLE DU SCANNER -->
         <div style="text-align: center; margin: 16px 0;">
             <button class="btn-secondary" onclick="stopScanner()" style="width: auto; padding: 8px 16px;">
                 ⏸️ Arrêter le scanner
@@ -828,9 +829,14 @@
         </div>
 
         <div class="detail-section">
-            <div class="section-title">📱 Scanner manuelle</div>
-            ...
+            <div class="section-title">📱 Scanner manuel</div>
+            <div class="form-group">
+                <input type="text" class="form-input" id="manual-barcode" placeholder="Entrez le code-barre manuellement">
+            </div>
+            <button class="btn-primary" onclick="searchByBarcode()">Rechercher</button>
         </div>
+
+        <div id="scan-result"></div>
     </div>
 </div>
 	
