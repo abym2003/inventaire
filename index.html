@@ -813,20 +813,10 @@
     <div id="scan-page" class="page hidden">
     <div class="header">
         <h1>📷 Scanner</h1>
-        <div class="header-subtitle">Scanner un code-barre</div>
+        <div class="header-subtitle">Présentez un code-barre</div>
     </div>
     <div class="container">
         <div class="scanner-container" id="scanner-reader"></div>
-
-        <!-- BOUTONS DE CONTRÔLE DU SCANNER -->
-        <div style="text-align: center; margin: 16px 0;">
-            <button class="btn-secondary" onclick="stopScanner()" style="width: auto; padding: 8px 16px;">
-                ⏸️ Arrêter le scanner
-            </button>
-            <button class="btn-secondary" onclick="initScanner()" style="width: auto; padding: 8px 16px; margin-left: 8px;">
-				▶️ Redémarrer
-			</button>
-        </div>
 
         <div class="detail-section">
             <div class="section-title">📱 Scanner manuel</div>
@@ -1161,31 +1151,76 @@
     if (page === 'dashboard') loadDashboard();
     if (page === 'inventory') loadInventory();
     if (page === 'scan') {
-    // Arrêter tout scanner existant proprement
+    // Arrêter tout scanner existant
     if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            html5QrCode.clear();
-            html5QrCode = null;
-            setTimeout(() => initScanner(), 100);
-        }).catch(() => {
-            html5QrCode = null;
-            setTimeout(() => initScanner(), 100);
-        });
-    } else {
-        setTimeout(() => initScanner(), 100);
+        html5QrCode.stop().catch(() => {});
+        html5QrCode = null;
     }
+    
+    // Vider le conteneur et démarrer le scanner
+    document.getElementById('scanner-reader').innerHTML = '';
+    startSimpleScanner();
 }
 
 function navigateToWithScanner(page) {
-    // Si on est déjà sur la page scan et on veut aller ailleurs
-    if (page !== 'scan' && !document.getElementById('scan-page').classList.contains('hidden')) {
-        stopScanner().then(() => {
-            navigateTo(page);
-        });
+    // Si on quitte la page scan, arrêter le scanner
+    if (html5QrCode && page !== 'scan') {
+        html5QrCode.stop().catch(() => {});
+        html5QrCode = null;
+    }
+    
+    navigateTo(page);
+}
+
+function startSimpleScanner() {
+    // Initialiser le scanner HTML5
+    html5QrCode = new Html5QrcodeScanner(
+        "scanner-reader",
+        { 
+            fps: 10, 
+            qrbox: { width: 250, height: 150 },
+            aspectRatio: 1.0
+        },
+        false
+    );
+    
+    // Callback de succès
+    html5QrCode.render(
+        (decodedText) => {
+            console.log("Code barre détecté:", decodedText);
+            
+            // Arrêter temporairement le scanner
+            html5QrCode.pause();
+            
+            // Traiter immédiatement le code-barre
+            processBarcode(decodedText);
+            
+            // Redémarrer le scanner après un court délai
+            setTimeout(() => {
+                html5QrCode.resume();
+            }, 1000);
+        },
+        (errorMessage) => {
+            // Les erreurs normales sont ignorées
+        }
+    );
+}
+
+function processBarcode(barcode) {
+    console.log("Traitement du code-barre:", barcode);
+    
+    // Rechercher l'article
+    const article = articles.find(a => a.barcode === barcode);
+    
+    if (article) {
+        // Article trouvé : ouvrir sa fiche
+        showArticleDetail(article.id);
     } else {
-        navigateTo(page);
+        // Article non trouvé : ouvrir la création
+        createArticleFromBarcode(barcode);
     }
 }
+
 // Fonction utilitaire pour obtenir le label de navigation
 function getNavLabelForPage(page) {
     const pageLabels = {
@@ -1914,17 +1949,8 @@ function handleBarcodeScan(barcode) {
         alert('Veuillez entrer un code-barre');
         return;
     }
-
-    // Rechercher l'article
-    const article = articles.find(a => a.barcode === barcode);
     
-    if (article) {
-        // Si l'article existe, ouvrir sa fiche
-        showArticleDetail(article.id);
-    } else {
-        // Si l'article n'existe pas, ouvrir la création
-        createArticleFromBarcode(barcode);
-    }
+    processBarcode(barcode);
 }
 
         function createArticleFromBarcode(barcode) {
@@ -2306,8 +2332,20 @@ function filterSearchByLocation(locationId) {
             
             // Charger le dashboard
             loadDashboard();
+			 // Vérifier si on est déjà sur la page scan (cas du refresh)
+			const scanPage = document.getElementById('scan-page');
+				if (scanPage && !scanPage.classList.contains('hidden')) {
+				console.log("🔄 Page scan ouverte au chargement, démarrage du scanner...");
+				setTimeout(() => {
+					if (html5QrCode) {
+						html5QrCode.stop().catch(() => {});
+						html5QrCode = null;
+					}
+					startSimpleScanner();
+				}, 1000);
+				}
         });
-        // loadDashboard(); // Supprimer cette ligne (déjà dans DOMContentLoaded)
+        
     </script>
 
 <script>
