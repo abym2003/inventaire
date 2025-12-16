@@ -1152,13 +1152,7 @@ function navigateTo(page) {
     if (page === 'dashboard') loadDashboard();
     if (page === 'inventory') loadInventory();
     if (page === 'scan') {
-        // Arrêter tout scanner existant
-        if (html5QrCode) {
-            html5QrCode.stop().catch(() => {});
-            html5QrCode = null;
-        }
-        
-        // Vider le conteneur et démarrer le scanner
+        // IMPORTANT: Vider le conteneur AVANT de démarrer le nouveau scanner
         const scannerContainer = document.getElementById('scanner-reader');
         if (scannerContainer) {
             scannerContainer.innerHTML = '';
@@ -1167,7 +1161,7 @@ function navigateTo(page) {
         // Démarrer le scanner après un court délai
         setTimeout(() => {
             startSimpleScanner();
-        }, 300);
+        }, 300); // Délai pour laisser le DOM se mettre à jour
     }
     if (page === 'search') loadSearchPage();
     if (page === 'locations') loadLocations();
@@ -1186,21 +1180,24 @@ function navigateToWithScanner(page) {
 function startSimpleScanner() {
     console.log("🟢 Démarrage du scanner...");
     
-    // Vérifier que l'élément existe
+    // Vérifier que l'élément existe et est visible
     const scannerElement = document.getElementById('scanner-reader');
-    if (!scannerElement) {
-        console.error("❌ Élément scanner-reader non trouvé!");
+    const scanPage = document.getElementById('scan-page');
+    
+    if (!scannerElement || !scanPage || scanPage.classList.contains('hidden')) {
+        console.log("Scanner non disponible, page cachée");
         return;
     }
     
-    // Vérifier que la page scan est visible
-    const scanPage = document.getElementById('scan-page');
-    if (!scanPage || scanPage.classList.contains('hidden')) {
-        console.log("Page scan cachée, scanner non démarré");
-        return;
+    // Nettoyer tout scanner précédent
+    if (html5QrCode) {
+        html5QrCode.stop().catch(() => {});
+        html5QrCode.clear();
+        html5QrCode = null;
     }
     
     try {
+        // Utiliser Html5QrcodeScanner au lieu de Html5Qrcode
         html5QrCode = new Html5QrcodeScanner(
             "scanner-reader",
             { 
@@ -1209,7 +1206,7 @@ function startSimpleScanner() {
                 aspectRatio: 1.0,
                 rememberLastUsedCamera: true
             },
-            false
+            false // verbose
         );
         
         console.log("✅ Scanner initialisé");
@@ -1218,10 +1215,10 @@ function startSimpleScanner() {
             (decodedText) => {
                 console.log("🎯 Code barre détecté:", decodedText);
                 
-                // Arrêter le scanner
+                // Arrêter le scanner après détection
                 if (html5QrCode) {
                     html5QrCode.stop().then(() => {
-                        console.log("✅ Scanner arrêté");
+                        console.log("✅ Scanner arrêté après détection");
                         handleBarcode(decodedText);
                     }).catch((err) => {
                         console.log("⚠️ Erreur arrêt scanner:", err);
@@ -1230,7 +1227,8 @@ function startSimpleScanner() {
                 }
             },
             (errorMessage) => {
-                console.log("📡 Scanner en écoute...", errorMessage);
+                // Pas d'erreur, juste logging du statut
+                console.log("📡 Scanner en écoute...");
             }
         );
     } catch (error) {
@@ -1242,7 +1240,10 @@ function handleBarcode(barcode) {
     console.log("📋 Traitement du code-barre:", barcode);
     
     // Mettre à jour le champ manuel
-    document.getElementById('manual-barcode').value = barcode;
+    const manualInput = document.getElementById('manual-barcode');
+    if (manualInput) {
+        manualInput.value = barcode;
+    }
     
     // Rechercher l'article
     const article = articles.find(a => a.barcode === barcode);
