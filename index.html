@@ -1161,11 +1161,16 @@
     if (page === 'dashboard') loadDashboard();
     if (page === 'inventory') loadInventory();
     if (page === 'scan') {
-        // Petit délai avant d'initialiser le scanner
-        setTimeout(() => {
-            initScanner();
-        }, 100);
+    // Arrêter tout scanner existant
+    if (html5QrCode) {
+        html5QrCode.stop().catch(() => {});
     }
+    
+    // Petit délai avant d'initialiser
+    setTimeout(() => {
+        initScanner();
+    }, 300);
+}
     if (page === 'search') loadSearchPage();
     if (page === 'locations') loadLocations();
 }
@@ -1702,14 +1707,18 @@ function getNavLabelForPage(page) {
 
 function initFreshScanner() {
     // Démarrer le scanner seulement si sur la page scan
-    if (!document.getElementById('scan-page') || !document.getElementById('scan-page').classList.contains('hidden')) {
+    const scanPage = document.getElementById('scan-page');
+    if (!scanPage || scanPage.classList.contains('hidden')) {
+        console.log("Page scan cachée, scanner non démarré");
         return;
     }
-
+    
     // Vider le conteneur du scanner
     const scannerContainer = document.getElementById('scanner-reader');
     scannerContainer.innerHTML = '';
-
+    
+    console.log("Initialisation du scanner...");
+    
     // Demander la permission caméra
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ 
@@ -1718,6 +1727,8 @@ function initFreshScanner() {
         .then(function(stream) {
             // Arrêter le stream de test
             stream.getTracks().forEach(track => track.stop());
+            
+            console.log("Caméra accessible, démarrage scanner...");
             
             // Initialiser le scanner
             html5QrCode = new Html5QrcodeScanner(
@@ -1733,6 +1744,7 @@ function initFreshScanner() {
             
             html5QrCode.render(
                 (decodedText) => {
+                    console.log("Code barre détecté:", decodedText);
                     // Arrêter le scanner après la détection
                     html5QrCode.stop().then(() => {
                         handleBarcodeScan(decodedText);
@@ -1741,24 +1753,24 @@ function initFreshScanner() {
                     });
                 },
                 (errorMessage) => {
-                    // Erreurs normales, pas besoin d'alerte
-                    console.log("Scanner error (normal):", errorMessage);
+                    // Erreurs normales
+                    console.log("Scanner en cours:", errorMessage);
                 }
             );
         })
         .catch(function(err) {
-            console.error("Camera error:", err);
-            // Afficher un message moins intrusif
+            console.error("Erreur caméra:", err);
             document.getElementById('scanner-reader').innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #888;">
                     <div style="font-size: 48px; margin-bottom: 16px;">📷</div>
                     <div style="margin-bottom: 16px;">Impossible d'accéder à la caméra</div>
-                    <div style="font-size: 14px; margin-bottom: 20px;">Veuillez vérifier les permissions</div>
+                    <div style="font-size: 14px; margin-bottom: 20px;">${err.message}</div>
                     <button class="btn-secondary" onclick="initScanner()">Réessayer</button>
                 </div>
             `;
         });
     } else {
+        console.log("Navigateur ne supporte pas getUserMedia");
         document.getElementById('scanner-reader').innerHTML = `
             <div style="text-align: center; padding: 40px; color: #888;">
                 <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
