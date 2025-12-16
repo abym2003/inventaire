@@ -21,6 +21,7 @@
             overflow-x: hidden;
         }
 
+        /* Header */
         .header {
             background: #1e1e1e;
             padding: 16px 20px;
@@ -42,12 +43,14 @@
             margin-top: 4px;
         }
 
+        /* Main Container */
         .container {
             padding: 20px;
             padding-bottom: 90px;
             min-height: calc(100vh - 140px);
         }
 
+        /* Dashboard Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -61,13 +64,6 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             border: 1px solid #333;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
         }
 
         .stat-value {
@@ -82,6 +78,7 @@
             color: #aaa;
         }
 
+        /* Quick Actions */
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -115,6 +112,7 @@
             box-shadow: 0 4px 12px rgba(3, 218, 198, 0.3);
         }
 
+        /* Search Bar */
         .search-container {
             margin-bottom: 20px;
         }
@@ -134,6 +132,7 @@
             border-color: #bb86fc;
         }
 
+        /* Filters */
         .filters {
             display: flex;
             gap: 8px;
@@ -159,6 +158,7 @@
             border-color: #bb86fc;
         }
 
+        /* Article List */
         .article-list {
             display: flex;
             flex-direction: column;
@@ -223,6 +223,7 @@
             border: 1px solid #333;
         }
 
+        /* Floating Action Button */
         .fab {
             position: fixed;
             bottom: 80px;
@@ -247,6 +248,7 @@
             transform: scale(0.9);
         }
 
+        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -293,6 +295,7 @@
             color: #bb86fc;
         }
 
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -350,6 +353,7 @@
             justify-content: center;
         }
 
+        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
         }
@@ -423,6 +427,7 @@
             color: #fff;
         }
 
+        /* Scanner */
         .scanner-container {
             position: relative;
             width: 100%;
@@ -458,6 +463,7 @@
             box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
         }
 
+        /* Detail Page */
         .detail-header {
             background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
             padding: 24px;
@@ -515,6 +521,7 @@
             color: #bb86fc;
         }
 
+        /* History */
         .history-item {
             display: flex;
             gap: 12px;
@@ -551,6 +558,7 @@
             color: #888;
         }
 
+        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -567,6 +575,7 @@
             color: #888;
         }
 
+        /* Location List */
         .location-list-item {
             display: flex;
             justify-content: space-between;
@@ -576,12 +585,6 @@
             border-radius: 12px;
             margin-bottom: 12px;
             border: 1px solid #333;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .location-list-item:hover {
-            background: #252525;
         }
 
         .location-info {
@@ -623,6 +626,7 @@
             background: #333;
         }
 
+        /* Multi Select */
         .location-select {
             display: flex;
             flex-direction: column;
@@ -656,6 +660,7 @@
             flex: 1;
         }
 
+        /* Import/Export Page */
         .export-section {
             background: #1e1e1e;
             padding: 20px;
@@ -703,63 +708,10 @@
         .hidden {
             display: none !important;
         }
-
-        .detail-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .detail-info-item {
-            background: #121212;
-            padding: 12px;
-            border-radius: 8px;
-        }
-
-        .detail-info-label {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 4px;
-        }
-
-        .detail-info-value {
-            font-size: 15px;
-            color: #e0e0e0;
-            font-weight: 500;
-        }
-		
-		/* Styles pour la page recherche */
-#search-instructions {
-    margin-top: 40px;
-    text-align: center;
-    padding: 40px 20px;
-}
-
-#search-instructions .empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-#search-instructions .empty-text {
-    font-size: 15px;
-    color: #aaa;
-    line-height: 1.5;
-}
-
-/* Animation pour les résultats */
-#search-results-container {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
     </style>
 </head>
 <body>
+    <!-- Dashboard Page -->
     <div id="dashboard-page" class="page">
         <div class="header">
             <h1>📦 Gestion d'Inventaire</h1>
@@ -767,24 +719,32 @@
         </div>
         <div class="container">
             <div class="stats-grid">
-                <div class="stat-card" onclick="navigateTo('locations')">
-                    <div class="stat-value" id="total-locations">0</div>
-                    <div class="stat-label">Emplacement</div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-articles">0</div>
+                    <div class="stat-label">Articles</div>
                 </div>
-                <div class="stat-card" onclick="showLowStock()">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-quantity">0</div>
+                    <div class="stat-label">Quantité totale</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-locations">0</div>
+                    <div class="stat-label">Emplacements</div>
+                </div>
+                <div class="stat-card">
                     <div class="stat-value" id="low-stock">0</div>
                     <div class="stat-label">Stock faible</div>
                 </div>
             </div>
 
             <div class="quick-actions">
-    <button class="action-btn" onclick="showAddArticleModal()">
-        ➕ Ajouter article
-    </button>
-    <button class="action-btn secondary" onclick="navigateToWithScanner('scan')">
-        📷 Scanner
-    </button>
-</div>
+                <button class="action-btn" onclick="showAddArticleModal()">
+                    ➕ Ajouter article
+                </button>
+                <button class="action-btn secondary" onclick="navigateTo('scan')">
+                    📷 Scanner
+                </button>
+            </div>
 
             <div class="detail-section">
                 <div class="section-title">Activité récente</div>
@@ -793,6 +753,7 @@
         </div>
     </div>
 
+    <!-- Inventory Page -->
     <div id="inventory-page" class="page hidden">
         <div class="header">
             <h1>📋 Inventaire</h1>
@@ -810,82 +771,33 @@
         <button class="fab" onclick="showAddArticleModal()">+</button>
     </div>
 
+    <!-- Scan Page -->
     <div id="scan-page" class="page hidden">
-    <div class="header">
-        <h1>📷 Scanner</h1>
-        <div class="header-subtitle">Présentez un code-barre</div>
-    </div>
-    <div class="container">
-        <div class="scanner-container" id="scanner-reader"></div>
-
-        <div class="detail-section">
-            <div class="section-title">📱 Scanner manuel</div>
-            <div class="form-group">
-                <input type="text" class="form-input" id="manual-barcode" placeholder="Entrez le code-barre manuellement">
-            </div>
-            <button class="btn-primary" onclick="searchByBarcode()">Rechercher</button>
+        <div class="header">
+            <h1>📷 Scanner</h1>
+            <div class="header-subtitle">Scanner un code-barre</div>
         </div>
-
-        <div id="scan-result"></div>
-    </div>
-</div>
-	
-	<div id="search-page" class="page hidden">
-    <div class="header">
-        <h1>🔍 Recherche Avancée</h1>
-        <div class="header-subtitle">Trouver des articles rapidement</div>
-    </div>
-    <div class="container">
-        <!-- Section filtres d'emplacement en premier -->
-        <div class="detail-section">
-            <div class="section-title">📍 Filtrer par emplacement</div>
-            <div class="filters" id="search-location-filters"></div>
-        </div>
-
-        <!-- Section filtres de statut de stock -->
-        <div class="detail-section">
-            <div class="section-title">📊 Filtrer par statut de stock</div>
-            <div class="filters">
-                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
-                    Tous
-                </div>
-                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
-                    ⚠️ Stock faible
-                </div>
-                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
-                    ❌ Rupture
+        <div class="container">
+            <div class="scanner-container">
+                <video id="scanner-video" autoplay playsinline></video>
+                <div class="scanner-overlay">
+                    <div class="scanner-frame"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- Champ de recherche après les filtres -->
-        <div class="search-container" style="margin-top: 20px;">
-            <input type="text" class="search-input" id="advanced-search-input" 
-                   placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie, fournisseur...">
-        </div>
-
-        <!-- Message d'instructions au lieu de liste vide -->
-        <div id="search-instructions" class="empty-state">
-            <div class="empty-icon">🔍</div>
-            <div class="empty-text">
-                <p style="margin-bottom: 12px;">Entrez un terme de recherche ci-dessus</p>
-                <p style="font-size: 14px; color: #aaa;">
-                    Vous pouvez rechercher par :<br>
-                    • Nom d'article<br>
-                    • Code-barre<br>
-                    • Famille ou catégorie<br>
-                    • Fournisseur
-                </p>
+            <div class="detail-section">
+                <div class="section-title">📱 Scanner manuelle</div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="manual-barcode" placeholder="Entrez le code-barre manuellement">
+                </div>
+                <button class="btn-primary" onclick="searchByBarcode()">Rechercher</button>
             </div>
-        </div>
 
-        <!-- Conteneur pour les résultats (caché initialement) -->
-        <div id="search-results-container" class="hidden">
-            <div class="article-list" id="search-results"></div>
+            <div id="scan-result"></div>
         </div>
     </div>
-</div>
 
+    <!-- Detail Page -->
     <div id="detail-page" class="page hidden">
         <div class="header">
             <h1>📦 Détails</h1>
@@ -894,6 +806,7 @@
         <div class="container" id="detail-container"></div>
     </div>
 
+    <!-- Locations Page -->
     <div id="locations-page" class="page hidden">
         <div class="header">
             <h1>📍 Emplacements</h1>
@@ -905,12 +818,14 @@
         <button class="fab" onclick="showAddLocationModal()">+</button>
     </div>
 
+    <!-- Import/Export Page -->
     <div id="import-export-page" class="page hidden">
         <div class="header">
             <h1>📊 Import/Export</h1>
             <div class="header-subtitle">Gestion des données</div>
         </div>
         <div class="container">
+            <!-- Export Section -->
             <div class="export-section">
                 <div class="export-icon">📤</div>
                 <div class="section-title">Exporter l'inventaire</div>
@@ -922,6 +837,7 @@
                 <button class="btn-secondary" onclick="downloadExcel()">💾 Télécharger Excel</button>
             </div>
 
+            <!-- Import Section -->
             <div class="export-section">
                 <div class="export-icon">📥</div>
                 <div class="section-title">Importer l'inventaire</div>
@@ -936,6 +852,7 @@
                 </div>
             </div>
 
+            <!-- Backup Section -->
             <div class="export-section">
                 <div class="section-title">💾 Sauvegarde locale</div>
                 <button class="btn-secondary" onclick="backupData()">Créer une sauvegarde</button>
@@ -944,29 +861,31 @@
         </div>
     </div>
 
+    <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-    <div class="nav-item active" onclick="navigateToWithScanner('dashboard')">
-        <div class="nav-icon">🏠</div>
-        <div class="nav-label">Accueil</div>
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('inventory')">
-        <div class="nav-icon">📋</div>
-        <div class="nav-label">Inventaire</div>
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('search')">  
-        <div class="nav-icon">🔍</div>  
-        <div class="nav-label">Recherche</div>  
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('locations')">
-        <div class="nav-icon">📍</div>
-        <div class="nav-label">Lieux</div>
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('import-export')">
-        <div class="nav-icon">📊</div>
-        <div class="nav-label">Export</div>
-    </div>
-</nav>
+        <div class="nav-item active" onclick="navigateTo('dashboard')">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">Accueil</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('inventory')">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Inventaire</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('scan')">
+            <div class="nav-icon">📷</div>
+            <div class="nav-label">Scanner</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('locations')">
+            <div class="nav-icon">📍</div>
+            <div class="nav-label">Lieux</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('import-export')">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Export</div>
+        </div>
+    </nav>
 
+    <!-- Add Article Modal -->
     <div id="add-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -975,50 +894,27 @@
             </div>
             <form onsubmit="saveArticle(event)">
                 <div class="form-group">
-                    <label class="form-label">Code-barre</label>
-                    <input type="text" class="form-input" id="article-barcode">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Famille *</label>
-                    <input type="text" class="form-input" id="article-famille" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Catégorie *</label>
-                    <input type="text" class="form-input" id="article-categorie" required>
-                </div>
-				<div class="form-group">
                     <label class="form-label">Nom de l'article *</label>
                     <input type="text" class="form-input" id="article-name" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Taille</label>
-                    <input type="text" class="form-input" id="article-taille">
+                    <label class="form-label">Code-barre</label>
+                    <input type="text" class="form-input" id="article-barcode">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Longueur</label>
-                    <input type="text" class="form-input" id="article-longueur">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="article-description"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Conditionnement *</label>
-                    <input type="number" class="form-input" id="article-conditionnement" required min="1" value="1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Fournisseur</label>
-                    <input type="text" class="form-input" id="article-fournisseur">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Lieu de stockage *</label>
-                    <select class="form-select" id="article-location" required></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nombre *</label>
-                    <input type="number" class="form-input" id="article-nombre" required min="0" value="1">
+                    <label class="form-label">Emplacements et quantités</label>
+                    <div id="locations-checkboxes" class="location-select"></div>
                 </div>
                 <button type="submit" class="btn-primary">Enregistrer</button>
             </form>
         </div>
     </div>
 
+    <!-- Add Location Modal -->
     <div id="add-location-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1039,6 +935,7 @@
         </div>
     </div>
 
+    <!-- Move Article Modal -->
     <div id="move-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1055,7 +952,7 @@
                     <select class="form-select" id="move-to" required></select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Nombre</label>
+                    <label class="form-label">Quantité</label>
                     <input type="number" class="form-input" id="move-quantity" min="1" required>
                 </div>
                 <button type="submit" class="btn-primary">Déplacer</button>
@@ -1063,6 +960,7 @@
         </div>
     </div>
 
+    <!-- Stock Action Modal -->
     <div id="stock-action-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1075,7 +973,7 @@
                     <select class="form-select" id="stock-location" required></select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Nombre</label>
+                    <label class="form-label">Quantité</label>
                     <input type="number" class="form-input" id="stock-quantity" min="1" required>
                 </div>
                 <button type="submit" class="btn-primary" id="stock-action-btn">Confirmer</button>
@@ -1085,1071 +983,673 @@
 
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-	<script src="js/html5-qrcode.min.js"></script>
     <script>
-let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
-let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
-let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
-let currentArticleId = null;
-let currentStockAction = null;
-let html5QrCode = null;
+        // Data Storage
+        let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
+        let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
+        let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
+        let currentArticleId = null;
+        let currentStockAction = null;
+        let html5QrCode = null;
 
-if (locations.length === 0) {
-    locations = [
-        { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
-        { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
-        { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
-    ];
-    saveToStorage();
-}
-
-function stopScanner() {
-    if (html5QrCode) {
-        return html5QrCode.stop().then(() => {
-            html5QrCode.clear();
-            html5QrCode = null;
-            return true;
-        }).catch(err => {
-            console.log("Erreur arrêt scanner:", err);
-            html5QrCode = null;
-            return false;
-        });
-    }
-    return Promise.resolve(true);
-}
-
-function navigateTo(page) {
-    // Arrêter proprement le scanner si on quitte la page scan
-    if (html5QrCode && page !== 'scan') {
-        html5QrCode.stop().then(() => {
-            html5QrCode.clear();
-            html5QrCode = null;
-        }).catch(() => {
-            html5QrCode = null;
-        });
-    }
-    
-    // Masquer toutes les pages
-    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-    
-    // Afficher la page demandée
-    const targetPage = document.getElementById(`${page}-page`);
-    if (targetPage) {
-        targetPage.classList.remove('hidden');
-    }
-    
-    // Mettre à jour la navigation active
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    
-    // Trouver l'élément de navigation correspondant
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        if (item.textContent.includes(getNavLabelForPage(page))) {
-            item.classList.add('active');
+        // Initialize default locations if empty
+        if (locations.length === 0) {
+            locations = [
+                { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
+                { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
+                { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
+            ];
+            saveToStorage();
         }
-    });
-    
-    // Charger le contenu de la page
-    if (page === 'dashboard') loadDashboard();
-    if (page === 'inventory') loadInventory();
-    if (page === 'scan') {
-        // IMPORTANT: Vider le conteneur AVANT de démarrer le nouveau scanner
-        const scannerContainer = document.getElementById('scanner-reader');
-        if (scannerContainer) {
-            scannerContainer.innerHTML = '';
+
+        // Navigation
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`${page}-page`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget?.classList.add('active');
+
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'inventory') loadInventory();
+            if (page === 'scan') initScanner();
+            if (page === 'locations') loadLocations();
         }
-        
-        // Démarrer le scanner après un court délai
-        setTimeout(() => {
-            startSimpleScanner();
-        }, 300); // Délai pour laisser le DOM se mettre à jour
-    }
-    if (page === 'search') loadSearchPage();
-    if (page === 'locations') loadLocations();
-}
 
-function navigateToWithScanner(page) {
-    // Si on quitte la page scan, arrêter le scanner
-    if (html5QrCode && page !== 'scan') {
-        html5QrCode.stop().catch(() => {});
-        html5QrCode = null;
-    }
-    
-    navigateTo(page);
-}
+        // Save to localStorage
+        function saveToStorage() {
+            localStorage.setItem('inventory_articles', JSON.stringify(articles));
+            localStorage.setItem('inventory_locations', JSON.stringify(locations));
+            localStorage.setItem('inventory_history', JSON.stringify(history));
+        }
 
-function startSimpleScanner() {
-    console.log("🟢 Démarrage du scanner...");
-    
-    // Vérifier que l'élément existe et est visible
-    const scannerElement = document.getElementById('scanner-reader');
-    const scanPage = document.getElementById('scan-page');
-    
-    if (!scannerElement || !scanPage || scanPage.classList.contains('hidden')) {
-        console.log("Scanner non disponible, page cachée");
-        return;
-    }
-    
-    // Nettoyer tout scanner précédent
-    if (html5QrCode) {
-        html5QrCode.stop().catch(() => {});
-        html5QrCode.clear();
-        html5QrCode = null;
-    }
-    
-    try {
-        // Utiliser Html5QrcodeScanner au lieu de Html5Qrcode
-        html5QrCode = new Html5QrcodeScanner(
-            "scanner-reader",
-            { 
-                fps: 10, 
-                qrbox: { width: 250, height: 150 },
-                aspectRatio: 1.0,
-                rememberLastUsedCamera: true
-            },
-            false // verbose
-        );
-        
-        console.log("✅ Scanner initialisé");
-        
-        html5QrCode.render(
-            (decodedText) => {
-                console.log("🎯 Code barre détecté:", decodedText);
-                
-                // Arrêter le scanner après détection
-                if (html5QrCode) {
-                    html5QrCode.stop().then(() => {
-                        console.log("✅ Scanner arrêté après détection");
-                        handleBarcode(decodedText);
-                    }).catch((err) => {
-                        console.log("⚠️ Erreur arrêt scanner:", err);
-                        handleBarcode(decodedText);
-                    });
-                }
-            },
-            (errorMessage) => {
-                // Pas d'erreur, juste logging du statut
-                console.log("📡 Scanner en écoute...");
-            }
-        );
-    } catch (error) {
-        console.error("❌ Erreur d'initialisation:", error);
-    }
-}
+        // Add to history
+        function addHistory(action, articleName, details = '') {
+            history.unshift({
+                id: Date.now(),
+                action,
+                articleName,
+                details,
+                date: new Date().toISOString()
+            });
+            if (history.length > 50) history = history.slice(0, 50);
+            saveToStorage();
+        }
 
-function handleBarcode(barcode) {
-    console.log("📋 Traitement du code-barre:", barcode);
-    
-    // Mettre à jour le champ manuel
-    const manualInput = document.getElementById('manual-barcode');
-    if (manualInput) {
-        manualInput.value = barcode;
-    }
-    
-    // Rechercher l'article
-    const article = articles.find(a => a.barcode === barcode);
-    
-    if (article) {
-        // Article trouvé : ouvrir sa fiche
-        console.log("✅ Article trouvé, ouverture de la fiche");
-        showArticleDetail(article.id);
-    } else {
-        // Article non trouvé : ouvrir la création
-        console.log("❌ Article non trouvé, ouverture création");
-        createArticleFromBarcode(barcode);
-    }
-}
+        // Load Dashboard
+        function loadDashboard() {
+            const totalArticles = articles.length;
+            const totalQuantity = articles.reduce((sum, art) => 
+                sum + Object.values(art.quantities || {}).reduce((s, q) => s + q, 0), 0);
+            const totalLocations = locations.length;
+            const lowStock = articles.filter(art => 
+                Object.values(art.quantities || {}).reduce((s, q) => s + q, 0) < 5).length;
 
-function searchByBarcode() {
-    const barcode = document.getElementById('manual-barcode').value.trim();
-    if (!barcode) {
-        alert('Veuillez entrer un code-barre');
-        return;
-    }
-    
-    handleBarcode(barcode);
-}
+            document.getElementById('total-articles').textContent = totalArticles;
+            document.getElementById('total-quantity').textContent = totalQuantity;
+            document.getElementById('total-locations').textContent = totalLocations;
+            document.getElementById('low-stock').textContent = lowStock;
 
-function getNavLabelForPage(page) {
-    const pageLabels = {
-        'dashboard': 'Accueil',
-        'inventory': 'Inventaire',
-        'scan': 'Scanner',
-        'search': 'Recherche',
-        'locations': 'Lieux',
-        'import-export': 'Export'
-    };
-    return pageLabels[page] || '';
-}
-
-function saveToStorage() {
-    localStorage.setItem('inventory_articles', JSON.stringify(articles));
-    localStorage.setItem('inventory_locations', JSON.stringify(locations));
-    localStorage.setItem('inventory_history', JSON.stringify(history));
-}
-
-function addHistory(action, articleName, details = '') {
-    history.unshift({
-        id: Date.now(),
-        action,
-        articleName,
-        details,
-        date: new Date().toISOString()
-    });
-    if (history.length > 50) history = history.slice(0, 50);
-    saveToStorage();
-}
-
-function loadDashboard() {
-    const totalLocations = locations.length;
-    const lowStock = articles.filter(art => {
-        const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-        return total <= 2;
-    }).length;
-
-    document.getElementById('total-locations').textContent = totalLocations;
-    document.getElementById('low-stock').textContent = lowStock;
-
-    const activityHtml = history.slice(0, 5).map(h => `
-        <div class="history-item">
-            <div class="history-icon">${getActionIcon(h.action)}</div>
-            <div class="history-content">
-                <div class="history-action">${h.action} - ${h.articleName}</div>
-                <div class="history-date">${formatDate(h.date)} ${h.details ? '- ' + h.details : ''}</div>
-            </div>
-        </div>
-    `).join('') || '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Aucune activité récente</div></div>';
-
-    document.getElementById('recent-activity').innerHTML = activityHtml;
-}
-
-function showLowStock() {
-    navigateTo('inventory');
-    const filtered = articles.filter(art => {
-        const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-        return total <= 2;
-    });
-    displayArticles(filtered);
-}
-
-function loadInventory() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const activeFilter = document.querySelector('.filter-chip.active')?.dataset.location;
-
-    let filtered = articles.filter(art => 
-        art.name.toLowerCase().includes(searchTerm) ||
-        (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
-        (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
-        (art.categorie && art.categorie.toLowerCase().includes(searchTerm))
-    );
-
-    if (activeFilter && activeFilter !== 'all') {
-        filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
-    }
-
-    const filtersHtml = `
-        <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
-             data-location="all" onclick="filterByLocation('all')">
-            Tous
-        </div>
-        ${locations.map(loc => `
-            <div class="filter-chip ${activeFilter === loc.id.toString() ? 'active' : ''}" 
-                 data-location="${loc.id}" onclick="filterByLocation('${loc.id}')">
-                ${loc.name}
-            </div>
-        `).join('')}
-    `;
-    document.getElementById('location-filters').innerHTML = filtersHtml;
-
-    displayArticles(filtered);
-}
-
-function displayArticles(filtered) {
-    const listHtml = filtered.map(art => {
-        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-        const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
-        
-        return `
-            <div class="article-card" onclick="showArticleDetail('${art.id}')">
-                <div class="article-header">
-                    <div>
-                        <div class="article-name">${art.name}</div>
-                        ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
-                    </div>
-                    <div class="article-quantity">${totalQty}</div>
-                </div>
-                <div class="article-locations">
-                    ${locs.map(([locId, qty]) => {
-                        const loc = locations.find(l => l.id.toString() === locId);
-                        const total = qty.nombre * qty.conditionnement;
-                        return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    }).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article trouvé</div></div>';
-
-    document.getElementById('article-list').innerHTML = listHtml;
-}
-
-function filterByLocation(locationId) {
-    document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    loadInventory();
-}
-
-function showArticleDetail(articleId) {
-    currentArticleId = articleId;
-    const article = articles.find(a => a.id.toString() === articleId);
-    if (!article) return;
-
-    const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-    const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
-
-    const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
-
-    const detailHtml = `
-        <div class="detail-header">
-            <div class="detail-title">${article.name}</div>
-            ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
-        </div>
-
-        <div class="detail-section">
-            <div class="section-title">📋 Informations</div>
-            <div class="detail-info-grid">
-                <div class="detail-info-item">
-                    <div class="detail-info-label">Famille</div>
-                    <div class="detail-info-value">${article.famille || '-'}</div>
-                </div>
-                <div class="detail-info-item">
-                    <div class="detail-info-label">Catégorie</div>
-                    <div class="detail-info-value">${article.categorie || '-'}</div>
-                </div>
-                <div class="detail-info-item">
-                    <div class="detail-info-label">Taille</div>
-                    <div class="detail-info-value">${article.taille || '-'}</div>
-                </div>
-                <div class="detail-info-item">
-                    <div class="detail-info-label">Longueur</div>
-                    <div class="detail-info-value">${article.longueur || '-'}</div>
-                </div>
-                <div class="detail-info-item">
-                    <div class="detail-info-label">Conditionnement</div>
-                    <div class="detail-info-value">${article.conditionnement || '-'}</div>
-                </div>
-                <div class="detail-info-item">
-                    <div class="detail-info-label">Fournisseur</div>
-                    <div class="detail-info-value">${article.fournisseur || '-'}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="detail-section">
-            <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
-            ${locs.map(([locId, qty]) => {
-                const loc = locations.find(l => l.id.toString() === locId);
-                const total = qty.nombre * qty.conditionnement;
-                return loc ? `
-                    <div class="location-item">
-                        <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
-                        <div class="location-qty">${total} unités</div>
-                    </div>
-                ` : '';
-            }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
-        </div>
-
-        <div class="detail-section">
-            <div class="section-title">⚡ Actions rapides</div>
-            <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
-            <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
-            <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
-            <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
-        </div>
-
-        ${articleHistory.length > 0 ? `
-        <div class="detail-section">
-            <div class="section-title">📜 Historique</div>
-            ${articleHistory.map(h => `
+            const activityHtml = history.slice(0, 5).map(h => `
                 <div class="history-item">
                     <div class="history-icon">${getActionIcon(h.action)}</div>
                     <div class="history-content">
-                        <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
-                        <div class="history-date">${formatDate(h.date)}</div>
+                        <div class="history-action">${h.action} - ${h.articleName}</div>
+                        <div class="history-date">${formatDate(h.date)} ${h.details ? '- ' + h.details : ''}</div>
                     </div>
                 </div>
-            `).join('')}
-        </div>
-        ` : ''}
-    `;
+            `).join('') || '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Aucune activité récente</div></div>';
 
-    document.getElementById('detail-container').innerHTML = detailHtml;
-    navigateTo('detail');
-}
-
-function showAddArticleModal() {
-    const modal = document.getElementById('add-article-modal');
-    const locationSelect = document.getElementById('article-location');
-
-    locationSelect.innerHTML = locations.map(loc => 
-        `<option value="${loc.id}">${loc.name}</option>`
-    ).join('');
-
-    // Pré-remplir les champs avec les valeurs par défaut
-    document.getElementById('article-famille').value = "boulonnerie";
-    document.getElementById('article-categorie').value = "vis";
-    document.getElementById('article-name').value = "hexa";
-
-    modal.classList.add('active');
-}
-
-function showAddLocationModal() {
-    document.getElementById('add-location-modal').classList.add('active');
-}
-
-function showMoveArticleModal() {
-    const article = articles.find(a => a.id.toString() === currentArticleId);
-    if (!article) return;
-
-    const availableLocations = Object.entries(article.quantities || {})
-        .filter(([_, q]) => q.nombre > 0)
-        .map(([locId]) => locations.find(l => l.id.toString() === locId))
-        .filter(Boolean);
-
-    document.getElementById('move-from').innerHTML = availableLocations.map(loc => {
-        const qty = article.quantities[loc.id];
-        return `<option value="${loc.id}">${loc.name} (${qty.nombre} × ${qty.conditionnement})</option>`;
-    }).join('');
-
-    document.getElementById('move-to').innerHTML = locations.map(loc => 
-        `<option value="${loc.id}">${loc.name}</option>`
-    ).join('');
-
-    document.getElementById('move-article-modal').classList.add('active');
-}
-
-function showStockActionModal(action) {
-    currentStockAction = action;
-    const article = articles.find(a => a.id.toString() === currentArticleId);
-    if (!article) return;
-
-    document.getElementById('stock-action-title').textContent = 
-        action === 'add' ? 'Ajouter au stock' : 'Retirer du stock';
-    document.getElementById('stock-action-btn').textContent = 
-        action === 'add' ? '➕ Ajouter' : '➖ Retirer';
-
-    const availableLocations = action === 'remove' 
-        ? Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0)
-        : locations.map(l => [l.id.toString(), 0]);
-
-    document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
-        const loc = locations.find(l => l.id.toString() === locId);
-        const qty = article.quantities?.[locId];
-        return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' && qty ? ` (${qty.nombre} × ${qty.conditionnement})` : ''}</option>` : '';
-    }).join('');
-
-    document.getElementById('stock-action-modal').classList.add('active');
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
-    document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
-}
-
-function saveArticle(event) {
-    event.preventDefault();
-    
-    const name = document.getElementById('article-name').value.trim();
-    const barcode = document.getElementById('article-barcode').value.trim();
-    const famille = document.getElementById('article-famille').value.trim();
-    const categorie = document.getElementById('article-categorie').value.trim();
-    const taille = document.getElementById('article-taille').value.trim();
-    const longueur = document.getElementById('article-longueur').value.trim();
-    const conditionnement = parseInt(document.getElementById('article-conditionnement').value);
-    const fournisseur = document.getElementById('article-fournisseur').value.trim();
-    const locationId = document.getElementById('article-location').value;
-    const nombre = parseInt(document.getElementById('article-nombre').value);
-
-    let existingArticle = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
-
-    if (existingArticle) {
-        if (!existingArticle.quantities) existingArticle.quantities = {};
-        
-        if (existingArticle.quantities[locationId]) {
-            existingArticle.quantities[locationId].nombre += nombre;
-        } else {
-            existingArticle.quantities[locationId] = { nombre, conditionnement };
+            document.getElementById('recent-activity').innerHTML = activityHtml;
         }
 
-        addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
-    } else {
-        const article = {
-            id: Date.now(),
-            name,
-            barcode,
-            famille,
-            categorie,
-            taille,
-            longueur,
-            conditionnement,
-            fournisseur,
-            quantities: {
-                [locationId]: { nombre, conditionnement }
-            },
-            createdAt: new Date().toISOString()
-        };
+        // Load Inventory
+        function loadInventory() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const activeFilter = document.querySelector('.filter-chip.active')?.dataset.location;
 
-        articles.push(article);
-        addHistory('Ajout', name, `${nombre * conditionnement} unités`);
-    }
+            let filtered = articles.filter(art => 
+                art.name.toLowerCase().includes(searchTerm) ||
+                (art.barcode && art.barcode.toLowerCase().includes(searchTerm))
+            );
 
-    saveToStorage();
-    closeModal('add-article-modal');
-
-    // Réinitialiser les valeurs par défaut pour la prochaine utilisation
-    document.getElementById('article-famille').value = "boulonnerie";
-    document.getElementById('article-categorie').value = "vis";
-    document.getElementById('article-name').value = "hexa";
-
-    loadInventory();
-    loadDashboard();
-}
-
-function saveLocation(event) {
-    event.preventDefault();
-    
-    const name = document.getElementById('location-name').value;
-    const description = document.getElementById('location-description').value;
-
-    locations.push({
-        id: Date.now(),
-        name,
-        description
-    });
-
-    saveToStorage();
-    closeModal('add-location-modal');
-    loadLocations();
-    loadDashboard();
-}
-
-function moveArticle(event) {
-    event.preventDefault();
-    
-    const article = articles.find(a => a.id.toString() === currentArticleId);
-    if (!article) return;
-
-    const fromId = document.getElementById('move-from').value;
-    const toId = document.getElementById('move-to').value;
-    const quantity = parseInt(document.getElementById('move-quantity').value);
-
-    if (fromId === toId) {
-        alert('Les emplacements source et destination doivent être différents');
-        return;
-    }
-
-    if (!article.quantities[fromId] || article.quantities[fromId].nombre < quantity) {
-        alert('Nombre insuffisant dans l\'emplacement source');
-        return;
-    }
-
-    article.quantities[fromId].nombre -= quantity;
-    if (article.quantities[fromId].nombre === 0) delete article.quantities[fromId];
-    
-    if (!article.quantities[toId]) {
-        article.quantities[toId] = { nombre: quantity, conditionnement: article.conditionnement };
-    } else {
-        article.quantities[toId].nombre += quantity;
-    }
-
-    const fromLoc = locations.find(l => l.id.toString() === fromId);
-    const toLoc = locations.find(l => l.id.toString() === toId);
-
-    saveToStorage();
-    addHistory('Déplacement', article.name, `${quantity} de ${fromLoc.name} → ${toLoc.name}`);
-    
-    closeModal('move-article-modal');
-    showArticleDetail(currentArticleId);
-}
-
-function performStockAction(event) {
-    event.preventDefault();
-    
-    const article = articles.find(a => a.id.toString() === currentArticleId);
-    if (!article) return;
-
-    const locationId = document.getElementById('stock-location').value;
-    const quantity = parseInt(document.getElementById('stock-quantity').value);
-
-    if (currentStockAction === 'add') {
-        if (!article.quantities[locationId]) {
-            article.quantities[locationId] = { nombre: quantity, conditionnement: article.conditionnement };
-        } else {
-            article.quantities[locationId].nombre += quantity;
-        }
-        addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
-    } else {
-        if (!article.quantities[locationId] || article.quantities[locationId].nombre < quantity) {
-            alert('Nombre insuffisant');
-            return;
-        }
-        article.quantities[locationId].nombre -= quantity;
-        if (article.quantities[locationId].nombre === 0) delete article.quantities[locationId];
-        addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
-    }
-
-    saveToStorage();
-    closeModal('stock-action-modal');
-    showArticleDetail(currentArticleId);
-    loadDashboard();
-}
-
-function deleteArticle(articleId) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
-    
-    const article = articles.find(a => a.id.toString() === articleId);
-    articles = articles.filter(a => a.id.toString() !== articleId);
-    
-    saveToStorage();
-    addHistory('Suppression', article.name);
-    
-    navigateTo('inventory');
-    loadDashboard();
-}
-
-function loadLocations() {
-    const listHtml = locations.map(loc => {
-        const articleCount = articles.filter(art => 
-            art.quantities && art.quantities[loc.id] && art.quantities[loc.id].nombre > 0
-        ).length;
-
-        return `
-            <div class="location-list-item" onclick="showLocationInventory('${loc.id}')">
-                <div class="location-info">
-                    <div class="location-title">${loc.name}</div>
-                    <div class="location-count">${articleCount} article(s)</div>
-                    ${loc.description ? `<div class="location-count">${loc.description}</div>` : ''}
-                </div>
-                <div class="location-actions">
-                    <button class="icon-btn" onclick="event.stopPropagation(); deleteLocation('${loc.id}')">🗑️</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    document.getElementById('locations-list').innerHTML = listHtml;
-}
-
-function showLocationInventory(locationId) {
-    navigateTo('inventory');
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-        if (chip.dataset.location === locationId) {
-            chip.classList.add('active');
-        } else {
-            chip.classList.remove('active');
-        }
-    });
-    loadInventory();
-}
-
-function deleteLocation(locationId) {
-    const hasArticles = articles.some(art => 
-        art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
-    );
-
-    if (hasArticles) {
-        alert('Impossible de supprimer un emplacement contenant des articles');
-        return;
-    }
-
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) return;
-
-    locations = locations.filter(l => l.id.toString() !== locationId);
-    saveToStorage();
-    loadLocations();
-    loadDashboard();
-}
-
-function createArticleFromBarcode(barcode) {
-    showAddArticleModal();
-    document.getElementById('article-barcode').value = barcode;
-
-    // Pré-remplir les champs avec les valeurs par défaut
-    document.getElementById('article-famille').value = "boulonnerie";
-    document.getElementById('article-categorie').value = "vis";
-    document.getElementById('article-name').value = "hexa";
-}
-
-function exportToExcel() {
-    const email = document.getElementById('export-email').value.trim();
-    if (!email) {
-        alert('Veuillez entrer une adresse e-mail');
-        return;
-    }
-
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        alert('Adresse e-mail invalide');
-        return;
-    }
-
-    downloadExcel();
-    alert(`L'inventaire a été exporté.\nUn e-mail sera envoyé à ${email}\n(Fonctionnalité d'envoi à implémenter côté serveur)`);
-}
-
-function downloadExcel() {
-    const sortedArticles = [...articles].sort((a, b) => {
-        if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
-        return a.categorie.localeCompare(b.categorie);
-    });
-
-    const data = [];
-    let lastFamille = '';
-    let lastCategorie = '';
-
-    sortedArticles.forEach(art => {
-        if (art.famille !== lastFamille || art.categorie !== lastCategorie) {
-            if (data.length > 0) {
-                data.push({});
+            if (activeFilter && activeFilter !== 'all') {
+                filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
             }
-            lastFamille = art.famille;
-            lastCategorie = art.categorie;
+
+            const filtersHtml = `
+                <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
+                     data-location="all" onclick="filterByLocation('all')">
+                    Tous
+                </div>
+                ${locations.map(loc => `
+                    <div class="filter-chip ${activeFilter === loc.id.toString() ? 'active' : ''}" 
+                         data-location="${loc.id}" onclick="filterByLocation('${loc.id}')">
+                        ${loc.name}
+                    </div>
+                `).join('')}
+            `;
+            document.getElementById('location-filters').innerHTML = filtersHtml;
+
+            const listHtml = filtered.map(art => {
+                const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + q, 0);
+                const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q > 0);
+                
+                return `
+                    <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                        <div class="article-header">
+                            <div>
+                                <div class="article-name">${art.name}</div>
+                                ${art.barcode ? `<div class="article-meta">📊 ${art.barcode}</div>` : ''}
+                            </div>
+                            <div class="article-quantity">${totalQty}</div>
+                        </div>
+                        <div class="article-locations">
+                            ${locs.map(([locId, qty]) => {
+                                const loc = locations.find(l => l.id.toString() === locId);
+                                return loc ? `<span class="location-badge">${loc.name}: ${qty}</span>` : '';
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article trouvé</div></div>';
+
+            document.getElementById('article-list').innerHTML = listHtml;
         }
 
-        Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
-            const loc = locations.find(l => l.id.toString() === locId);
-            const total = qty.nombre * qty.conditionnement;
+        // Filter by location
+        function filterByLocation(locationId) {
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            loadInventory();
+        }
 
-            data.push({
-                'Nom': art.name,
-                'Code-barre': art.barcode || '',
-                'Famille': art.famille || '',
-                'Catégorie': art.categorie || '',
-                'Taille': art.taille || '',
-                'Longueur': art.longueur || '',
-                'Conditionnement': art.conditionnement || '',
-                'Nombre': qty.nombre,
-                'Total': total,
-                'Fournisseur': art.fournisseur || '',
-                'Lieu': loc ? loc.name : ''
-            });
+        // Search handler
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('search-input')?.addEventListener('input', loadInventory);
         });
-    });
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
-    
-    const fileName = `inventaire_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-}
+        // Show Article Detail
+        function showArticleDetail(articleId) {
+            currentArticleId = articleId;
+            const article = articles.find(a => a.id.toString() === articleId);
+            if (!article) return;
 
-function importFromExcel(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+            const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + q, 0);
+            const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q > 0);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
 
-            if (!confirm(`Importer ${jsonData.length} ligne(s) ? Cela ajoutera ou mettra à jour les articles existants.`)) {
-                return;
-            }
+            const detailHtml = `
+                <div class="detail-header">
+                    <div class="detail-title">${article.name}</div>
+                    ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
+                    ${article.description ? `<div style="margin-top: 12px; color: #aaa; font-size: 14px;">${article.description}</div>` : ''}
+                </div>
 
-            jsonData.forEach(row => {
-                if (!row['Nom']) return;
+                <div class="detail-section">
+                    <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
+                    ${locs.map(([locId, qty]) => {
+                        const loc = locations.find(l => l.id.toString() === locId);
+                        return loc ? `
+                            <div class="location-item">
+                                <div class="location-name">${loc.name}</div>
+                                <div class="location-qty">${qty} unités</div>
+                            </div>
+                        ` : '';
+                    }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
+                </div>
 
-                const name = row['Nom'];
-                const locationName = row['Lieu'];
-                const location = locations.find(l => l.name === locationName);
-                if (!location) return;
+                <div class="detail-section">
+                    <div class="section-title">⚡ Actions rapides</div>
+                    <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+                    <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+                    <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+                    <button class="btn-secondary" onclick="editArticle('${article.id}')">✏️ Modifier</button>
+                    <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+                </div>
 
-                let article = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+                ${articleHistory.length > 0 ? `
+                <div class="detail-section">
+                    <div class="section-title">📜 Historique</div>
+                    ${articleHistory.map(h => `
+                        <div class="history-item">
+                            <div class="history-icon">${getActionIcon(h.action)}</div>
+                            <div class="history-content">
+                                <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
+                                <div class="history-date">${formatDate(h.date)}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
+            `;
 
-                if (article) {
-                    if (!article.quantities[location.id]) {
-                        article.quantities[location.id] = {
-                            nombre: parseInt(row['Nombre']) || 0,
-                            conditionnement: parseInt(row['Conditionnement']) || 1
-                        };
-                    } else {
-                        article.quantities[location.id].nombre += parseInt(row['Nombre']) || 0;
-                    }
-                } else {
-                    article = {
-                        id: Date.now() + Math.random(),
-                        name,
-                        barcode: row['Code-barre'] || '',
-                        famille: row['Famille'] || '',
-                        categorie: row['Catégorie'] || '',
-                        taille: row['Taille'] || '',
-                        longueur: row['Longueur'] || '',
-                        conditionnement: parseInt(row['Conditionnement']) || 1,
-                        fournisseur: row['Fournisseur'] || '',
-                        quantities: {
-                            [location.id]: {
-                                nombre: parseInt(row['Nombre']) || 0,
-                                conditionnement: parseInt(row['Conditionnement']) || 1
-                            }
-                        },
-                        createdAt: new Date().toISOString()
-                    };
-                    articles.push(article);
-                }
+            document.getElementById('detail-container').innerHTML = detailHtml;
+            navigateTo('detail');
+        }
+
+        // Modals
+        function showAddArticleModal() {
+            const modal = document.getElementById('add-article-modal');
+            const checkboxesContainer = document.getElementById('locations-checkboxes');
+            
+            checkboxesContainer.innerHTML = locations.map(loc => `
+                <div class="location-checkbox">
+                    <input type="checkbox" id="loc-${loc.id}" value="${loc.id}">
+                    <label for="loc-${loc.id}" style="flex: 1; cursor: pointer;">${loc.name}</label>
+                    <input type="number" class="form-input" id="qty-${loc.id}" placeholder="Qté" min="0" value="0" 
+                           style="width: 80px;" onchange="document.getElementById('loc-${loc.id}').checked = this.value > 0">
+                </div>
+            `).join('');
+            
+            modal.classList.add('active');
+        }
+
+        function showAddLocationModal() {
+            document.getElementById('add-location-modal').classList.add('active');
+        }
+
+        function showMoveArticleModal() {
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+
+            const availableLocations = Object.entries(article.quantities || {})
+                .filter(([_, q]) => q > 0)
+                .map(([locId]) => locations.find(l => l.id.toString() === locId))
+                .filter(Boolean);
+
+            document.getElementById('move-from').innerHTML = availableLocations.map(loc => 
+                `<option value="${loc.id}">${loc.name} (${article.quantities[loc.id]} unités)</option>`
+            ).join('');
+
+            document.getElementById('move-to').innerHTML = locations.map(loc => 
+                `<option value="${loc.id}">${loc.name}</option>`
+            ).join('');
+
+            document.getElementById('move-article-modal').classList.add('active');
+        }
+
+        function showStockActionModal(action) {
+            currentStockAction = action;
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+
+            document.getElementById('stock-action-title').textContent = 
+                action === 'add' ? 'Ajouter au stock' : 'Retirer du stock';
+            document.getElementById('stock-action-btn').textContent = 
+                action === 'add' ? '➕ Ajouter' : '➖ Retirer';
+
+            const availableLocations = action === 'remove' 
+                ? Object.entries(article.quantities || {}).filter(([_, q]) => q > 0)
+                : locations.map(l => [l.id.toString(), 0]);
+
+            document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
+                const loc = locations.find(l => l.id.toString() === locId);
+                return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' ? ` (${article.quantities[locId]} unités)` : ''}</option>` : '';
+            }).join('');
+
+            document.getElementById('stock-action-modal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            // Reset forms
+            document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
+        }
+
+        // Save Article
+        function saveArticle(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('article-name').value;
+            const barcode = document.getElementById('article-barcode').value;
+            const description = document.getElementById('article-description').value;
+            
+            const quantities = {};
+            locations.forEach(loc => {
+                const qty = parseInt(document.getElementById(`qty-${loc.id}`).value) || 0;
+                if (qty > 0) quantities[loc.id] = qty;
+            });
+
+            const article = {
+                id: Date.now(),
+                name,
+                barcode,
+                description,
+                quantities,
+                createdAt: new Date().toISOString()
+            };
+
+            articles.push(article);
+            saveToStorage();
+            addHistory('Ajout', name, `Total: ${Object.values(quantities).reduce((s, q) => s + q, 0)} unités`);
+            
+            closeModal('add-article-modal');
+            loadInventory();
+            loadDashboard();
+        }
+
+        // Save Location
+        function saveLocation(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('location-name').value;
+            const description = document.getElementById('location-description').value;
+
+            locations.push({
+                id: Date.now(),
+                name,
+                description
             });
 
             saveToStorage();
-            addHistory('Import', `${jsonData.length} lignes`, 'depuis Excel');
-            alert('Import réussi !');
-            loadInventory();
+            closeModal('add-location-modal');
+            loadLocations();
             loadDashboard();
-
-        } catch (error) {
-            alert('Erreur lors de l\'import: ' + error.message);
         }
-    };
-    reader.readAsArrayBuffer(file);
-}
 
-function backupData() {
-    const backup = {
-        articles,
-        locations,
-        history,
-        date: new Date().toISOString()
-    };
+        // Move Article
+        function moveArticle(event) {
+            event.preventDefault();
+            
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
 
-    const dataStr = JSON.stringify(backup, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `inventaire_backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-}
+            const fromId = document.getElementById('move-from').value;
+            const toId = document.getElementById('move-to').value;
+            const quantity = parseInt(document.getElementById('move-quantity').value);
 
-function restoreData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const backup = JSON.parse(event.target.result);
-                if (!confirm('Restaurer cette sauvegarde ? Cela écrasera toutes les données actuelles.')) {
+            if (fromId === toId) {
+                alert('Les emplacements source et destination doivent être différents');
+                return;
+            }
+
+            if (!article.quantities[fromId] || article.quantities[fromId] < quantity) {
+                alert('Quantité insuffisante dans l\'emplacement source');
+                return;
+            }
+
+            article.quantities[fromId] -= quantity;
+            if (article.quantities[fromId] === 0) delete article.quantities[fromId];
+            
+            article.quantities[toId] = (article.quantities[toId] || 0) + quantity;
+
+            const fromLoc = locations.find(l => l.id.toString() === fromId);
+            const toLoc = locations.find(l => l.id.toString() === toId);
+
+            saveToStorage();
+            addHistory('Déplacement', article.name, `${quantity} de ${fromLoc.name} → ${toLoc.name}`);
+            
+            closeModal('move-article-modal');
+            showArticleDetail(currentArticleId);
+        }
+
+        // Stock Actions
+        function performStockAction(event) {
+            event.preventDefault();
+            
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+
+            const locationId = document.getElementById('stock-location').value;
+            const quantity = parseInt(document.getElementById('stock-quantity').value);
+
+            if (currentStockAction === 'add') {
+                article.quantities[locationId] = (article.quantities[locationId] || 0) + quantity;
+                addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
+            } else {
+                if (!article.quantities[locationId] || article.quantities[locationId] < quantity) {
+                    alert('Quantité insuffisante');
                     return;
                 }
-
-                articles = backup.articles || [];
-                locations = backup.locations || [];
-                history = backup.history || [];
-                
-                saveToStorage();
-                alert('Restauration réussie !');
-                loadDashboard();
-                navigateTo('dashboard');
-
-            } catch (error) {
-                alert('Erreur lors de la restauration: ' + error.message);
+                article.quantities[locationId] -= quantity;
+                if (article.quantities[locationId] === 0) delete article.quantities[locationId];
+                addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
             }
-        };
-        reader.readAsText(file);
-    };
-    input.click();
-}
 
-function getActionIcon(action) {
-    const icons = {
-        'Ajout': '➕',
-        'Suppression': '🗑️',
-        'Déplacement': '🔄',
-        'Ajout stock': '📥',
-        'Retrait stock': '📤',
-        'Import': '📥'
-    };
-    return icons[action] || '📝';
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 60000) return 'À l\'instant';
-    if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
-    if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
-    
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
-
-function loadSearchPage() {
-    const searchInput = document.getElementById('advanced-search-input');
-    searchInput.value = '';
-    
-    // Masquer les résultats et afficher les instructions
-    document.getElementById('search-results-container').classList.add('hidden');
-    document.getElementById('search-instructions').classList.remove('hidden');
-    
-    // Charger les filtres d'emplacement
-    const filtersHtml = `
-        <div class="filter-chip active" data-location="all" onclick="filterSearchByLocation('all')">
-            Tous les emplacements
-        </div>
-        ${locations.map(loc => `
-            <div class="filter-chip" data-location="${loc.id}" onclick="filterSearchByLocation('${loc.id}')">
-                ${loc.name}
-            </div>
-        `).join('')}
-    `;
-    document.getElementById('search-location-filters').innerHTML = filtersHtml;
-    
-    searchInput.focus();
-}
-
-function performAdvancedSearch() {
-    const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
-    const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
-    const activeLocation = document.querySelector('#search-page .filter-chip[data-location].active')?.dataset.location;
-    
-    // Si la recherche est vide, afficher les instructions
-    if (!searchTerm.trim()) {
-        document.getElementById('search-results-container').classList.add('hidden');
-        document.getElementById('search-instructions').classList.remove('hidden');
-        return;
-    }
-    
-    // Masquer les instructions et afficher les résultats
-    document.getElementById('search-instructions').classList.add('hidden');
-    document.getElementById('search-results-container').classList.remove('hidden');
-    
-    let filtered = articles.filter(art => {
-        // Recherche textuelle
-        const matchesText = 
-            art.name.toLowerCase().includes(searchTerm) ||
-            (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
-            (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
-            (art.categorie && art.categorie.toLowerCase().includes(searchTerm)) ||
-            (art.fournisseur && art.fournisseur.toLowerCase().includes(searchTerm));
-        
-        if (!matchesText) return false;
-        
-        // Calcul du stock total
-        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-        
-        // Appliquer le filtre stock
-        if (activeFilter === 'low') {
-            if (totalQty > 2 || totalQty === 0) return false;
-        } else if (activeFilter === 'zero') {
-            if (totalQty > 0) return false;
+            saveToStorage();
+            closeModal('stock-action-modal');
+            showArticleDetail(currentArticleId);
+            loadDashboard();
         }
-        
-        // Appliquer le filtre emplacement
-        if (activeLocation && activeLocation !== 'all') {
-            if (!art.quantities || !art.quantities[activeLocation]) return false;
-        }
-        
-        return true;
-    });
-    
-    displaySearchResults(filtered);
-}
 
-function displaySearchResults(filtered) {
-    const resultsHtml = filtered.map(art => {
-        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-        const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
-        
-        let stockStatus = '';
-        if (totalQty === 0) {
-            stockStatus = '<span style="color: #cf6679;">❌ Rupture</span>';
-        } else if (totalQty <= 2) {
-            stockStatus = '<span style="color: #FFA726;">⚠️ Faible</span>';
+        // Delete Article
+        function deleteArticle(articleId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
+            
+            const article = articles.find(a => a.id.toString() === articleId);
+            articles = articles.filter(a => a.id.toString() !== articleId);
+            
+            saveToStorage();
+            addHistory('Suppression', article.name);
+            
+            navigateTo('inventory');
+            loadDashboard();
         }
-        
-        return `
-            <div class="article-card" onclick="showArticleDetail('${art.id}')">
-                <div class="article-header">
-                    <div>
-                        <div class="article-name">${art.name}</div>
-                        ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
-                        ${art.barcode ? `<div class="article-meta">🏷️ ${art.barcode}</div>` : ''}
+
+        // Edit Article (simplified - reuses add modal)
+        function editArticle(articleId) {
+            alert('Fonctionnalité de modification en cours de développement');
+        }
+
+        // Load Locations
+        function loadLocations() {
+            const listHtml = locations.map(loc => {
+                const articleCount = articles.filter(art => 
+                    art.quantities && art.quantities[loc.id] && art.quantities[loc.id] > 0
+                ).length;
+
+                return `
+                    <div class="location-list-item">
+                        <div class="location-info">
+                            <div class="location-title">${loc.name}</div>
+                            <div class="location-count">${articleCount} article(s)</div>
+                            ${loc.description ? `<div class="location-count">${loc.description}</div>` : ''}
+                        </div>
+                        <div class="location-actions">
+                            <button class="icon-btn" onclick="deleteLocation('${loc.id}')">🗑️</button>
+                        </div>
                     </div>
-                    <div>
-                        <div class="article-quantity">${totalQty}</div>
-                        ${stockStatus ? `<div style="text-align: center; margin-top: 4px;">${stockStatus}</div>` : ''}
+                `;
+            }).join('');
+
+            document.getElementById('locations-list').innerHTML = listHtml;
+        }
+
+        // Delete Location
+        function deleteLocation(locationId) {
+            const hasArticles = articles.some(art => 
+                art.quantities && art.quantities[locationId] && art.quantities[locationId] > 0
+            );
+
+            if (hasArticles) {
+                alert('Impossible de supprimer un emplacement contenant des articles');
+                return;
+            }
+
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) return;
+
+            locations = locations.filter(l => l.id.toString() !== locationId);
+            saveToStorage();
+            loadLocations();
+            loadDashboard();
+        }
+
+        // Scanner
+        function initScanner() {
+            if (html5QrCode) return;
+
+            html5QrCode = new Html5Qrcode("scanner-video");
+            
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 150 } },
+                (decodedText) => {
+                    document.getElementById('manual-barcode').value = decodedText;
+                    searchByBarcode();
+                },
+                (errorMessage) => {
+                    // Scanning...
+                }
+            ).catch(err => {
+                console.error('Scanner error:', err);
+            });
+        }
+
+        function searchByBarcode() {
+            const barcode = document.getElementById('manual-barcode').value.trim();
+            if (!barcode) return;
+
+            const article = articles.find(a => a.barcode === barcode);
+            
+            if (article) {
+                showArticleDetail(article.id);
+            } else {
+                document.getElementById('scan-result').innerHTML = `
+                    <div class="detail-section">
+                        <div class="section-title">❌ Article non trouvé</div>
+                        <div style="text-align: center; padding: 20px; color: #888;">
+                            Aucun article avec le code "${barcode}"
+                        </div>
+                        <button class="btn-primary" onclick="createArticleFromBarcode('${barcode}')">
+                            ➕ Créer un nouvel article
+                        </button>
                     </div>
-                </div>
-                <div class="article-locations">
-                    ${locs.map(([locId, qty]) => {
-                        const loc = locations.find(l => l.id.toString() === locId);
-                        const total = qty.nombre * qty.conditionnement;
-                        return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    }).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article trouvé pour cette recherche</div></div>';
+                `;
+            }
+        }
 
-    document.getElementById('search-results').innerHTML = resultsHtml;
-}
+        function createArticleFromBarcode(barcode) {
+            showAddArticleModal();
+            document.getElementById('article-barcode').value = barcode;
+        }
 
-function filterSearchResults(filterType) {
-    document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
-        chip.classList.remove('active');
-    });
-    event.currentTarget.classList.add('active');
-    
-    // Lancer la recherche seulement si un terme est saisi
-    const searchTerm = document.getElementById('advanced-search-input').value;
-    if (searchTerm.trim()) {
-        performAdvancedSearch();
-    }
-}
+        // Excel Export/Import
+        function exportToExcel() {
+            const email = document.getElementById('export-email').value.trim();
+            if (!email) {
+                alert('Veuillez entrer une adresse e-mail');
+                return;
+            }
 
-function filterSearchByLocation(locationId) {
-    document.querySelectorAll('#search-page .filter-chip[data-location]').forEach(chip => {
-        chip.classList.remove('active');
-    });
-    event.currentTarget.classList.add('active');
-    
-    // Lancer la recherche seulement si un terme est saisi
-    const searchTerm = document.getElementById('advanced-search-input').value;
-    if (searchTerm.trim()) {
-        performAdvancedSearch();
-    }
-}
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                alert('Adresse e-mail invalide');
+                return;
+            }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialiser les écouteurs
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', loadInventory);
-    }
-    
-    const advancedSearchInput = document.getElementById('advanced-search-input');
-    if (advancedSearchInput) {
-        advancedSearchInput.addEventListener('input', performAdvancedSearch);
-    }
-    
-    // Charger le dashboard
-    loadDashboard();
-    
-    // VÉRIFICATION POUR LE SCANNER (cas du refresh de la page)
-    const scanPage = document.getElementById('scan-page');
-    if (scanPage && !scanPage.classList.contains('hidden')) {
-        console.log("🔄 Page scan détectée au chargement");
-        // Petit délai pour s'assurer que tout est chargé
-        setTimeout(() => {
-            startSimpleScanner();
-        }, 800);
-    }
-});
-</script>
+            downloadExcel();
+            alert(`L'inventaire a été exporté.\nUn e-mail sera envoyé à ${email}\n(Fonctionnalité d'envoi à implémenter côté serveur)`);
+        }
 
+        function downloadExcel() {
+            const data = articles.map(art => {
+                const row = {
+                    'Nom': art.name,
+                    'Code-barre': art.barcode || '',
+                    'Description': art.description || '',
+                    'Quantité totale': Object.values(art.quantities || {}).reduce((s, q) => s + q, 0)
+                };
+
+                locations.forEach(loc => {
+                    row[loc.name] = art.quantities?.[loc.id] || 0;
+                });
+
+                return row;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
+            
+            const fileName = `inventaire_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    if (!confirm(`Importer ${jsonData.length} article(s) ? Cela écrasera les données existantes.`)) {
+                        return;
+                    }
+
+                    // Import logic (simplified)
+                    articles = jsonData.map((row, index) => {
+                        const quantities = {};
+                        locations.forEach(loc => {
+                            if (row[loc.name]) quantities[loc.id] = parseInt(row[loc.name]) || 0;
+                        });
+
+                        return {
+                            id: Date.now() + index,
+                            name: row['Nom'] || `Article ${index + 1}`,
+                            barcode: row['Code-barre'] || '',
+                            description: row['Description'] || '',
+                            quantities,
+                            createdAt: new Date().toISOString()
+                        };
+                    });
+
+                    saveToStorage();
+                    addHistory('Import', `${jsonData.length} articles`, 'depuis Excel');
+                    alert('Import réussi !');
+                    loadInventory();
+                    loadDashboard();
+
+                } catch (error) {
+                    alert('Erreur lors de l\'import: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Backup/Restore
+        function backupData() {
+            const backup = {
+                articles,
+                locations,
+                history,
+                date: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventaire_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const backup = JSON.parse(event.target.result);
+                        if (!confirm('Restaurer cette sauvegarde ? Cela écrasera toutes les données actuelles.')) {
+                            return;
+                        }
+
+                        articles = backup.articles || [];
+                        locations = backup.locations || [];
+                        history = backup.history || [];
+                        
+                        saveToStorage();
+                        alert('Restauration réussie !');
+                        loadDashboard();
+                        navigateTo('dashboard');
+
+                    } catch (error) {
+                        alert('Erreur lors de la restauration: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Utility Functions
+        function getActionIcon(action) {
+            const icons = {
+                'Ajout': '➕',
+                'Suppression': '🗑️',
+                'Déplacement': '🔄',
+                'Ajout stock': '📥',
+                'Retrait stock': '📤',
+                'Import': '📥'
+            };
+            return icons[action] || '📝';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'À l\'instant';
+            if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+            if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
+            
+            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Initialize
+        loadDashboard();
+    </script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
@@ -2157,6 +1657,3 @@ if ('serviceWorker' in navigator) {
     .catch(err => console.error('Service Worker error:', err));
 }
 </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
-</body>
-</html>
