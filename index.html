@@ -728,6 +728,35 @@
             color: #e0e0e0;
             font-weight: 500;
         }
+		
+		/* Styles pour la page recherche */
+#search-instructions {
+    margin-top: 40px;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+#search-instructions .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+#search-instructions .empty-text {
+    font-size: 15px;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+/* Animation pour les résultats */
+#search-results-container {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
     </style>
 </head>
 <body>
@@ -801,36 +830,61 @@
         </div>
     </div>
 	
-	<div id="search-page" class="page hidden">  <!-- ID changé -->
-		<div class="header">
-			<h1>🔍 Recherche Avancée</h1>  <!-- Titre changé -->
-			<div class="header-subtitle">Trouver des articles rapidement</div>  <!-- Sous-titre changé -->
-		</div>
-		<div class="container">
-			<div class="search-container">
-				<input type="text" class="search-input" id="advanced-search-input" placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie...">
-			</div>
+	<div id="search-page" class="page hidden">
+    <div class="header">
+        <h1>🔍 Recherche Avancée</h1>
+        <div class="header-subtitle">Trouver des articles rapidement</div>
+    </div>
+    <div class="container">
+        <!-- Section filtres d'emplacement en premier -->
+        <div class="detail-section">
+            <div class="section-title">📍 Filtrer par emplacement</div>
+            <div class="filters" id="search-location-filters"></div>
+        </div>
 
-			<div class="filters">
-				<div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
-					Tous
-				</div>
-				<div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
-					⚠️ Stock faible
-				</div>
-				<div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
-					❌ Rupture
-				</div>
-			</div>
+        <!-- Section filtres de statut de stock -->
+        <div class="detail-section">
+            <div class="section-title">📊 Filtrer par statut de stock</div>
+            <div class="filters">
+                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
+                    Tous
+                </div>
+                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
+                    ⚠️ Stock faible
+                </div>
+                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
+                    ❌ Rupture
+                </div>
+            </div>
+        </div>
 
-			<div class="detail-section">
-				<div class="section-title">📍 Filtrer par emplacement</div>
-				<div class="filters" id="search-location-filters"></div>
-			</div>
+        <!-- Champ de recherche après les filtres -->
+        <div class="search-container" style="margin-top: 20px;">
+            <input type="text" class="search-input" id="advanced-search-input" 
+                   placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie, fournisseur...">
+        </div>
 
-			<div class="article-list" id="search-results"></div>
-		</div>
-	</div>
+        <!-- Message d'instructions au lieu de liste vide -->
+        <div id="search-instructions" class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-text">
+                <p style="margin-bottom: 12px;">Entrez un terme de recherche ci-dessus</p>
+                <p style="font-size: 14px; color: #aaa;">
+                    Vous pouvez rechercher par :<br>
+                    • Nom d'article<br>
+                    • Code-barre<br>
+                    • Famille ou catégorie<br>
+                    • Fournisseur
+                </p>
+            </div>
+        </div>
+
+        <!-- Conteneur pour les résultats (caché initialement) -->
+        <div id="search-results-container" class="hidden">
+            <div class="article-list" id="search-results"></div>
+        </div>
+    </div>
+</div>
 
     <div id="detail-page" class="page hidden">
         <div class="header">
@@ -1277,15 +1331,20 @@
         }
 
         function showAddArticleModal() {
-            const modal = document.getElementById('add-article-modal');
-            const locationSelect = document.getElementById('article-location');
-            
-            locationSelect.innerHTML = locations.map(loc => 
-                `<option value="${loc.id}">${loc.name}</option>`
-            ).join('');
-            
-            modal.classList.add('active');
-        }
+			const modal = document.getElementById('add-article-modal');
+			const locationSelect = document.getElementById('article-location');
+    
+			locationSelect.innerHTML = locations.map(loc => 
+				`<option value="${loc.id}">${loc.name}</option>`
+			).join('');
+    
+			// Pré-remplir les champs avec les valeurs par défaut
+			document.getElementById('article-famille').value = "boulonnerie";
+			document.getElementById('article-categorie').value = "vis";
+			document.getElementById('article-name').value = "hexa";
+    
+			modal.classList.add('active');
+		}
 
         function showAddLocationModal() {
             document.getElementById('add-location-modal').classList.add('active');
@@ -1388,9 +1447,15 @@
             }
 
             saveToStorage();
-            closeModal('add-article-modal');
-            loadInventory();
-            loadDashboard();
+			closeModal('add-article-modal');
+    
+			// Réinitialiser les valeurs par défaut pour la prochaine utilisation
+			document.getElementById('article-famille').value = "boulonnerie";
+			document.getElementById('article-categorie').value = "vis";
+			document.getElementById('article-name').value = "hexa";
+    
+			loadInventory();
+			loadDashboard();
         }
 
         function saveLocation(event) {
@@ -1575,14 +1640,23 @@
             );
             
             html5QrCode.render(
-                (decodedText) => {
-                    document.getElementById('manual-barcode').value = decodedText;
-                    searchByBarcode();
-                },
-                (errorMessage) => {
-                    // Ignorer les erreurs continues
-                }
-            );
+				(decodedText) => {
+					document.getElementById('manual-barcode').value = decodedText;
+        
+					// Recherche automatique après scan
+					const article = articles.find(a => a.barcode === decodedText);
+					if (article) {
+						// Si l'article existe, ouvrir sa fiche
+						showArticleDetail(article.id);
+					} else {
+						// Si l'article n'existe pas, ouvrir la création
+						createArticleFromBarcode(decodedText);
+					}
+			},
+			(errorMessage) => {
+			// Ignorer les erreurs continues
+			}
+			);
         })
         .catch(function(err) {
             alert("Erreur d'accès à la caméra : " + err.message + "\n\nVeuillez autoriser l'accès à la caméra dans les paramètres de votre navigateur.");
@@ -1594,32 +1668,29 @@
 }
 
         function searchByBarcode() {
-            const barcode = document.getElementById('manual-barcode').value.trim();
-            if (!barcode) return;
+			const barcode = document.getElementById('manual-barcode').value.trim();
+			if (!barcode) return;
 
-            const article = articles.find(a => a.barcode === barcode);
-            
-            if (article) {
-                showArticleDetail(article.id);
-            } else {
-                document.getElementById('scan-result').innerHTML = `
-                    <div class="detail-section">
-                        <div class="section-title">❌ Article non trouvé</div>
-                        <div style="text-align: center; padding: 20px; color: #888;">
-                            Aucun article avec le code "${barcode}"
-                        </div>
-                        <button class="btn-primary" onclick="createArticleFromBarcode('${barcode}')">
-                            ➕ Créer un nouvel article
-                        </button>
-                    </div>
-                `;
-            }
-        }
+			const article = articles.find(a => a.barcode === barcode);
+    
+			if (article) {
+				// Si l'article existe, ouvrir automatiquement sa fiche
+				showArticleDetail(article.id);
+			} else {
+				// Si l'article n'existe pas, ouvrir automatiquement la création
+				createArticleFromBarcode(barcode);
+			}
+		}
 
         function createArticleFromBarcode(barcode) {
-            showAddArticleModal();
-            document.getElementById('article-barcode').value = barcode;
-        }
+			showAddArticleModal();
+			document.getElementById('article-barcode').value = barcode;
+    
+			// Pré-remplir les champs avec les valeurs par défaut
+			document.getElementById('article-famille').value = "boulonnerie";
+			document.getElementById('article-categorie').value = "vis";
+			document.getElementById('article-name').value = "hexa";
+		}
 
         function exportToExcel() {
             const email = document.getElementById('export-email').value.trim();
@@ -1828,11 +1899,14 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
 
-		function loadSearchPage() {
+		// Fonction pour charger la page recherche
+function loadSearchPage() {
     const searchInput = document.getElementById('advanced-search-input');
     searchInput.value = '';
-    searchInput.focus();
-    performAdvancedSearch();
+    
+    // Masquer les résultats et afficher les instructions
+    document.getElementById('search-results-container').classList.add('hidden');
+    document.getElementById('search-instructions').classList.remove('hidden');
     
     // Charger les filtres d'emplacement
     const filtersHtml = `
@@ -1846,6 +1920,8 @@
         `).join('')}
     `;
     document.getElementById('search-location-filters').innerHTML = filtersHtml;
+    
+    searchInput.focus();
 }
 
 // Fonction de recherche avancée
@@ -1853,6 +1929,17 @@ function performAdvancedSearch() {
     const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
     const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
     const activeLocation = document.querySelector('#search-page .filter-chip[data-location].active')?.dataset.location;
+    
+    // Si la recherche est vide, afficher les instructions
+    if (!searchTerm.trim()) {
+        document.getElementById('search-results-container').classList.add('hidden');
+        document.getElementById('search-instructions').classList.remove('hidden');
+        return;
+    }
+    
+    // Masquer les instructions et afficher les résultats
+    document.getElementById('search-instructions').classList.add('hidden');
+    document.getElementById('search-results-container').classList.remove('hidden');
     
     let filtered = articles.filter(art => {
         // Recherche textuelle
@@ -1921,7 +2008,7 @@ function displaySearchResults(filtered) {
                 </div>
             </div>
         `;
-    }).join('') || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Aucun article trouvé</div></div>';
+    }).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article trouvé pour cette recherche</div></div>';
 
     document.getElementById('search-results').innerHTML = resultsHtml;
 }
@@ -1932,7 +2019,12 @@ function filterSearchResults(filterType) {
         chip.classList.remove('active');
     });
     event.currentTarget.classList.add('active');
-    performAdvancedSearch();
+    
+    // Lancer la recherche seulement si un terme est saisi
+    const searchTerm = document.getElementById('advanced-search-input').value;
+    if (searchTerm.trim()) {
+        performAdvancedSearch();
+    }
 }
 
 // Filtrer par emplacement dans la recherche
@@ -1941,7 +2033,12 @@ function filterSearchByLocation(locationId) {
         chip.classList.remove('active');
     });
     event.currentTarget.classList.add('active');
-    performAdvancedSearch();
+    
+    // Lancer la recherche seulement si un terme est saisi
+    const searchTerm = document.getElementById('advanced-search-input').value;
+    if (searchTerm.trim()) {
+        performAdvancedSearch();
+    }
 }
 
 // Écouteur pour la recherche en temps réel
