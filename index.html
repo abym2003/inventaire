@@ -2,106 +2,441 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventaire - Scanner Code-Barre</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#bb86fc">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Gestion d'Inventaire</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: #1e1e1e;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #bb86fc;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
         }
 
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            padding: 20px;
+            padding-bottom: 90px;
+            min-height: calc(100vh - 140px);
         }
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            padding: 25px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .header-info {
-            flex: 1;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+            margin-bottom: 24px;
         }
 
-        h1 i {
-            font-size: 2rem;
+        .stat-card {
+            background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .stats {
-            display: flex;
-            gap: 20px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 15px;
-            border-radius: 10px;
-            text-align: center;
-            min-width: 120px;
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
         }
 
         .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            display: block;
+            font-size: 32px;
+            font-weight: 700;
+            color: #bb86fc;
+            margin-bottom: 4px;
         }
 
         .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
+            font-size: 13px;
+            color: #aaa;
         }
 
-        /* Scanner Section */
-        .scanner-section {
-            padding: 25px;
-            border-bottom: 2px solid #eee;
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #03dac6 0%, #00bfa5 100%);
+            box-shadow: 0 4px 12px rgba(3, 218, 198, 0.3);
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 15px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #bb86fc;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-chip.active {
+            background: #bb86fc;
+            color: #000;
+            border-color: #bb86fc;
+        }
+
+        .article-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .article-card {
+            background: #1e1e1e;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .article-card:active {
+            transform: scale(0.98);
+            background: #252525;
+        }
+
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .article-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .article-quantity {
+            background: #bb86fc;
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .article-meta {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .article-locations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .location-badge {
+            background: #2a2a2a;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #03dac6;
+            border: 1px solid #333;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 6px 20px rgba(187, 134, 252, 0.5);
+            color: #000;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 50;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+            border-top: 1px solid #333;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            background: #2a2a2a;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            color: #888;
+        }
+
+        .nav-item.active .nav-icon {
+            color: #bb86fc;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .nav-item.active .nav-label {
+            color: #bb86fc;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1e1e1e;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #bb86fc;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #121212;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #bb86fc;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #cf6679 0%, #b00020 100%);
+            color: #fff;
         }
 
         .scanner-container {
             position: relative;
             width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            border-radius: 15px;
-            overflow: hidden;
+            height: 300px;
             background: #000;
-            min-height: 350px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
 
-        #interactive {
+        #scanner-video {
             width: 100%;
-            height: 350px;
+            height: 100%;
+            object-fit: cover;
         }
 
         .scanner-overlay {
@@ -110,820 +445,1718 @@
             left: 0;
             right: 0;
             bottom: 0;
-            pointer-events: none;
-            border: 3px solid #4CAF50;
-            border-radius: 15px;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-            z-index: 10;
-        }
-
-        .scan-line {
-            position: absolute;
-            top: 20%;
-            left: 5%;
-            right: 5%;
-            height: 4px;
-            background: #4CAF50;
-            box-shadow: 0 0 10px #4CAF50;
-            animation: scan 3s infinite linear;
-            z-index: 11;
-        }
-
-        @keyframes scan {
-            0% { top: 20%; }
-            50% { top: 80%; }
-            100% { top: 20%; }
-        }
-
-        .scanner-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            min-width: 180px;
             justify-content: center;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            color: white;
+        .scanner-frame {
+            width: 250px;
+            height: 150px;
+            border: 3px solid #bb86fc;
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(75, 108, 183, 0.4);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
-            color: white;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0, 176, 155, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(255, 65, 108, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Product Form */
-        .form-section {
-            padding: 25px;
-            background: #f8f9fa;
-            border-bottom: 2px solid #eee;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .form-group {
+        .detail-header {
+            background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
+            padding: 24px;
+            border-radius: 12px;
             margin-bottom: 20px;
+            border: 1px solid #333;
         }
 
-        label {
-            display: block;
+        .detail-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #bb86fc;
             margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 0.95rem;
         }
 
-        .input-with-icon {
-            position: relative;
+        .detail-code {
+            font-size: 14px;
+            color: #888;
+            font-family: 'Courier New', monospace;
         }
 
-        .input-with-icon i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #4b6cb7;
-        }
-
-        .input-with-icon input,
-        .input-with-icon select,
-        .input-with-icon textarea {
-            width: 100%;
-            padding: 15px 15px 15px 45px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .input-with-icon textarea {
-            min-height: 100px;
-            resize: vertical;
-            padding-top: 15px;
-        }
-
-        .input-with-icon input:focus,
-        .input-with-icon select:focus,
-        .input-with-icon textarea:focus {
-            outline: none;
-            border-color: #4b6cb7;
-            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.1);
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-
-        /* Inventory Section */
-        .inventory-section {
-            padding: 25px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
+        .detail-section {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
         }
 
         .section-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.4rem;
-            color: #333;
-        }
-
-        .section-title i {
-            color: #4b6cb7;
-        }
-
-        .search-box {
-            position: relative;
-            width: 300px;
-            max-width: 100%;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px 15px 12px 45px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #666;
-        }
-
-        /* Inventory Items */
-        .inventory-items {
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .inventory-item {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border-left: 5px solid #4b6cb7;
-            transition: transform 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .inventory-item:hover {
-            transform: translateX(5px);
-        }
-
-        .item-info {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .item-name {
-            font-size: 1.2rem;
+            font-size: 16px;
             font-weight: 600;
-            color: #333;
+            color: #03dac6;
+            margin-bottom: 12px;
+        }
+
+        .location-item {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            padding: 12px;
+            background: #121212;
+            border-radius: 8px;
+            margin-bottom: 8px;
         }
 
-        .item-category {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #e3f2fd;
-            color: #1976d2;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
+        .location-name {
+            font-size: 15px;
+            color: #e0e0e0;
         }
 
-        .item-details {
-            color: #666;
-            font-size: 0.95rem;
-            margin-top: 8px;
+        .location-qty {
+            font-size: 15px;
+            font-weight: 600;
+            color: #bb86fc;
+        }
+
+        .history-item {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
+            padding: 12px;
+            background: #121212;
+            border-radius: 8px;
+            margin-bottom: 8px;
         }
 
-        .item-quantity {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #4b6cb7;
-            min-width: 80px;
-            text-align: right;
-        }
-
-        .item-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
+        .history-icon {
             width: 40px;
             height: 40px;
+            background: #2a2a2a;
             border-radius: 50%;
-            border: none;
-            background: #f5f5f5;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
         }
 
-        .action-btn:hover {
-            background: #4b6cb7;
-            color: white;
-            transform: scale(1.1);
+        .history-content {
+            flex: 1;
         }
 
-        /* Empty State */
+        .history-action {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #888;
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #666;
         }
 
-        .empty-state i {
-            font-size: 4rem;
-            color: #ccc;
-            margin-bottom: 20px;
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
         }
 
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #444;
+        .empty-text {
+            font-size: 16px;
+            color: #888;
         }
 
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 18px 25px;
-            background: white;
+        .location-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #1e1e1e;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .location-list-item:hover {
+            background: #252525;
+        }
+
+        .location-info {
+            flex: 1;
+        }
+
+        .location-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+
+        .location-count {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .location-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 15px;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.5s ease;
-            z-index: 1000;
-            max-width: 400px;
-            border-left: 5px solid #4CAF50;
+            justify-content: center;
+            font-size: 18px;
         }
 
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
+        .icon-btn:active {
+            background: #333;
         }
 
-        .toast i {
-            font-size: 1.5rem;
-            color: #4CAF50;
+        .location-select {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
-        .toast.error {
-            border-left-color: #f44336;
+        .location-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #121212;
+            border-radius: 8px;
+            cursor: pointer;
         }
 
-        .toast.error i {
-            color: #f44336;
+        .location-checkbox input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-            }
-            
-            .stats {
-                justify-content: center;
-            }
-            
-            .stat-item {
-                min-width: 100px;
-            }
-            
-            .btn {
-                min-width: 150px;
-                padding: 12px 20px;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .search-box {
-                width: 100%;
-            }
-            
-            .item-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .item-quantity {
-                text-align: left;
-            }
+        .quantity-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
-        @media (max-width: 480px) {
-            .container {
-                border-radius: 10px;
-            }
-            
-            .scanner-container {
-                min-height: 300px;
-            }
-            
-            #interactive {
-                height: 300px;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
+        .quantity-input-group input {
+            flex: 1;
         }
+
+        .export-section {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+        }
+
+        .export-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 2px dashed #555;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            border-color: #bb86fc;
+            background: #333;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .detail-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .detail-info-item {
+            background: #121212;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .detail-info-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .detail-info-value {
+            font-size: 15px;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+		
+		/* Styles pour la page recherche */
+#search-instructions {
+    margin-top: 40px;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+#search-instructions .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+#search-instructions .empty-text {
+    font-size: 15px;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+/* Animation pour les résultats */
+#search-results-container {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="header-info">
-                <h1><i class="fas fa-boxes"></i> Inventaire Intelligent</h1>
-                <p>Scanner et gérez votre inventaire en temps réel</p>
-            </div>
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-value" id="total-items">0</span>
-                    <span class="stat-label">Produits</span>
+    <div id="dashboard-page" class="page">
+        <div class="header">
+            <h1>📦 Gestion d'Inventaire</h1>
+            <div class="header-subtitle">Tableau de bord</div>
+        </div>
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card" onclick="navigateTo('locations')">
+                    <div class="stat-value" id="total-locations">0</div>
+                    <div class="stat-label">Emplacement</div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="total-quantity">0</span>
-                    <span class="stat-label">Quantité totale</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="last-scan">-</span>
-                    <span class="stat-label">Dernier scan</span>
+                <div class="stat-card" onclick="showLowStock()">
+                    <div class="stat-value" id="low-stock">0</div>
+                    <div class="stat-label">Stock faible</div>
                 </div>
             </div>
-        </header>
 
-        <!-- Scanner Section -->
-        <section class="scanner-section">
-            <h2 class="section-title"><i class="fas fa-barcode"></i> Scanner Code-Barre</h2>
-            <div class="scanner-container">
-                <div id="interactive"></div>
-                <div class="scanner-overlay"></div>
-                <div class="scan-line"></div>
-            </div>
-            <div class="scanner-controls">
-                <button id="startButton" class="btn btn-primary">
-                    <i class="fas fa-play"></i> Démarrer Scanner
-                </button>
-                <button id="stopButton" class="btn btn-danger" disabled>
-                    <i class="fas fa-stop"></i> Arrêter Scanner
-                </button>
-                <button id="manualAdd" class="btn btn-success">
-                    <i class="fas fa-plus-circle"></i> Ajouter Manuellement
-                </button>
-            </div>
-        </section>
+            <div class="quick-actions">
+    <button class="action-btn" onclick="showAddArticleModal()">
+        ➕ Ajouter article
+    </button>
+    <button class="action-btn secondary" onclick="navigateToWithScanner('scan')">
+        📷 Scanner
+    </button>
+</div>
 
-        <!-- Product Form -->
-        <section class="form-section">
-            <h2 class="section-title"><i class="fas fa-edit"></i> Fiche Produit</h2>
-            <form id="productForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="barcode">Code-Barre *</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-barcode"></i>
-                            <input type="text" id="barcode" name="barcode" required 
-                                   placeholder="Scannez ou entrez le code-barres">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="name">Nom du Produit *</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-box"></i>
-                            <input type="text" id="name" name="name" required 
-                                   placeholder="Nom du produit">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="category">Catégorie *</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-tag"></i>
-                            <select id="category" name="category" required>
-                                <option value="">Sélectionnez une catégorie</option>
-                                <option value="alimentaire">Alimentaire</option>
-                                <option value="electronique">Électronique</option>
-                                <option value="textile">Textile</option>
-                                <option value="maison">Maison & Jardin</option>
-                                <option value="sante">Santé & Beauté</option>
-                                <option value="bureau">Bureau</option>
-                                <option value="autre">Autre</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="quantity">Quantité *</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-calculator"></i>
-                            <input type="number" id="quantity" name="quantity" 
-                                   min="1" value="1" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="price">Prix (optionnel)</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-euro-sign"></i>
-                            <input type="number" id="price" name="price" 
-                                   min="0" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="location">Emplacement</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <input type="text" id="location" name="location" 
-                                   placeholder="Ex: Rayon A, Étagère 3">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-file-alt"></i>
-                        <textarea id="description" name="description" 
-                                  placeholder="Description du produit..."></textarea>
-                    </div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Enregistrer Produit
-                    </button>
-                    <button type="button" id="clearForm" class="btn btn-danger">
-                        <i class="fas fa-times"></i> Effacer Formulaire
-                    </button>
-                </div>
-            </form>
-        </section>
-
-        <!-- Inventory Section -->
-        <section class="inventory-section">
-            <div class="section-header">
-                <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Inventaire</h2>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Rechercher un produit...">
-                </div>
+            <div class="detail-section">
+                <div class="section-title">Activité récente</div>
+                <div id="recent-activity"></div>
             </div>
-            
-            <div class="inventory-items" id="inventoryItems">
-                <!-- Les produits apparaîtront ici -->
-                <div class="empty-state">
-                    <i class="fas fa-box-open"></i>
-                    <h3>Aucun produit dans l'inventaire</h3>
-                    <p>Scannez votre premier produit pour commencer</p>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <i class="fas fa-check-circle"></i>
-        <div>
-            <strong id="toastTitle">Succès</strong>
-            <p id="toastMessage">Opération effectuée avec succès</p>
         </div>
     </div>
 
-    <script>
-    let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
-    let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
-    let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
-    let currentArticleId = null;
-    let currentStockAction = null;
-    let html5QrCode = null;
+    <div id="inventory-page" class="page hidden">
+        <div class="header">
+            <h1>📋 Inventaire</h1>
+            <div class="header-subtitle">Liste des articles</div>
+        </div>
+        <div class="container">
+            <div class="search-container">
+                <input type="text" class="search-input" id="search-input" placeholder="🔍 Rechercher un article...">
+            </div>
 
-    if (locations.length === 0) {
-        locations = [
-            { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
-            { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
-            { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
-        ];
-        saveToStorage();
-    }
+            <div class="filters" id="location-filters"></div>
 
-    function stopScanner() {
-        if (html5QrCode) {
-            return html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                html5QrCode = null;
-                return true;
-            }).catch(err => {
-                console.log("Erreur arrêt scanner:", err);
-                html5QrCode = null;
-                return false;
-            });
-        }
-        return Promise.resolve(true);
-    }
+            <div class="article-list" id="article-list"></div>
+        </div>
+        <button class="fab" onclick="showAddArticleModal()">+</button>
+    </div>
 
-    function navigateTo(page) {
-        // Arrêter proprement le scanner si on quitte la page scan
-        if (html5QrCode && page !== 'scan') {
-            stopScanner();
-        }
-        
-        // Masquer toutes les pages
-        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-        
-        // Afficher la page demandée
-        const targetPage = document.getElementById(`${page}-page`);
-        if (targetPage) {
-            targetPage.classList.remove('hidden');
-        }
-        
-        // Mettre à jour la navigation active
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        event.currentTarget?.classList.add('active');
-        
-        // Charger le contenu de la page
-        if (page === 'dashboard') loadDashboard();
-        if (page === 'inventory') loadInventory();
-        if (page === 'scan') {
-            // Démarrer le scanner immédiatement
-            setTimeout(() => {
-                initScanner();
-            }, 100);
-        }
-        if (page === 'search') loadSearchPage();
-        if (page === 'locations') loadLocations();
-    }
+    <div id="scan-page" class="page hidden">
+    <div class="header">
+        <h1>📷 Scanner</h1>
+        <div class="header-subtitle">Présentez un code-barre</div>
+    </div>
+    <div class="container">
+        <div class="scanner-container" id="scanner-reader"></div>
 
-    function navigateToWithScanner(page) {
-        if (page !== 'scan' && html5QrCode) {
-            stopScanner().then(() => {
-                navigateTo(page);
-            });
-        } else {
-            navigateTo(page);
-        }
-    }
+        <div class="detail-section">
+            <div class="section-title">📱 Scanner manuel</div>
+            <div class="form-group">
+                <input type="text" class="form-input" id="manual-barcode" placeholder="Entrez le code-barre manuellement">
+            </div>
+            <button class="btn-primary" onclick="searchByBarcode()">Rechercher</button>
+        </div>
 
-    function getNavLabelForPage(page) {
-        const pageLabels = {
-            'dashboard': 'Accueil',
-            'inventory': 'Inventaire',
-            'scan': 'Scanner',
-            'search': 'Recherche',
-            'locations': 'Lieux',
-            'import-export': 'Export'
-        };
-        return pageLabels[page] || '';
-    }
+        <div id="scan-result"></div>
+    </div>
+</div>
+	
+	<div id="search-page" class="page hidden">
+    <div class="header">
+        <h1>🔍 Recherche Avancée</h1>
+        <div class="header-subtitle">Trouver des articles rapidement</div>
+    </div>
+    <div class="container">
+        <!-- Section filtres d'emplacement en premier -->
+        <div class="detail-section">
+            <div class="section-title">📍 Filtrer par emplacement</div>
+            <div class="filters" id="search-location-filters"></div>
+        </div>
 
-    function initScanner() {
-        // Arrêter le scanner s'il est déjà en cours
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                html5QrCode = null;
-                initFreshScanner();
-            }).catch(() => {
-                html5QrCode = null;
-                initFreshScanner();
-            });
-        } else {
-            initFreshScanner();
-        }
-    }
-
-    function initFreshScanner() {
-        // Vérifier qu'on est bien sur la page scan
-        const scanPage = document.getElementById('scan-page');
-        if (!scanPage || scanPage.classList.contains('hidden')) {
-            console.log("Scanner: page non visible");
-            return;
-        }
-        
-        // Vider le conteneur
-        const scannerContainer = document.getElementById('scanner-reader');
-        scannerContainer.innerHTML = '';
-        
-        // Tester l'accès caméra
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
-            })
-            .then(function(stream) {
-                stream.getTracks().forEach(track => track.stop());
-                
-                // Initialiser le scanner
-                html5QrCode = new Html5QrcodeScanner(
-                    "scanner-reader",
-                    { 
-                        fps: 10, 
-                        qrbox: { width: 250, height: 150 },
-                        aspectRatio: 1.0
-                    },
-                    false
-                );
-                
-                html5QrCode.render(
-                    (decodedText) => {
-                        // Arrêter et traiter
-                        if (html5QrCode) {
-                            html5QrCode.stop().then(() => {
-                                handleBarcodeScan(decodedText);
-                            }).catch(() => {
-                                handleBarcodeScan(decodedText);
-                            });
-                        }
-                    },
-                    (errorMessage) => {
-                        // Ignorer les erreurs normales
-                    }
-                );
-            })
-            .catch(function(err) {
-                console.error("Erreur caméra:", err);
-                scannerContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #888;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📷</div>
-                        <div style="margin-bottom: 16px;">Accès caméra nécessaire</div>
-                        <button class="btn-secondary" onclick="initScanner()">Réessayer</button>
-                    </div>
-                `;
-            });
-        } else {
-            scannerContainer.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #888;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
-                    <div>Navigateur incompatible</div>
+        <!-- Section filtres de statut de stock -->
+        <div class="detail-section">
+            <div class="section-title">📊 Filtrer par statut de stock</div>
+            <div class="filters">
+                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
+                    Tous
                 </div>
-            `;
-        }
-    }
+                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
+                    ⚠️ Stock faible
+                </div>
+                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
+                    ❌ Rupture
+                </div>
+            </div>
+        </div>
 
-    function handleBarcodeScan(barcode) {
-        document.getElementById('manual-barcode').value = barcode;
-        const article = articles.find(a => a.barcode === barcode);
+        <!-- Champ de recherche après les filtres -->
+        <div class="search-container" style="margin-top: 20px;">
+            <input type="text" class="search-input" id="advanced-search-input" 
+                   placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie, fournisseur...">
+        </div>
+
+        <!-- Message d'instructions au lieu de liste vide -->
+        <div id="search-instructions" class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-text">
+                <p style="margin-bottom: 12px;">Entrez un terme de recherche ci-dessus</p>
+                <p style="font-size: 14px; color: #aaa;">
+                    Vous pouvez rechercher par :<br>
+                    • Nom d'article<br>
+                    • Code-barre<br>
+                    • Famille ou catégorie<br>
+                    • Fournisseur
+                </p>
+            </div>
+        </div>
+
+        <!-- Conteneur pour les résultats (caché initialement) -->
+        <div id="search-results-container" class="hidden">
+            <div class="article-list" id="search-results"></div>
+        </div>
+    </div>
+</div>
+
+    <div id="detail-page" class="page hidden">
+        <div class="header">
+            <h1>📦 Détails</h1>
+            <div class="header-subtitle">Information de l'article</div>
+        </div>
+        <div class="container" id="detail-container"></div>
+    </div>
+
+    <div id="locations-page" class="page hidden">
+        <div class="header">
+            <h1>📍 Emplacements</h1>
+            <div class="header-subtitle">Gestion des lieux</div>
+        </div>
+        <div class="container">
+            <div id="locations-list"></div>
+        </div>
+        <button class="fab" onclick="showAddLocationModal()">+</button>
+    </div>
+
+    <div id="import-export-page" class="page hidden">
+        <div class="header">
+            <h1>📊 Import/Export</h1>
+            <div class="header-subtitle">Gestion des données</div>
+        </div>
+        <div class="container">
+            <div class="export-section">
+                <div class="export-icon">📤</div>
+                <div class="section-title">Exporter l'inventaire</div>
+                <div class="form-group">
+                    <label class="form-label">Adresse e-mail</label>
+                    <input type="email" class="form-input" id="export-email" placeholder="votre@email.com">
+                </div>
+                <button class="btn-primary" onclick="exportToExcel()">📧 Exporter et envoyer</button>
+                <button class="btn-secondary" onclick="downloadExcel()">💾 Télécharger Excel</button>
+            </div>
+
+            <div class="export-section">
+                <div class="export-icon">📥</div>
+                <div class="section-title">Importer l'inventaire</div>
+                <div class="file-input-wrapper">
+                    <input type="file" id="import-file" accept=".xlsx,.xls,.csv" onchange="importFromExcel(event)">
+                    <label for="import-file" class="file-input-label">
+                        📁 Sélectionner un fichier Excel
+                    </label>
+                </div>
+                <div style="margin-top: 12px; font-size: 13px; color: #888; text-align: center;">
+                    Formats acceptés: .xlsx, .xls, .csv
+                </div>
+            </div>
+
+            <div class="export-section">
+                <div class="section-title">💾 Sauvegarde locale</div>
+                <button class="btn-secondary" onclick="backupData()">Créer une sauvegarde</button>
+                <button class="btn-secondary" onclick="restoreData()">Restaurer une sauvegarde</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+    <div class="nav-item active" onclick="navigateToWithScanner('dashboard')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Accueil</div>
+    </div>
+    <div class="nav-item" onclick="navigateToWithScanner('inventory')">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">Inventaire</div>
+    </div>
+    <div class="nav-item" onclick="navigateToWithScanner('search')">  
+        <div class="nav-icon">🔍</div>  
+        <div class="nav-label">Recherche</div>  
+    </div>
+    <div class="nav-item" onclick="navigateToWithScanner('locations')">
+        <div class="nav-icon">📍</div>
+        <div class="nav-label">Lieux</div>
+    </div>
+    <div class="nav-item" onclick="navigateToWithScanner('import-export')">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Export</div>
+    </div>
+</nav>
+
+    <div id="add-article-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Nouvel Article</div>
+                <button class="close-btn" onclick="closeModal('add-article-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveArticle(event)">
+                <div class="form-group">
+                    <label class="form-label">Code-barre</label>
+                    <input type="text" class="form-input" id="article-barcode">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Famille *</label>
+                    <input type="text" class="form-input" id="article-famille" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Catégorie *</label>
+                    <input type="text" class="form-input" id="article-categorie" required>
+                </div>
+				<div class="form-group">
+                    <label class="form-label">Nom de l'article *</label>
+                    <input type="text" class="form-input" id="article-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Taille</label>
+                    <input type="text" class="form-input" id="article-taille">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Longueur</label>
+                    <input type="text" class="form-input" id="article-longueur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Conditionnement *</label>
+                    <input type="number" class="form-input" id="article-conditionnement" required min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fournisseur</label>
+                    <input type="text" class="form-input" id="article-fournisseur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lieu de stockage *</label>
+                    <select class="form-select" id="article-location" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre *</label>
+                    <input type="number" class="form-input" id="article-nombre" required min="0" value="1">
+                </div>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-location-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Nouvel Emplacement</div>
+                <button class="close-btn" onclick="closeModal('add-location-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveLocation(event)">
+                <div class="form-group">
+                    <label class="form-label">Nom de l'emplacement *</label>
+                    <input type="text" class="form-input" id="location-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="location-description"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="move-article-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Déplacer l'article</div>
+                <button class="close-btn" onclick="closeModal('move-article-modal')">&times;</button>
+            </div>
+            <form onsubmit="moveArticle(event)">
+                <div class="form-group">
+                    <label class="form-label">Depuis</label>
+                    <select class="form-select" id="move-from" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vers</label>
+                    <select class="form-select" id="move-to" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre</label>
+                    <input type="number" class="form-input" id="move-quantity" min="1" required>
+                </div>
+                <button type="submit" class="btn-primary">Déplacer</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="stock-action-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="stock-action-title">Action sur le stock</div>
+                <button class="close-btn" onclick="closeModal('stock-action-modal')">&times;</button>
+            </div>
+            <form onsubmit="performStockAction(event)">
+                <div class="form-group">
+                    <label class="form-label">Emplacement</label>
+                    <select class="form-select" id="stock-location" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre</label>
+                    <input type="number" class="form-input" id="stock-quantity" min="1" required>
+                </div>
+                <button type="submit" class="btn-primary" id="stock-action-btn">Confirmer</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+	<script src="js/html5-qrcode.min.js"></script>
+    <script>
+let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
+let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
+let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
+let currentArticleId = null;
+let currentStockAction = null;
+let html5QrCode = null;
+
+if (locations.length === 0) {
+    locations = [
+        { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
+        { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
+        { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
+    ];
+    saveToStorage();
+}
+
+function stopScanner() {
+    if (html5QrCode) {
+        return html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+            html5QrCode = null;
+            return true;
+        }).catch(err => {
+            console.log("Erreur arrêt scanner:", err);
+            html5QrCode = null;
+            return false;
+        });
+    }
+    return Promise.resolve(true);
+}
+
+function navigateTo(page) {
+    // Arrêter proprement le scanner si on quitte la page scan
+    if (html5QrCode && page !== 'scan') {
+        html5QrCode.stop().then(() => {
+            html5QrCode.clear();
+            html5QrCode = null;
+        }).catch(() => {
+            html5QrCode = null;
+        });
+    }
+    
+    // Masquer toutes les pages
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    
+    // Afficher la page demandée
+    const targetPage = document.getElementById(`${page}-page`);
+    if (targetPage) {
+        targetPage.classList.remove('hidden');
+    }
+    
+    // Mettre à jour la navigation active
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    
+    // Trouver l'élément de navigation correspondant
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        if (item.textContent.includes(getNavLabelForPage(page))) {
+            item.classList.add('active');
+        }
+    });
+    
+    // Charger le contenu de la page
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'inventory') loadInventory();
+    if (page === 'scan') {
+        // IMPORTANT: Vider le conteneur AVANT de démarrer le nouveau scanner
+        const scannerContainer = document.getElementById('scanner-reader');
+        if (scannerContainer) {
+            scannerContainer.innerHTML = '';
+        }
         
-        if (article) {
-            setTimeout(() => showArticleDetail(article.id), 300);
-        } else {
-            setTimeout(() => createArticleFromBarcode(barcode), 300);
-        }
+        // Démarrer le scanner après un court délai
+        setTimeout(() => {
+            startSimpleScanner();
+        }, 300); // Délai pour laisser le DOM se mettre à jour
+    }
+    if (page === 'search') loadSearchPage();
+    if (page === 'locations') loadLocations();
+}
+
+function navigateToWithScanner(page) {
+    // Si on quitte la page scan, arrêter le scanner
+    if (html5QrCode && page !== 'scan') {
+        html5QrCode.stop().catch(() => {});
+        html5QrCode = null;
+    }
+    
+    navigateTo(page);
+}
+
+function startSimpleScanner() {
+    console.log("🟢 Démarrage du scanner...");
+    
+    // Vérifier que l'élément existe et est visible
+    const scannerElement = document.getElementById('scanner-reader');
+    const scanPage = document.getElementById('scan-page');
+    
+    if (!scannerElement || !scanPage || scanPage.classList.contains('hidden')) {
+        console.log("Scanner non disponible, page cachée");
+        return;
+    }
+    
+    // Nettoyer tout scanner précédent
+    if (html5QrCode) {
+        html5QrCode.stop().catch(() => {});
+        html5QrCode.clear();
+        html5QrCode = null;
+    }
+    
+    try {
+        // Utiliser Html5QrcodeScanner au lieu de Html5Qrcode
+        html5QrCode = new Html5QrcodeScanner(
+            "scanner-reader",
+            { 
+                fps: 10, 
+                qrbox: { width: 250, height: 150 },
+                aspectRatio: 1.0,
+                rememberLastUsedCamera: true
+            },
+            false // verbose
+        );
+        
+        console.log("✅ Scanner initialisé");
+        
+        html5QrCode.render(
+            (decodedText) => {
+                console.log("🎯 Code barre détecté:", decodedText);
+                
+                // Arrêter le scanner après détection
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        console.log("✅ Scanner arrêté après détection");
+                        handleBarcode(decodedText);
+                    }).catch((err) => {
+                        console.log("⚠️ Erreur arrêt scanner:", err);
+                        handleBarcode(decodedText);
+                    });
+                }
+            },
+            (errorMessage) => {
+                // Pas d'erreur, juste logging du statut
+                console.log("📡 Scanner en écoute...");
+            }
+        );
+    } catch (error) {
+        console.error("❌ Erreur d'initialisation:", error);
+    }
+}
+
+function handleBarcode(barcode) {
+    console.log("📋 Traitement du code-barre:", barcode);
+    
+    // Mettre à jour le champ manuel
+    const manualInput = document.getElementById('manual-barcode');
+    if (manualInput) {
+        manualInput.value = barcode;
+    }
+    
+    // Rechercher l'article
+    const article = articles.find(a => a.barcode === barcode);
+    
+    if (article) {
+        // Article trouvé : ouvrir sa fiche
+        console.log("✅ Article trouvé, ouverture de la fiche");
+        showArticleDetail(article.id);
+    } else {
+        // Article non trouvé : ouvrir la création
+        console.log("❌ Article non trouvé, ouverture création");
+        createArticleFromBarcode(barcode);
+    }
+}
+
+function searchByBarcode() {
+    const barcode = document.getElementById('manual-barcode').value.trim();
+    if (!barcode) {
+        alert('Veuillez entrer un code-barre');
+        return;
+    }
+    
+    handleBarcode(barcode);
+}
+
+function getNavLabelForPage(page) {
+    const pageLabels = {
+        'dashboard': 'Accueil',
+        'inventory': 'Inventaire',
+        'scan': 'Scanner',
+        'search': 'Recherche',
+        'locations': 'Lieux',
+        'import-export': 'Export'
+    };
+    return pageLabels[page] || '';
+}
+
+function saveToStorage() {
+    localStorage.setItem('inventory_articles', JSON.stringify(articles));
+    localStorage.setItem('inventory_locations', JSON.stringify(locations));
+    localStorage.setItem('inventory_history', JSON.stringify(history));
+}
+
+function addHistory(action, articleName, details = '') {
+    history.unshift({
+        id: Date.now(),
+        action,
+        articleName,
+        details,
+        date: new Date().toISOString()
+    });
+    if (history.length > 50) history = history.slice(0, 50);
+    saveToStorage();
+}
+
+function loadDashboard() {
+    const totalLocations = locations.length;
+    const lowStock = articles.filter(art => {
+        const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        return total <= 2;
+    }).length;
+
+    document.getElementById('total-locations').textContent = totalLocations;
+    document.getElementById('low-stock').textContent = lowStock;
+
+    const activityHtml = history.slice(0, 5).map(h => `
+        <div class="history-item">
+            <div class="history-icon">${getActionIcon(h.action)}</div>
+            <div class="history-content">
+                <div class="history-action">${h.action} - ${h.articleName}</div>
+                <div class="history-date">${formatDate(h.date)} ${h.details ? '- ' + h.details : ''}</div>
+            </div>
+        </div>
+    `).join('') || '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Aucune activité récente</div></div>';
+
+    document.getElementById('recent-activity').innerHTML = activityHtml;
+}
+
+function showLowStock() {
+    navigateTo('inventory');
+    const filtered = articles.filter(art => {
+        const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        return total <= 2;
+    });
+    displayArticles(filtered);
+}
+
+function loadInventory() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const activeFilter = document.querySelector('.filter-chip.active')?.dataset.location;
+
+    let filtered = articles.filter(art => 
+        art.name.toLowerCase().includes(searchTerm) ||
+        (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
+        (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
+        (art.categorie && art.categorie.toLowerCase().includes(searchTerm))
+    );
+
+    if (activeFilter && activeFilter !== 'all') {
+        filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
     }
 
-    function searchByBarcode() {
-        const barcode = document.getElementById('manual-barcode').value.trim();
-        if (!barcode) {
-            alert('Veuillez entrer un code-barre');
+    const filtersHtml = `
+        <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
+             data-location="all" onclick="filterByLocation('all')">
+            Tous
+        </div>
+        ${locations.map(loc => `
+            <div class="filter-chip ${activeFilter === loc.id.toString() ? 'active' : ''}" 
+                 data-location="${loc.id}" onclick="filterByLocation('${loc.id}')">
+                ${loc.name}
+            </div>
+        `).join('')}
+    `;
+    document.getElementById('location-filters').innerHTML = filtersHtml;
+
+    displayArticles(filtered);
+}
+
+function displayArticles(filtered) {
+    const listHtml = filtered.map(art => {
+        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
+        
+        return `
+            <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                <div class="article-header">
+                    <div>
+                        <div class="article-name">${art.name}</div>
+                        ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
+                    </div>
+                    <div class="article-quantity">${totalQty}</div>
+                </div>
+                <div class="article-locations">
+                    ${locs.map(([locId, qty]) => {
+                        const loc = locations.find(l => l.id.toString() === locId);
+                        const total = qty.nombre * qty.conditionnement;
+                        return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article trouvé</div></div>';
+
+    document.getElementById('article-list').innerHTML = listHtml;
+}
+
+function filterByLocation(locationId) {
+    document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    loadInventory();
+}
+
+function showArticleDetail(articleId) {
+    currentArticleId = articleId;
+    const article = articles.find(a => a.id.toString() === articleId);
+    if (!article) return;
+
+    const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+    const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
+
+    const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
+
+    const detailHtml = `
+        <div class="detail-header">
+            <div class="detail-title">${article.name}</div>
+            ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">📋 Informations</div>
+            <div class="detail-info-grid">
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Famille</div>
+                    <div class="detail-info-value">${article.famille || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Catégorie</div>
+                    <div class="detail-info-value">${article.categorie || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Taille</div>
+                    <div class="detail-info-value">${article.taille || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Longueur</div>
+                    <div class="detail-info-value">${article.longueur || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Conditionnement</div>
+                    <div class="detail-info-value">${article.conditionnement || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Fournisseur</div>
+                    <div class="detail-info-value">${article.fournisseur || '-'}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
+            ${locs.map(([locId, qty]) => {
+                const loc = locations.find(l => l.id.toString() === locId);
+                const total = qty.nombre * qty.conditionnement;
+                return loc ? `
+                    <div class="location-item">
+                        <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
+                        <div class="location-qty">${total} unités</div>
+                    </div>
+                ` : '';
+            }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">⚡ Actions rapides</div>
+            <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+            <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+            <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+            <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+        </div>
+
+        ${articleHistory.length > 0 ? `
+        <div class="detail-section">
+            <div class="section-title">📜 Historique</div>
+            ${articleHistory.map(h => `
+                <div class="history-item">
+                    <div class="history-icon">${getActionIcon(h.action)}</div>
+                    <div class="history-content">
+                        <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
+                        <div class="history-date">${formatDate(h.date)}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        ` : ''}
+    `;
+
+    document.getElementById('detail-container').innerHTML = detailHtml;
+    navigateTo('detail');
+}
+
+function showAddArticleModal() {
+    const modal = document.getElementById('add-article-modal');
+    const locationSelect = document.getElementById('article-location');
+
+    locationSelect.innerHTML = locations.map(loc => 
+        `<option value="${loc.id}">${loc.name}</option>`
+    ).join('');
+
+    // Pré-remplir les champs avec les valeurs par défaut
+    document.getElementById('article-famille').value = "boulonnerie";
+    document.getElementById('article-categorie').value = "vis";
+    document.getElementById('article-name').value = "hexa";
+
+    modal.classList.add('active');
+}
+
+function showAddLocationModal() {
+    document.getElementById('add-location-modal').classList.add('active');
+}
+
+function showMoveArticleModal() {
+    const article = articles.find(a => a.id.toString() === currentArticleId);
+    if (!article) return;
+
+    const availableLocations = Object.entries(article.quantities || {})
+        .filter(([_, q]) => q.nombre > 0)
+        .map(([locId]) => locations.find(l => l.id.toString() === locId))
+        .filter(Boolean);
+
+    document.getElementById('move-from').innerHTML = availableLocations.map(loc => {
+        const qty = article.quantities[loc.id];
+        return `<option value="${loc.id}">${loc.name} (${qty.nombre} × ${qty.conditionnement})</option>`;
+    }).join('');
+
+    document.getElementById('move-to').innerHTML = locations.map(loc => 
+        `<option value="${loc.id}">${loc.name}</option>`
+    ).join('');
+
+    document.getElementById('move-article-modal').classList.add('active');
+}
+
+function showStockActionModal(action) {
+    currentStockAction = action;
+    const article = articles.find(a => a.id.toString() === currentArticleId);
+    if (!article) return;
+
+    document.getElementById('stock-action-title').textContent = 
+        action === 'add' ? 'Ajouter au stock' : 'Retirer du stock';
+    document.getElementById('stock-action-btn').textContent = 
+        action === 'add' ? '➕ Ajouter' : '➖ Retirer';
+
+    const availableLocations = action === 'remove' 
+        ? Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0)
+        : locations.map(l => [l.id.toString(), 0]);
+
+    document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
+        const loc = locations.find(l => l.id.toString() === locId);
+        const qty = article.quantities?.[locId];
+        return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' && qty ? ` (${qty.nombre} × ${qty.conditionnement})` : ''}</option>` : '';
+    }).join('');
+
+    document.getElementById('stock-action-modal').classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+    document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
+}
+
+function saveArticle(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('article-name').value.trim();
+    const barcode = document.getElementById('article-barcode').value.trim();
+    const famille = document.getElementById('article-famille').value.trim();
+    const categorie = document.getElementById('article-categorie').value.trim();
+    const taille = document.getElementById('article-taille').value.trim();
+    const longueur = document.getElementById('article-longueur').value.trim();
+    const conditionnement = parseInt(document.getElementById('article-conditionnement').value);
+    const fournisseur = document.getElementById('article-fournisseur').value.trim();
+    const locationId = document.getElementById('article-location').value;
+    const nombre = parseInt(document.getElementById('article-nombre').value);
+
+    let existingArticle = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+
+    if (existingArticle) {
+        if (!existingArticle.quantities) existingArticle.quantities = {};
+        
+        if (existingArticle.quantities[locationId]) {
+            existingArticle.quantities[locationId].nombre += nombre;
+        } else {
+            existingArticle.quantities[locationId] = { nombre, conditionnement };
+        }
+
+        addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
+    } else {
+        const article = {
+            id: Date.now(),
+            name,
+            barcode,
+            famille,
+            categorie,
+            taille,
+            longueur,
+            conditionnement,
+            fournisseur,
+            quantities: {
+                [locationId]: { nombre, conditionnement }
+            },
+            createdAt: new Date().toISOString()
+        };
+
+        articles.push(article);
+        addHistory('Ajout', name, `${nombre * conditionnement} unités`);
+    }
+
+    saveToStorage();
+    closeModal('add-article-modal');
+
+    // Réinitialiser les valeurs par défaut pour la prochaine utilisation
+    document.getElementById('article-famille').value = "boulonnerie";
+    document.getElementById('article-categorie').value = "vis";
+    document.getElementById('article-name').value = "hexa";
+
+    loadInventory();
+    loadDashboard();
+}
+
+function saveLocation(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('location-name').value;
+    const description = document.getElementById('location-description').value;
+
+    locations.push({
+        id: Date.now(),
+        name,
+        description
+    });
+
+    saveToStorage();
+    closeModal('add-location-modal');
+    loadLocations();
+    loadDashboard();
+}
+
+function moveArticle(event) {
+    event.preventDefault();
+    
+    const article = articles.find(a => a.id.toString() === currentArticleId);
+    if (!article) return;
+
+    const fromId = document.getElementById('move-from').value;
+    const toId = document.getElementById('move-to').value;
+    const quantity = parseInt(document.getElementById('move-quantity').value);
+
+    if (fromId === toId) {
+        alert('Les emplacements source et destination doivent être différents');
+        return;
+    }
+
+    if (!article.quantities[fromId] || article.quantities[fromId].nombre < quantity) {
+        alert('Nombre insuffisant dans l\'emplacement source');
+        return;
+    }
+
+    article.quantities[fromId].nombre -= quantity;
+    if (article.quantities[fromId].nombre === 0) delete article.quantities[fromId];
+    
+    if (!article.quantities[toId]) {
+        article.quantities[toId] = { nombre: quantity, conditionnement: article.conditionnement };
+    } else {
+        article.quantities[toId].nombre += quantity;
+    }
+
+    const fromLoc = locations.find(l => l.id.toString() === fromId);
+    const toLoc = locations.find(l => l.id.toString() === toId);
+
+    saveToStorage();
+    addHistory('Déplacement', article.name, `${quantity} de ${fromLoc.name} → ${toLoc.name}`);
+    
+    closeModal('move-article-modal');
+    showArticleDetail(currentArticleId);
+}
+
+function performStockAction(event) {
+    event.preventDefault();
+    
+    const article = articles.find(a => a.id.toString() === currentArticleId);
+    if (!article) return;
+
+    const locationId = document.getElementById('stock-location').value;
+    const quantity = parseInt(document.getElementById('stock-quantity').value);
+
+    if (currentStockAction === 'add') {
+        if (!article.quantities[locationId]) {
+            article.quantities[locationId] = { nombre: quantity, conditionnement: article.conditionnement };
+        } else {
+            article.quantities[locationId].nombre += quantity;
+        }
+        addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
+    } else {
+        if (!article.quantities[locationId] || article.quantities[locationId].nombre < quantity) {
+            alert('Nombre insuffisant');
             return;
         }
+        article.quantities[locationId].nombre -= quantity;
+        if (article.quantities[locationId].nombre === 0) delete article.quantities[locationId];
+        addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
+    }
 
-        const article = articles.find(a => a.barcode === barcode);
-        
-        if (article) {
-            showArticleDetail(article.id);
+    saveToStorage();
+    closeModal('stock-action-modal');
+    showArticleDetail(currentArticleId);
+    loadDashboard();
+}
+
+function deleteArticle(articleId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
+    
+    const article = articles.find(a => a.id.toString() === articleId);
+    articles = articles.filter(a => a.id.toString() !== articleId);
+    
+    saveToStorage();
+    addHistory('Suppression', article.name);
+    
+    navigateTo('inventory');
+    loadDashboard();
+}
+
+function loadLocations() {
+    const listHtml = locations.map(loc => {
+        const articleCount = articles.filter(art => 
+            art.quantities && art.quantities[loc.id] && art.quantities[loc.id].nombre > 0
+        ).length;
+
+        return `
+            <div class="location-list-item" onclick="showLocationInventory('${loc.id}')">
+                <div class="location-info">
+                    <div class="location-title">${loc.name}</div>
+                    <div class="location-count">${articleCount} article(s)</div>
+                    ${loc.description ? `<div class="location-count">${loc.description}</div>` : ''}
+                </div>
+                <div class="location-actions">
+                    <button class="icon-btn" onclick="event.stopPropagation(); deleteLocation('${loc.id}')">🗑️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('locations-list').innerHTML = listHtml;
+}
+
+function showLocationInventory(locationId) {
+    navigateTo('inventory');
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        if (chip.dataset.location === locationId) {
+            chip.classList.add('active');
         } else {
-            createArticleFromBarcode(barcode);
+            chip.classList.remove('active');
         }
-    }
-
-    function createArticleFromBarcode(barcode) {
-        showAddArticleModal();
-        document.getElementById('article-barcode').value = barcode;
-        document.getElementById('article-famille').value = "boulonnerie";
-        document.getElementById('article-categorie').value = "vis";
-        document.getElementById('article-name').value = "hexa";
-    }
-
-    // ... reste des fonctions existantes (saveToStorage, addHistory, loadDashboard, etc.) ...
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (html5QrCode) {
-            stopScanner();
-        }
-        
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', loadInventory);
-        }
-        
-        const advancedSearchInput = document.getElementById('advanced-search-input');
-        if (advancedSearchInput) {
-            advancedSearchInput.addEventListener('input', performAdvancedSearch);
-        }
-        
-        loadDashboard();
     });
+    loadInventory();
+}
+
+function deleteLocation(locationId) {
+    const hasArticles = articles.some(art => 
+        art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
+    );
+
+    if (hasArticles) {
+        alert('Impossible de supprimer un emplacement contenant des articles');
+        return;
+    }
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) return;
+
+    locations = locations.filter(l => l.id.toString() !== locationId);
+    saveToStorage();
+    loadLocations();
+    loadDashboard();
+}
+
+function createArticleFromBarcode(barcode) {
+    showAddArticleModal();
+    document.getElementById('article-barcode').value = barcode;
+
+    // Pré-remplir les champs avec les valeurs par défaut
+    document.getElementById('article-famille').value = "boulonnerie";
+    document.getElementById('article-categorie').value = "vis";
+    document.getElementById('article-name').value = "hexa";
+}
+
+function exportToExcel() {
+    const email = document.getElementById('export-email').value.trim();
+    if (!email) {
+        alert('Veuillez entrer une adresse e-mail');
+        return;
+    }
+
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        alert('Adresse e-mail invalide');
+        return;
+    }
+
+    downloadExcel();
+    alert(`L'inventaire a été exporté.\nUn e-mail sera envoyé à ${email}\n(Fonctionnalité d'envoi à implémenter côté serveur)`);
+}
+
+function downloadExcel() {
+    const sortedArticles = [...articles].sort((a, b) => {
+        if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
+        return a.categorie.localeCompare(b.categorie);
+    });
+
+    const data = [];
+    let lastFamille = '';
+    let lastCategorie = '';
+
+    sortedArticles.forEach(art => {
+        if (art.famille !== lastFamille || art.categorie !== lastCategorie) {
+            if (data.length > 0) {
+                data.push({});
+            }
+            lastFamille = art.famille;
+            lastCategorie = art.categorie;
+        }
+
+        Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
+            const loc = locations.find(l => l.id.toString() === locId);
+            const total = qty.nombre * qty.conditionnement;
+
+            data.push({
+                'Nom': art.name,
+                'Code-barre': art.barcode || '',
+                'Famille': art.famille || '',
+                'Catégorie': art.categorie || '',
+                'Taille': art.taille || '',
+                'Longueur': art.longueur || '',
+                'Conditionnement': art.conditionnement || '',
+                'Nombre': qty.nombre,
+                'Total': total,
+                'Fournisseur': art.fournisseur || '',
+                'Lieu': loc ? loc.name : ''
+            });
+        });
+    });
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
+    
+    const fileName = `inventaire_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+}
+
+function importFromExcel(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+            if (!confirm(`Importer ${jsonData.length} ligne(s) ? Cela ajoutera ou mettra à jour les articles existants.`)) {
+                return;
+            }
+
+            jsonData.forEach(row => {
+                if (!row['Nom']) return;
+
+                const name = row['Nom'];
+                const locationName = row['Lieu'];
+                const location = locations.find(l => l.name === locationName);
+                if (!location) return;
+
+                let article = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+
+                if (article) {
+                    if (!article.quantities[location.id]) {
+                        article.quantities[location.id] = {
+                            nombre: parseInt(row['Nombre']) || 0,
+                            conditionnement: parseInt(row['Conditionnement']) || 1
+                        };
+                    } else {
+                        article.quantities[location.id].nombre += parseInt(row['Nombre']) || 0;
+                    }
+                } else {
+                    article = {
+                        id: Date.now() + Math.random(),
+                        name,
+                        barcode: row['Code-barre'] || '',
+                        famille: row['Famille'] || '',
+                        categorie: row['Catégorie'] || '',
+                        taille: row['Taille'] || '',
+                        longueur: row['Longueur'] || '',
+                        conditionnement: parseInt(row['Conditionnement']) || 1,
+                        fournisseur: row['Fournisseur'] || '',
+                        quantities: {
+                            [location.id]: {
+                                nombre: parseInt(row['Nombre']) || 0,
+                                conditionnement: parseInt(row['Conditionnement']) || 1
+                            }
+                        },
+                        createdAt: new Date().toISOString()
+                    };
+                    articles.push(article);
+                }
+            });
+
+            saveToStorage();
+            addHistory('Import', `${jsonData.length} lignes`, 'depuis Excel');
+            alert('Import réussi !');
+            loadInventory();
+            loadDashboard();
+
+        } catch (error) {
+            alert('Erreur lors de l\'import: ' + error.message);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function backupData() {
+    const backup = {
+        articles,
+        locations,
+        history,
+        date: new Date().toISOString()
+    };
+
+    const dataStr = JSON.stringify(backup, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventaire_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+}
+
+function restoreData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const backup = JSON.parse(event.target.result);
+                if (!confirm('Restaurer cette sauvegarde ? Cela écrasera toutes les données actuelles.')) {
+                    return;
+                }
+
+                articles = backup.articles || [];
+                locations = backup.locations || [];
+                history = backup.history || [];
+                
+                saveToStorage();
+                alert('Restauration réussie !');
+                loadDashboard();
+                navigateTo('dashboard');
+
+            } catch (error) {
+                alert('Erreur lors de la restauration: ' + error.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function getActionIcon(action) {
+    const icons = {
+        'Ajout': '➕',
+        'Suppression': '🗑️',
+        'Déplacement': '🔄',
+        'Ajout stock': '📥',
+        'Retrait stock': '📤',
+        'Import': '📥'
+    };
+    return icons[action] || '📝';
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return 'À l\'instant';
+    if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+    if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
+    
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function loadSearchPage() {
+    const searchInput = document.getElementById('advanced-search-input');
+    searchInput.value = '';
+    
+    // Masquer les résultats et afficher les instructions
+    document.getElementById('search-results-container').classList.add('hidden');
+    document.getElementById('search-instructions').classList.remove('hidden');
+    
+    // Charger les filtres d'emplacement
+    const filtersHtml = `
+        <div class="filter-chip active" data-location="all" onclick="filterSearchByLocation('all')">
+            Tous les emplacements
+        </div>
+        ${locations.map(loc => `
+            <div class="filter-chip" data-location="${loc.id}" onclick="filterSearchByLocation('${loc.id}')">
+                ${loc.name}
+            </div>
+        `).join('')}
+    `;
+    document.getElementById('search-location-filters').innerHTML = filtersHtml;
+    
+    searchInput.focus();
+}
+
+function performAdvancedSearch() {
+    const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
+    const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
+    const activeLocation = document.querySelector('#search-page .filter-chip[data-location].active')?.dataset.location;
+    
+    // Si la recherche est vide, afficher les instructions
+    if (!searchTerm.trim()) {
+        document.getElementById('search-results-container').classList.add('hidden');
+        document.getElementById('search-instructions').classList.remove('hidden');
+        return;
+    }
+    
+    // Masquer les instructions et afficher les résultats
+    document.getElementById('search-instructions').classList.add('hidden');
+    document.getElementById('search-results-container').classList.remove('hidden');
+    
+    let filtered = articles.filter(art => {
+        // Recherche textuelle
+        const matchesText = 
+            art.name.toLowerCase().includes(searchTerm) ||
+            (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
+            (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
+            (art.categorie && art.categorie.toLowerCase().includes(searchTerm)) ||
+            (art.fournisseur && art.fournisseur.toLowerCase().includes(searchTerm));
+        
+        if (!matchesText) return false;
+        
+        // Calcul du stock total
+        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        
+        // Appliquer le filtre stock
+        if (activeFilter === 'low') {
+            if (totalQty > 2 || totalQty === 0) return false;
+        } else if (activeFilter === 'zero') {
+            if (totalQty > 0) return false;
+        }
+        
+        // Appliquer le filtre emplacement
+        if (activeLocation && activeLocation !== 'all') {
+            if (!art.quantities || !art.quantities[activeLocation]) return false;
+        }
+        
+        return true;
+    });
+    
+    displaySearchResults(filtered);
+}
+
+function displaySearchResults(filtered) {
+    const resultsHtml = filtered.map(art => {
+        const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
+        
+        let stockStatus = '';
+        if (totalQty === 0) {
+            stockStatus = '<span style="color: #cf6679;">❌ Rupture</span>';
+        } else if (totalQty <= 2) {
+            stockStatus = '<span style="color: #FFA726;">⚠️ Faible</span>';
+        }
+        
+        return `
+            <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                <div class="article-header">
+                    <div>
+                        <div class="article-name">${art.name}</div>
+                        ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
+                        ${art.barcode ? `<div class="article-meta">🏷️ ${art.barcode}</div>` : ''}
+                    </div>
+                    <div>
+                        <div class="article-quantity">${totalQty}</div>
+                        ${stockStatus ? `<div style="text-align: center; margin-top: 4px;">${stockStatus}</div>` : ''}
+                    </div>
+                </div>
+                <div class="article-locations">
+                    ${locs.map(([locId, qty]) => {
+                        const loc = locations.find(l => l.id.toString() === locId);
+                        const total = qty.nombre * qty.conditionnement;
+                        return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article trouvé pour cette recherche</div></div>';
+
+    document.getElementById('search-results').innerHTML = resultsHtml;
+}
+
+function filterSearchResults(filterType) {
+    document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    // Lancer la recherche seulement si un terme est saisi
+    const searchTerm = document.getElementById('advanced-search-input').value;
+    if (searchTerm.trim()) {
+        performAdvancedSearch();
+    }
+}
+
+function filterSearchByLocation(locationId) {
+    document.querySelectorAll('#search-page .filter-chip[data-location]').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    // Lancer la recherche seulement si un terme est saisi
+    const searchTerm = document.getElementById('advanced-search-input').value;
+    if (searchTerm.trim()) {
+        performAdvancedSearch();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialiser les écouteurs
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', loadInventory);
+    }
+    
+    const advancedSearchInput = document.getElementById('advanced-search-input');
+    if (advancedSearchInput) {
+        advancedSearchInput.addEventListener('input', performAdvancedSearch);
+    }
+    
+    // Charger le dashboard
+    loadDashboard();
+    
+    // VÉRIFICATION POUR LE SCANNER (cas du refresh de la page)
+    const scanPage = document.getElementById('scan-page');
+    if (scanPage && !scanPage.classList.contains('hidden')) {
+        console.log("🔄 Page scan détectée au chargement");
+        // Petit délai pour s'assurer que tout est chargé
+        setTimeout(() => {
+            startSimpleScanner();
+        }, 800);
+    }
+});
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => console.log('Service Worker registered'))
+    .catch(err => console.error('Service Worker error:', err));
+}
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
