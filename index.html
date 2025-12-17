@@ -493,11 +493,6 @@
             color: #03dac6;
             margin-bottom: 12px;
         }
-		
-		#detail-page ~ .bottom-nav .nav-item {
-			opacity: 0.5;
-			pointer-events: none;
-		}
 
         .location-item {
             display: flex;
@@ -1440,7 +1435,6 @@ function navigateTo(page) {
         initScanner();
     }, 100);
 }
-
         function showMoveArticleModal() {
             const article = articles.find(a => a.id.toString() === currentArticleId);
             if (!article) return;
