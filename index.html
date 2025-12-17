@@ -8,7 +8,6 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <title>Gestion d'Inventaire</title>
     <style>
-        /* Tout le CSS original est ici */
         * {
             margin: 0;
             padding: 0;
@@ -22,7 +21,684 @@
             overflow-x: hidden;
         }
 
-        /* ... tout le reste du CSS ... */
+        .header {
+            background: #1e1e1e;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #bb86fc;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .container {
+            padding: 20px;
+            padding-bottom: 90px;
+            min-height: calc(100vh - 140px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #bb86fc;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #03dac6 0%, #00bfa5 100%);
+            box-shadow: 0 4px 12px rgba(3, 218, 198, 0.3);
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 15px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #bb86fc;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-chip.active {
+            background: #bb86fc;
+            color: #000;
+            border-color: #bb86fc;
+        }
+
+        .article-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .article-card {
+            background: #1e1e1e;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .article-card:active {
+            transform: scale(0.98);
+            background: #252525;
+        }
+
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .article-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .article-quantity {
+            background: #bb86fc;
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .article-meta {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .article-locations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .location-badge {
+            background: #2a2a2a;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #03dac6;
+            border: 1px solid #333;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 6px 20px rgba(187, 134, 252, 0.5);
+            color: #000;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 50;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+            border-top: 1px solid #333;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            background: #2a2a2a;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            color: #888;
+        }
+
+        .nav-item.active .nav-icon {
+            color: #bb86fc;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .nav-item.active .nav-label {
+            color: #bb86fc;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1e1e1e;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #bb86fc;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #121212;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #bb86fc;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #cf6679 0%, #b00020 100%);
+            color: #fff;
+        }
+
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #scanner-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scanner-frame {
+            width: 250px;
+            height: 150px;
+            border: 3px solid #bb86fc;
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+        }
+
+        .detail-header {
+            background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        .detail-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #bb86fc;
+            margin-bottom: 8px;
+        }
+
+        .detail-code {
+            font-size: 14px;
+            color: #888;
+            font-family: 'Courier New', monospace;
+        }
+
+        .detail-section {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #03dac6;
+            margin-bottom: 12px;
+        }
+
+        .location-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #121212;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .location-name {
+            font-size: 15px;
+            color: #e0e0e0;
+        }
+
+        .location-qty {
+            font-size: 15px;
+            font-weight: 600;
+            color: #bb86fc;
+        }
+
+        .history-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: #121212;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            background: #2a2a2a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .history-content {
+            flex: 1;
+        }
+
+        .history-action {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            color: #888;
+        }
+
+        .location-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #1e1e1e;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .location-list-item:hover {
+            background: #252525;
+        }
+
+        .location-info {
+            flex: 1;
+        }
+
+        .location-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+
+        .location-count {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .location-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .icon-btn:active {
+            background: #333;
+        }
+
+        .location-select {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .location-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #121212;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .location-checkbox input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .quantity-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .quantity-input-group input {
+            flex: 1;
+        }
+
+        .export-section {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+        }
+
+        .export-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 2px dashed #555;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            border-color: #bb86fc;
+            background: #333;
+        }
 
         .hidden {
             display: none !important;
@@ -33,6 +709,12 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-bottom: 16px;
+        }
+
+        .detail-info-item {
+            background: #121212;
+            padding: 12px;
+            border-radius: 8px;
         }
 
         .detail-info-label {
@@ -46,35 +728,6 @@
             color: #e0e0e0;
             font-weight: 500;
         }
-		
-		/* Styles pour la page recherche */
-#search-instructions {
-    margin-top: 40px;
-    text-align: center;
-    padding: 40px 20px;
-}
-
-#search-instructions .empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-#search-instructions .empty-text {
-    font-size: 15px;
-    color: #aaa;
-    line-height: 1.5;
-}
-
-/* Animation pour les résultats */
-#search-results-container {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
     </style>
 </head>
 <body>
@@ -96,13 +749,13 @@
             </div>
 
             <div class="quick-actions">
-    <button class="action-btn" onclick="showAddArticleModal()">
-        ➕ Ajouter article
-    </button>
-    <button class="action-btn secondary" onclick="navigateToWithScanner('scan')">
-        📷 Scanner
-    </button>
-</div>
+                <button class="action-btn" onclick="showAddArticleModal()">
+                    ➕ Ajouter article
+                </button>
+                <button class="action-btn secondary" onclick="navigateTo('search')">
+                    🔍 Recherche avancée
+                </button>
+            </div>
 
             <div class="detail-section">
                 <div class="section-title">Activité récente</div>
@@ -129,50 +782,35 @@
     </div>
 
     <div id="scan-page" class="page hidden">
-    <div class="header">
-        <h1>📷 Scanner</h1>
-        <div class="header-subtitle">Scanner un code-barre</div>
-    </div>
-    <div class="container">
-        <div class="scanner-container" id="scanner-reader"></div>
-
-        <!-- BOUTONS DE CONTRÔLE DU SCANNER -->
-        <div style="text-align: center; margin: 16px 0;">
-            <button class="btn-secondary" onclick="stopScanner()" style="width: auto; padding: 8px 16px;">
-                ⏸️ Arrêter le scanner
-            </button>
-            <button class="btn-secondary" onclick="initScanner()" style="width: auto; padding: 8px 16px; margin-left: 8px;">
-                ▶️ Redémarrer
-            </button>
+        <div class="header">
+            <h1>📷 Scanner</h1>
+            <div class="header-subtitle">Scanner un code-barre</div>
         </div>
+        <div class="container">
+            <div class="scanner-container" id="scanner-reader"></div>
 
-        <div class="detail-section">
-            <div class="section-title">📱 Scanner manuel</div>
-            <div class="form-group">
-                <input type="text" class="form-input" id="manual-barcode" placeholder="Entrez le code-barre manuellement">
+            <div class="detail-section">
+                <div class="section-title">📱 Scanner manuelle</div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="manual-barcode" placeholder="Entrez le code-barre manuellement">
+                </div>
+                <button class="btn-primary" onclick="searchByBarcode()">Rechercher</button>
             </div>
-            <button class="btn-primary" onclick="searchByBarcode()">Rechercher</button>
-        </div>
 
-        <div id="scan-result"></div>
-    </div>
-</div>
-	
-	<div id="search-page" class="page hidden">
-    <div class="header">
-        <h1>🔍 Recherche Avancée</h1>
-        <div class="header-subtitle">Trouver des articles rapidement</div>
-    </div>
-    <div class="container">
-        <!-- Section filtres d'emplacement en premier -->
-        <div class="detail-section">
-            <div class="section-title">📍 Filtrer par emplacement</div>
-            <div class="filters" id="search-location-filters"></div>
+            <div id="scan-result"></div>
         </div>
+    </div>
+    
+    <div id="search-page" class="page hidden">
+        <div class="header">
+            <h1>🔍 Recherche Avancée</h1>
+            <div class="header-subtitle">Trouver des articles rapidement</div>
+        </div>
+        <div class="container">
+            <div class="search-container">
+                <input type="text" class="search-input" id="advanced-search-input" placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie...">
+            </div>
 
-        <!-- Section filtres de statut de stock -->
-        <div class="detail-section">
-            <div class="section-title">📊 Filtrer par statut de stock</div>
             <div class="filters">
                 <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
                     Tous
@@ -184,35 +822,15 @@
                     ❌ Rupture
                 </div>
             </div>
-        </div>
 
-        <!-- Champ de recherche après les filtres -->
-        <div class="search-container" style="margin-top: 20px;">
-            <input type="text" class="search-input" id="advanced-search-input" 
-                   placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie, fournisseur...">
-        </div>
-
-        <!-- Message d'instructions au lieu de liste vide -->
-        <div id="search-instructions" class="empty-state">
-            <div class="empty-icon">🔍</div>
-            <div class="empty-text">
-                <p style="margin-bottom: 12px;">Entrez un terme de recherche ci-dessus</p>
-                <p style="font-size: 14px; color: #aaa;">
-                    Vous pouvez rechercher par :<br>
-                    • Nom d'article<br>
-                    • Code-barre<br>
-                    • Famille ou catégorie<br>
-                    • Fournisseur
-                </p>
+            <div class="detail-section">
+                <div class="section-title">📍 Filtrer par emplacement</div>
+                <div class="filters" id="search-location-filters"></div>
             </div>
-        </div>
 
-        <!-- Conteneur pour les résultats (caché initialement) -->
-        <div id="search-results-container" class="hidden">
             <div class="article-list" id="search-results"></div>
         </div>
     </div>
-</div>
 
     <div id="detail-page" class="page hidden">
         <div class="header">
@@ -273,27 +891,27 @@
     </div>
 
     <nav class="bottom-nav">
-    <div class="nav-item active" onclick="navigateToWithScanner('dashboard')">
-        <div class="nav-icon">🏠</div>
-        <div class="nav-label">Accueil</div>
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('inventory')">
-        <div class="nav-icon">📋</div>
-        <div class="nav-label">Inventaire</div>
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('search')">  
-        <div class="nav-icon">🔍</div>  
-        <div class="nav-label">Recherche</div>  
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('locations')">
-        <div class="nav-icon">📍</div>
-        <div class="nav-label">Lieux</div>
-    </div>
-    <div class="nav-item" onclick="navigateToWithScanner('import-export')">
-        <div class="nav-icon">📊</div>
-        <div class="nav-label">Export</div>
-    </div>
-</nav>
+        <div class="nav-item active" onclick="navigateTo('dashboard')">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">Accueil</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('inventory')">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Inventaire</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('search')">
+            <div class="nav-icon">🔍</div>
+            <div class="nav-label">Recherche</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('locations')">
+            <div class="nav-icon">📍</div>
+            <div class="nav-label">Lieux</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('import-export')">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Export</div>
+        </div>
+    </nav>
 
     <div id="add-article-modal" class="modal">
         <div class="modal-content">
@@ -314,7 +932,7 @@
                     <label class="form-label">Catégorie *</label>
                     <input type="text" class="form-input" id="article-categorie" required>
                 </div>
-				<div class="form-group">
+                <div class="form-group">
                     <label class="form-label">Nom de l'article *</label>
                     <input type="text" class="form-input" id="article-name" required>
                 </div>
@@ -414,236 +1032,945 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-    let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
-    let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
-    let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
-    let currentArticleId = null;
-    let currentStockAction = null;
-    let html5QrCode = null;
+        let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
+        let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
+        let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
+        let currentArticleId = null;
+        let currentStockAction = null;
+        let html5QrCode = null;
 
-    if (locations.length === 0) {
-        locations = [
-            { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
-            { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
-            { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
-        ];
-        saveToStorage();
-    }
+        if (locations.length === 0) {
+            locations = [
+                { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
+                { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
+                { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
+            ];
+            saveToStorage();
+        }
 
-    function stopScanner() {
-        if (html5QrCode) {
-            return html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                html5QrCode = null;
-                return true;
-            }).catch(err => {
-                console.log("Erreur arrêt scanner:", err);
-                html5QrCode = null;
-                return false;
+        function navigateTo(page) {
+            // Arrêter le scanner si on quitte la page scan
+            if (html5QrCode && page !== 'scan') {
+                html5QrCode.pause();
+            }
+            
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`${page}-page`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            // Activer l'onglet correspondant
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
+                    item.classList.add('active');
+                }
             });
-        }
-        return Promise.resolve(true);
-    }
 
-    function navigateTo(page) {
-        // Arrêter proprement le scanner si on quitte la page scan
-        if (html5QrCode && page !== 'scan') {
-            stopScanner();
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'inventory') loadInventory();
+            if (page === 'scan') initScanner();
+            if (page === 'search') loadSearchPage();
+            if (page === 'locations') loadLocations();
+            if (page === 'import-export') loadImportExport();
         }
-        
-        // Masquer toutes les pages
-        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-        
-        // Afficher la page demandée
-        const targetPage = document.getElementById(`${page}-page`);
-        if (targetPage) {
-            targetPage.classList.remove('hidden');
-        }
-        
-        // Mettre à jour la navigation active
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        event.currentTarget?.classList.add('active');
-        
-        // Charger le contenu de la page
-        if (page === 'dashboard') loadDashboard();
-        if (page === 'inventory') loadInventory();
-        if (page === 'scan') {
-            // Démarrer le scanner immédiatement
-            setTimeout(() => {
-                initScanner();
-            }, 100);
-        }
-        if (page === 'search') loadSearchPage();
-        if (page === 'locations') loadLocations();
-    }
 
-    function navigateToWithScanner(page) {
-        if (page !== 'scan' && html5QrCode) {
-            stopScanner().then(() => {
-                navigateTo(page);
+        function saveToStorage() {
+            localStorage.setItem('inventory_articles', JSON.stringify(articles));
+            localStorage.setItem('inventory_locations', JSON.stringify(locations));
+            localStorage.setItem('inventory_history', JSON.stringify(history));
+        }
+
+        function addHistory(action, articleName, details = '') {
+            history.unshift({
+                id: Date.now(),
+                action,
+                articleName,
+                details,
+                date: new Date().toISOString()
             });
-        } else {
-            navigateTo(page);
+            if (history.length > 50) history = history.slice(0, 50);
+            saveToStorage();
         }
-    }
 
-    function getNavLabelForPage(page) {
-        const pageLabels = {
-            'dashboard': 'Accueil',
-            'inventory': 'Inventaire',
-            'scan': 'Scanner',
-            'search': 'Recherche',
-            'locations': 'Lieux',
-            'import-export': 'Export'
-        };
-        return pageLabels[page] || '';
-    }
+        function loadDashboard() {
+            const totalLocations = locations.length;
+            const lowStock = articles.filter(art => {
+                const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+                return total <= 2;
+            }).length;
 
-    function initScanner() {
-        // Arrêter le scanner s'il est déjà en cours
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                html5QrCode = null;
-                initFreshScanner();
-            }).catch(() => {
-                html5QrCode = null;
-                initFreshScanner();
+            document.getElementById('total-locations').textContent = totalLocations;
+            document.getElementById('low-stock').textContent = lowStock;
+
+            const activityHtml = history.slice(0, 5).map(h => `
+                <div class="history-item">
+                    <div class="history-icon">${getActionIcon(h.action)}</div>
+                    <div class="history-content">
+                        <div class="history-action">${h.action} - ${h.articleName}</div>
+                        <div class="history-date">${formatDate(h.date)} ${h.details ? '- ' + h.details : ''}</div>
+                    </div>
+                </div>
+            `).join('') || '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Aucune activité récente</div></div>';
+
+            document.getElementById('recent-activity').innerHTML = activityHtml;
+        }
+
+        function showLowStock() {
+            navigateTo('search');
+            document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.dataset.filter === 'low') {
+                    chip.classList.add('active');
+                }
             });
-        } else {
-            initFreshScanner();
+            performAdvancedSearch();
         }
-    }
 
-    function initFreshScanner() {
-        // Vérifier qu'on est bien sur la page scan
-        const scanPage = document.getElementById('scan-page');
-        if (!scanPage || scanPage.classList.contains('hidden')) {
-            console.log("Scanner: page non visible");
-            return;
+        function loadInventory() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const activeFilter = document.querySelector('.filter-chip.active')?.dataset.location;
+
+            let filtered = articles.filter(art => 
+                art.name.toLowerCase().includes(searchTerm) ||
+                (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
+                (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
+                (art.categorie && art.categorie.toLowerCase().includes(searchTerm))
+            );
+
+            if (activeFilter && activeFilter !== 'all') {
+                filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
+            }
+
+            const filtersHtml = `
+                <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
+                     data-location="all" onclick="filterByLocation('all')">
+                    Tous
+                </div>
+                ${locations.map(loc => `
+                    <div class="filter-chip ${activeFilter === loc.id.toString() ? 'active' : ''}" 
+                         data-location="${loc.id}" onclick="filterByLocation('${loc.id}')">
+                        ${loc.name}
+                    </div>
+                `).join('')}
+            `;
+            document.getElementById('location-filters').innerHTML = filtersHtml;
+
+            displayArticles(filtered);
         }
-        
-        // Vider le conteneur
-        const scannerContainer = document.getElementById('scanner-reader');
-        scannerContainer.innerHTML = '';
-        
-        // Tester l'accès caméra
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
-            })
-            .then(function(stream) {
-                stream.getTracks().forEach(track => track.stop());
+
+        function displayArticles(filtered) {
+            const listHtml = filtered.map(art => {
+                const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+                const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
                 
-                // Initialiser le scanner
-                html5QrCode = new Html5QrcodeScanner(
-                    "scanner-reader",
-                    { 
-                        fps: 10, 
-                        qrbox: { width: 250, height: 150 },
-                        aspectRatio: 1.0
-                    },
-                    false
-                );
-                
-                html5QrCode.render(
-                    (decodedText) => {
-                        // Arrêter et traiter
-                        if (html5QrCode) {
-                            html5QrCode.stop().then(() => {
-                                handleBarcodeScan(decodedText);
-                            }).catch(() => {
-                                handleBarcodeScan(decodedText);
-                            });
-                        }
-                    },
-                    (errorMessage) => {
-                        // Ignorer les erreurs normales
-                    }
-                );
-            })
-            .catch(function(err) {
-                console.error("Erreur caméra:", err);
-                scannerContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #888;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📷</div>
-                        <div style="margin-bottom: 16px;">Accès caméra nécessaire</div>
-                        <button class="btn-secondary" onclick="initScanner()">Réessayer</button>
+                return `
+                    <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                        <div class="article-header">
+                            <div>
+                                <div class="article-name">${art.name}</div>
+                                ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
+                            </div>
+                            <div class="article-quantity">${totalQty}</div>
+                        </div>
+                        <div class="article-locations">
+                            ${locs.map(([locId, qty]) => {
+                                const loc = locations.find(l => l.id.toString() === locId);
+                                const total = qty.nombre * qty.conditionnement;
+                                return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
+                            }).join('')}
+                        </div>
                     </div>
                 `;
-            });
-        } else {
-            scannerContainer.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #888;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
-                    <div>Navigateur incompatible</div>
+            }).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article trouvé</div></div>';
+
+            document.getElementById('article-list').innerHTML = listHtml;
+        }
+
+        function filterByLocation(locationId) {
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            loadInventory();
+        }
+
+        function showArticleDetail(articleId) {
+            currentArticleId = articleId;
+            const article = articles.find(a => a.id.toString() === articleId);
+            if (!article) return;
+
+            const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+            const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
+
+            const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
+
+            const detailHtml = `
+                <div class="detail-header">
+                    <div class="detail-title">${article.name}</div>
+                    ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
                 </div>
+
+                <div class="detail-section">
+                    <div class="section-title">📋 Informations</div>
+                    <div class="detail-info-grid">
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Famille</div>
+                            <div class="detail-info-value">${article.famille || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Catégorie</div>
+                            <div class="detail-info-value">${article.categorie || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Taille</div>
+                            <div class="detail-info-value">${article.taille || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Longueur</div>
+                            <div class="detail-info-value">${article.longueur || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Conditionnement</div>
+                            <div class="detail-info-value">${article.conditionnement || '-'}</div>
+                        </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Fournisseur</div>
+                            <div class="detail-info-value">${article.fournisseur || '-'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
+                    ${locs.map(([locId, qty]) => {
+                        const loc = locations.find(l => l.id.toString() === locId);
+                        const total = qty.nombre * qty.conditionnement;
+                        return loc ? `
+                            <div class="location-item">
+                                <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
+                                <div class="location-qty">${total} unités</div>
+                            </div>
+                        ` : '';
+                    }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
+                </div>
+
+                <div class="detail-section">
+                    <div class="section-title">⚡ Actions rapides</div>
+                    <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+                    <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+                    <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+                    <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+                </div>
+
+                ${articleHistory.length > 0 ? `
+                <div class="detail-section">
+                    <div class="section-title">📜 Historique</div>
+                    ${articleHistory.map(h => `
+                        <div class="history-item">
+                            <div class="history-icon">${getActionIcon(h.action)}</div>
+                            <div class="history-content">
+                                <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
+                                <div class="history-date">${formatDate(h.date)}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
             `;
-        }
-    }
 
-    function handleBarcodeScan(barcode) {
-        document.getElementById('manual-barcode').value = barcode;
-        const article = articles.find(a => a.barcode === barcode);
-        
-        if (article) {
-            setTimeout(() => showArticleDetail(article.id), 300);
-        } else {
-            setTimeout(() => createArticleFromBarcode(barcode), 300);
-        }
-    }
-
-    function searchByBarcode() {
-        const barcode = document.getElementById('manual-barcode').value.trim();
-        if (!barcode) {
-            alert('Veuillez entrer un code-barre');
-            return;
+            document.getElementById('detail-container').innerHTML = detailHtml;
+            navigateTo('detail');
         }
 
-        const article = articles.find(a => a.barcode === barcode);
-        
-        if (article) {
-            showArticleDetail(article.id);
-        } else {
-            createArticleFromBarcode(barcode);
+        function showAddArticleModal() {
+            const modal = document.getElementById('add-article-modal');
+            const locationSelect = document.getElementById('article-location');
+            
+            locationSelect.innerHTML = locations.map(loc => 
+                `<option value="${loc.id}">${loc.name}</option>`
+            ).join('');
+            
+            modal.classList.add('active');
         }
-    }
 
-    function createArticleFromBarcode(barcode) {
-        showAddArticleModal();
-        document.getElementById('article-barcode').value = barcode;
-        document.getElementById('article-famille').value = "boulonnerie";
-        document.getElementById('article-categorie').value = "vis";
-        document.getElementById('article-name').value = "hexa";
-    }
+        function showAddLocationModal() {
+            document.getElementById('add-location-modal').classList.add('active');
+        }
 
-    // ... reste des fonctions existantes (saveToStorage, addHistory, loadDashboard, etc.) ...
+        function showMoveArticleModal() {
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        if (html5QrCode) {
-            stopScanner();
+            const availableLocations = Object.entries(article.quantities || {})
+                .filter(([_, q]) => q.nombre > 0)
+                .map(([locId]) => locations.find(l => l.id.toString() === locId))
+                .filter(Boolean);
+
+            document.getElementById('move-from').innerHTML = availableLocations.map(loc => {
+                const qty = article.quantities[loc.id];
+                return `<option value="${loc.id}">${loc.name} (${qty.nombre} × ${qty.conditionnement})</option>`;
+            }).join('');
+
+            document.getElementById('move-to').innerHTML = locations.map(loc => 
+                `<option value="${loc.id}">${loc.name}</option>`
+            ).join('');
+
+            document.getElementById('move-article-modal').classList.add('active');
         }
-        
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', loadInventory);
+
+        function showStockActionModal(action) {
+            currentStockAction = action;
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+
+            document.getElementById('stock-action-title').textContent = 
+                action === 'add' ? 'Ajouter au stock' : 'Retirer du stock';
+            document.getElementById('stock-action-btn').textContent = 
+                action === 'add' ? '➕ Ajouter' : '➖ Retirer';
+
+            const availableLocations = action === 'remove' 
+                ? Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0)
+                : locations.map(l => [l.id.toString(), 0]);
+
+            document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
+                const loc = locations.find(l => l.id.toString() === locId);
+                const qty = article.quantities?.[locId];
+                return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' && qty ? ` (${qty.nombre} × ${qty.conditionnement})` : ''}</option>` : '';
+            }).join('');
+
+            document.getElementById('stock-action-modal').classList.add('active');
         }
-        
-        const advancedSearchInput = document.getElementById('advanced-search-input');
-        if (advancedSearchInput) {
-            advancedSearchInput.addEventListener('input', performAdvancedSearch);
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
         }
-        
+
+        function saveArticle(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('article-name').value.trim();
+            const barcode = document.getElementById('article-barcode').value.trim();
+            const famille = document.getElementById('article-famille').value.trim();
+            const categorie = document.getElementById('article-categorie').value.trim();
+            const taille = document.getElementById('article-taille').value.trim();
+            const longueur = document.getElementById('article-longueur').value.trim();
+            const conditionnement = parseInt(document.getElementById('article-conditionnement').value);
+            const fournisseur = document.getElementById('article-fournisseur').value.trim();
+            const locationId = document.getElementById('article-location').value;
+            const nombre = parseInt(document.getElementById('article-nombre').value);
+
+            let existingArticle = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+
+            if (existingArticle) {
+                if (!existingArticle.quantities) existingArticle.quantities = {};
+                
+                if (existingArticle.quantities[locationId]) {
+                    existingArticle.quantities[locationId].nombre += nombre;
+                } else {
+                    existingArticle.quantities[locationId] = { nombre, conditionnement };
+                }
+
+                addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
+            } else {
+                const article = {
+                    id: Date.now(),
+                    name,
+                    barcode,
+                    famille,
+                    categorie,
+                    taille,
+                    longueur,
+                    conditionnement,
+                    fournisseur,
+                    quantities: {
+                        [locationId]: { nombre, conditionnement }
+                    },
+                    createdAt: new Date().toISOString()
+                };
+
+                articles.push(article);
+                addHistory('Ajout', name, `${nombre * conditionnement} unités`);
+            }
+
+            saveToStorage();
+            closeModal('add-article-modal');
+            loadInventory();
+            loadDashboard();
+        }
+
+        function saveLocation(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('location-name').value;
+            const description = document.getElementById('location-description').value;
+
+            locations.push({
+                id: Date.now(),
+                name,
+                description
+            });
+
+            saveToStorage();
+            closeModal('add-location-modal');
+            loadLocations();
+            loadDashboard();
+        }
+
+        function moveArticle(event) {
+            event.preventDefault();
+            
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+
+            const fromId = document.getElementById('move-from').value;
+            const toId = document.getElementById('move-to').value;
+            const quantity = parseInt(document.getElementById('move-quantity').value);
+
+            if (fromId === toId) {
+                alert('Les emplacements source et destination doivent être différents');
+                return;
+            }
+
+            if (!article.quantities[fromId] || article.quantities[fromId].nombre < quantity) {
+                alert('Nombre insuffisant dans l\'emplacement source');
+                return;
+            }
+
+            article.quantities[fromId].nombre -= quantity;
+            if (article.quantities[fromId].nombre === 0) delete article.quantities[fromId];
+            
+            if (!article.quantities[toId]) {
+                article.quantities[toId] = { nombre: quantity, conditionnement: article.conditionnement };
+            } else {
+                article.quantities[toId].nombre += quantity;
+            }
+
+            const fromLoc = locations.find(l => l.id.toString() === fromId);
+            const toLoc = locations.find(l => l.id.toString() === toId);
+
+            saveToStorage();
+            addHistory('Déplacement', article.name, `${quantity} de ${fromLoc.name} → ${toLoc.name}`);
+            
+            closeModal('move-article-modal');
+            showArticleDetail(currentArticleId);
+        }
+
+        function performStockAction(event) {
+            event.preventDefault();
+            
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+
+            const locationId = document.getElementById('stock-location').value;
+            const quantity = parseInt(document.getElementById('stock-quantity').value);
+
+            if (currentStockAction === 'add') {
+                if (!article.quantities[locationId]) {
+                    article.quantities[locationId] = { nombre: quantity, conditionnement: article.conditionnement };
+                } else {
+                    article.quantities[locationId].nombre += quantity;
+                }
+                addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
+            } else {
+                if (!article.quantities[locationId] || article.quantities[locationId].nombre < quantity) {
+                    alert('Nombre insuffisant');
+                    return;
+                }
+                article.quantities[locationId].nombre -= quantity;
+                if (article.quantities[locationId].nombre === 0) delete article.quantities[locationId];
+                addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
+            }
+
+            saveToStorage();
+            closeModal('stock-action-modal');
+            showArticleDetail(currentArticleId);
+            loadDashboard();
+        }
+
+        function deleteArticle(articleId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
+            
+            const article = articles.find(a => a.id.toString() === articleId);
+            articles = articles.filter(a => a.id.toString() !== articleId);
+            
+            saveToStorage();
+            addHistory('Suppression', article.name);
+            
+            navigateTo('inventory');
+            loadDashboard();
+        }
+
+        function loadLocations() {
+            const listHtml = locations.map(loc => {
+                const articleCount = articles.filter(art => 
+                    art.quantities && art.quantities[loc.id] && art.quantities[loc.id].nombre > 0
+                ).length;
+
+                return `
+                    <div class="location-list-item" onclick="showLocationInventory('${loc.id}')">
+                        <div class="location-info">
+                            <div class="location-title">${loc.name}</div>
+                            <div class="location-count">${articleCount} article(s)</div>
+                            ${loc.description ? `<div class="location-count">${loc.description}</div>` : ''}
+                        </div>
+                        <div class="location-actions">
+                            <button class="icon-btn" onclick="event.stopPropagation(); deleteLocation('${loc.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('locations-list').innerHTML = listHtml;
+        }
+
+        function showLocationInventory(locationId) {
+            navigateTo('inventory');
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                if (chip.dataset.location === locationId) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            });
+            loadInventory();
+        }
+
+        function deleteLocation(locationId) {
+            const hasArticles = articles.some(art => 
+                art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
+            );
+
+            if (hasArticles) {
+                alert('Impossible de supprimer un emplacement contenant des articles');
+                return;
+            }
+
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) return;
+
+            locations = locations.filter(l => l.id.toString() !== locationId);
+            saveToStorage();
+            loadLocations();
+            loadDashboard();
+        }
+
+        function initScanner() {
+            if (html5QrCode) {
+                return;
+            }
+
+            // Demander explicitement la permission caméra
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                })
+                .then(function(stream) {
+                    // Arrêter le stream temporaire
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    // Initialiser le scanner
+                    html5QrCode = new Html5QrcodeScanner(
+                        "scanner-reader",
+                        { 
+                            fps: 10, 
+                            qrbox: { width: 250, height: 150 },
+                            aspectRatio: 1.0,
+                            rememberLastUsedCamera: true
+                        },
+                        false
+                    );
+                    
+                    html5QrCode.render(
+                        (decodedText) => {
+                            document.getElementById('manual-barcode').value = decodedText;
+                            searchByBarcode();
+                        },
+                        (errorMessage) => {
+                            // Ignorer les erreurs continues
+                        }
+                    );
+                })
+                .catch(function(err) {
+                    alert("Erreur d'accès à la caméra : " + err.message + "\n\nVeuillez autoriser l'accès à la caméra dans les paramètres de votre navigateur.");
+                    console.error("Camera error:", err);
+                });
+            } else {
+                alert("Votre navigateur ne supporte pas l'accès à la caméra");
+            }
+        }
+
+        function searchByBarcode() {
+            const barcode = document.getElementById('manual-barcode').value.trim();
+            if (!barcode) return;
+
+            const article = articles.find(a => a.barcode === barcode);
+            
+            if (article) {
+                showArticleDetail(article.id);
+            } else {
+                document.getElementById('scan-result').innerHTML = `
+                    <div class="detail-section">
+                        <div class="section-title">❌ Article non trouvé</div>
+                        <div style="text-align: center; padding: 20px; color: #888;">
+                            Aucun article avec le code "${barcode}"
+                        </div>
+                        <button class="btn-primary" onclick="createArticleFromBarcode('${barcode}')">
+                            ➕ Créer un nouvel article
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function createArticleFromBarcode(barcode) {
+            showAddArticleModal();
+            document.getElementById('article-barcode').value = barcode;
+        }
+
+        function exportToExcel() {
+            const email = document.getElementById('export-email').value.trim();
+            if (!email) {
+                alert('Veuillez entrer une adresse e-mail');
+                return;
+            }
+
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                alert('Adresse e-mail invalide');
+                return;
+            }
+
+            downloadExcel();
+            alert(`L'inventaire a été exporté.\nUn e-mail sera envoyé à ${email}\n(Fonctionnalité d'envoi à implémenter côté serveur)`);
+        }
+
+        function downloadExcel() {
+            const sortedArticles = [...articles].sort((a, b) => {
+                if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
+                return a.categorie.localeCompare(b.categorie);
+            });
+
+            const data = [];
+            let lastFamille = '';
+            let lastCategorie = '';
+
+            sortedArticles.forEach(art => {
+                if (art.famille !== lastFamille || art.categorie !== lastCategorie) {
+                    if (data.length > 0) {
+                        data.push({});
+                    }
+                    lastFamille = art.famille;
+                    lastCategorie = art.categorie;
+                }
+
+                Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
+                    const loc = locations.find(l => l.id.toString() === locId);
+                    const total = qty.nombre * qty.conditionnement;
+
+                    data.push({
+                        'Nom': art.name,
+                        'Code-barre': art.barcode || '',
+                        'Famille': art.famille || '',
+                        'Catégorie': art.categorie || '',
+                        'Taille': art.taille || '',
+                        'Longueur': art.longueur || '',
+                        'Conditionnement': art.conditionnement || '',
+                        'Nombre': qty.nombre,
+                        'Total': total,
+                        'Fournisseur': art.fournisseur || '',
+                        'Lieu': loc ? loc.name : ''
+                    });
+                });
+            });
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
+            
+            const fileName = `inventaire_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    if (!confirm(`Importer ${jsonData.length} ligne(s) ? Cela ajoutera ou mettra à jour les articles existants.`)) {
+                        return;
+                    }
+
+                    jsonData.forEach(row => {
+                        if (!row['Nom']) return;
+
+                        const name = row['Nom'];
+                        const locationName = row['Lieu'];
+                        const location = locations.find(l => l.name === locationName);
+                        if (!location) return;
+
+                        let article = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+
+                        if (article) {
+                            if (!article.quantities[location.id]) {
+                                article.quantities[location.id] = {
+                                    nombre: parseInt(row['Nombre']) || 0,
+                                    conditionnement: parseInt(row['Conditionnement']) || 1
+                                };
+                            } else {
+                                article.quantities[location.id].nombre += parseInt(row['Nombre']) || 0;
+                            }
+                        } else {
+                            article = {
+                                id: Date.now() + Math.random(),
+                                name,
+                                barcode: row['Code-barre'] || '',
+                                famille: row['Famille'] || '',
+                                categorie: row['Catégorie'] || '',
+                                taille: row['Taille'] || '',
+                                longueur: row['Longueur'] || '',
+                                conditionnement: parseInt(row['Conditionnement']) || 1,
+                                fournisseur: row['Fournisseur'] || '',
+                                quantities: {
+                                    [location.id]: {
+                                        nombre: parseInt(row['Nombre']) || 0,
+                                        conditionnement: parseInt(row['Conditionnement']) || 1
+                                    }
+                                },
+                                createdAt: new Date().toISOString()
+                            };
+                            articles.push(article);
+                        }
+                    });
+
+                    saveToStorage();
+                    addHistory('Import', `${jsonData.length} lignes`, 'depuis Excel');
+                    alert('Import réussi !');
+                    loadInventory();
+                    loadDashboard();
+
+                } catch (error) {
+                    alert('Erreur lors de l\'import: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function backupData() {
+            const backup = {
+                articles,
+                locations,
+                history,
+                date: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(backup, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventaire_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const backup = JSON.parse(event.target.result);
+                        if (!confirm('Restaurer cette sauvegarde ? Cela écrasera toutes les données actuelles.')) {
+                            return;
+                        }
+
+                        articles = backup.articles || [];
+                        locations = backup.locations || [];
+                        history = backup.history || [];
+                        
+                        saveToStorage();
+                        alert('Restauration réussie !');
+                        loadDashboard();
+                        navigateTo('dashboard');
+
+                    } catch (error) {
+                        alert('Erreur lors de la restauration: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function getActionIcon(action) {
+            const icons = {
+                'Ajout': '➕',
+                'Suppression': '🗑️',
+                'Déplacement': '🔄',
+                'Ajout stock': '📥',
+                'Retrait stock': '📤',
+                'Import': '📥'
+            };
+            return icons[action] || '📝';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'À l\'instant';
+            if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+            if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
+            
+            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function loadSearchPage() {
+            const searchInput = document.getElementById('advanced-search-input');
+            searchInput.value = '';
+            searchInput.focus();
+            performAdvancedSearch();
+            
+            // Charger les filtres d'emplacement
+            const filtersHtml = `
+                <div class="filter-chip active" data-location="all" onclick="filterSearchByLocation('all')">
+                    Tous les emplacements
+                </div>
+                ${locations.map(loc => `
+                    <div class="filter-chip" data-location="${loc.id}" onclick="filterSearchByLocation('${loc.id}')">
+                        ${loc.name}
+                    </div>
+                `).join('')}
+            `;
+            document.getElementById('search-location-filters').innerHTML = filtersHtml;
+        }
+
+        function performAdvancedSearch() {
+            const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
+            const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
+            const activeLocation = document.querySelector('#search-page .filter-chip[data-location].active')?.dataset.location;
+            
+            let filtered = articles.filter(art => {
+                // Recherche textuelle
+                const matchesText = 
+                    art.name.toLowerCase().includes(searchTerm) ||
+                    (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
+                    (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
+                    (art.categorie && art.categorie.toLowerCase().includes(searchTerm)) ||
+                    (art.fournisseur && art.fournisseur.toLowerCase().includes(searchTerm));
+                
+                if (!matchesText) return false;
+                
+                // Calcul du stock total
+                const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+                
+                // Appliquer le filtre stock
+                if (activeFilter === 'low') {
+                    if (totalQty > 2 || totalQty === 0) return false;
+                } else if (activeFilter === 'zero') {
+                    if (totalQty > 0) return false;
+                }
+                
+                // Appliquer le filtre emplacement
+                if (activeLocation && activeLocation !== 'all') {
+                    if (!art.quantities || !art.quantities[activeLocation]) return false;
+                }
+                
+                return true;
+            });
+            
+            displaySearchResults(filtered);
+        }
+
+        function displaySearchResults(filtered) {
+            const resultsHtml = filtered.map(art => {
+                const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+                const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
+                
+                let stockStatus = '';
+                if (totalQty === 0) {
+                    stockStatus = '<span style="color: #cf6679;">❌ Rupture</span>';
+                } else if (totalQty <= 2) {
+                    stockStatus = '<span style="color: #FFA726;">⚠️ Faible</span>';
+                }
+                
+                return `
+                    <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                        <div class="article-header">
+                            <div>
+                                <div class="article-name">${art.name}</div>
+                                ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
+                                ${art.barcode ? `<div class="article-meta">🏷️ ${art.barcode}</div>` : ''}
+                            </div>
+                            <div>
+                                <div class="article-quantity">${totalQty}</div>
+                                ${stockStatus ? `<div style="text-align: center; margin-top: 4px;">${stockStatus}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="article-locations">
+                            ${locs.map(([locId, qty]) => {
+                                const loc = locations.find(l => l.id.toString() === locId);
+                                const total = qty.nombre * qty.conditionnement;
+                                return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Aucun article trouvé</div></div>';
+
+            document.getElementById('search-results').innerHTML = resultsHtml;
+        }
+
+        function filterSearchResults(filterType) {
+            document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            performAdvancedSearch();
+        }
+
+        function filterSearchByLocation(locationId) {
+            document.querySelectorAll('#search-page .filter-chip[data-location]').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            performAdvancedSearch();
+        }
+
+        function loadImportExport() {
+            // Fonction pour charger la page import/export si nécessaire
+        }
+
+        // Écouteurs pour la recherche en temps réel
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', loadInventory);
+            }
+            
+            const advancedSearchInput = document.getElementById('advanced-search-input');
+            if (advancedSearchInput) {
+                advancedSearchInput.addEventListener('input', performAdvancedSearch);
+            }
+        });
+
         loadDashboard();
-    });
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(reg => console.log('Service Worker registered'))
-    .catch(err => console.error('Service Worker error:', err));
-}
-</script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.error('Service Worker error:', err));
+        }
+    </script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
