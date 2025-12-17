@@ -259,6 +259,7 @@
             padding: 12px 0;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
             border-top: 1px solid #333;
+            z-index: 1000;
         }
 
         .nav-item {
@@ -755,6 +756,7 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
         
+        /* Supprimer les styles qui désactivent les icônes */
         .nav-item.detail-page-active {
             background: transparent;
         }
@@ -806,6 +808,7 @@
     </style>
 </head>
 <body>
+    <!-- [Tout le HTML reste identique] -->
     <div id="dashboard-page" class="page">
         <div class="header">
             <h1>📦 Gestion d'Inventaire</h1>
@@ -1130,10 +1133,35 @@
                 <div class="form-group">
                     <label class="form-label">Nombre</label>
                     <input type="number" class="form-input" id="stock-quantity" min="1" required>
-                </button>
+                </div>
+                <button type="submit" class="btn-primary" id="stock-action-btn">Confirmer</button>
             </form>
         </div>
     </div>
+
+    <!-- NAVIGATION EN BAS - TOUJOURS VISIBLE -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="navigateTo('dashboard')">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">Accueil</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('inventory')">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Inventaire</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('search')">
+            <div class="nav-icon">🔍</div>
+            <div class="nav-label">Recherche</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('locations')">
+            <div class="nav-icon">📍</div>
+            <div class="nav-label">Lieux</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('import-export')">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Export</div>
+        </div>
+    </nav>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1164,16 +1192,18 @@
             // Afficher la page demandée
             document.getElementById(`${page}-page`).classList.remove('hidden');
             
-            // Gérer la navigation
+            // Gérer la navigation - TOUJOURS ACTIVER LE BOUTON CORRESPONDANT
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
-                item.classList.remove('detail-page-active');
             });
             
+            // Activer le bouton correspondant à la page
             if (page === 'detail') {
-                // Page détails : aucun bouton actif
+                // Pour la page détail, activer l'inventaire car c'est de là qu'on vient
                 document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.add('detail-page-active');
+                    if (item.onclick && item.onclick.toString().includes(`navigateTo('inventory')`)) {
+                        item.classList.add('active');
+                    }
                 });
             } else {
                 // Page normale : activer le bouton correspondant
@@ -1401,7 +1431,7 @@
                 ` : ''}
             `;
             
-            // Afficher la page de détails
+            // Afficher la page de détails sans toucher à la navigation
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
         }
