@@ -1173,9 +1173,10 @@ function navigateTo(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.getElementById(`${page}-page`).classList.remove('hidden');
     
-    // TOUJOURS réactiver les onglets sauf si on est sur 'detail'
+    // TOUJOURS afficher le bon onglet actif
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     
+    // Pour 'detail', n'activer aucun onglet
     if (page !== 'detail') {
         document.querySelectorAll('.nav-item').forEach(item => {
             if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
@@ -1191,7 +1192,6 @@ function navigateTo(page) {
     if (page === 'locations') loadLocations();
     if (page === 'import-export') loadImportExport();
     if (page === 'detail') {
-        // Injecter le HTML stocké
         if (window.tempArticleDetail) {
             document.getElementById('detail-container').innerHTML = window.tempArticleDetail;
             window.tempArticleDetail = null;
