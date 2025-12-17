@@ -754,6 +754,14 @@
 			100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 		}
 		
+		.nav-item.detail-page-active {
+			background: transparent;
+		}
+
+		.nav-item.detail-page-active .nav-icon,
+		.nav-item.detail-page-active .nav-label {
+			color: #888;
+		}
     </style>
 </head>
 <body>
@@ -1077,30 +1085,39 @@
         }
 
         function navigateTo(page) {
-            if (html5QrCode && page !== 'scan') {
-                html5QrCode.pause();
-            }
-            
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById(`${page}-page`).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
-            if (page !== 'detail') {
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
-                        item.classList.add('active');
-                    }
-                });
-            }
-            
-            if (page === 'dashboard') loadDashboard();
-            if (page === 'inventory') loadInventory();
-            if (page === 'scan') initScanner();
-            if (page === 'search') loadSearchPage();
-            if (page === 'locations') loadLocations();
-            if (page === 'import-export') loadImportExport();
-        }
+			if (html5QrCode && page !== 'scan') {
+				html5QrCode.pause();
+			}
+    
+			document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+			document.getElementById(`${page}-page`).classList.remove('hidden');
+    
+			document.querySelectorAll('.nav-item').forEach(item => {
+				item.classList.remove('active');
+				item.classList.remove('detail-page-active');
+			});
+    
+			if (page === 'detail') {
+				// Page détails : aucun bouton actif
+				document.querySelectorAll('.nav-item').forEach(item => {
+					item.classList.add('detail-page-active');
+				});
+			} else {
+				// Page normale : activer le bouton correspondant
+				document.querySelectorAll('.nav-item').forEach(item => {
+					if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
+						item.classList.add('active');
+					}
+				});
+			}
+    
+			if (page === 'dashboard') loadDashboard();
+			if (page === 'inventory') loadInventory();
+			if (page === 'scan') initScanner();
+			if (page === 'search') loadSearchPage();
+			if (page === 'locations') loadLocations();
+			if (page === 'import-export') loadImportExport();
+		}
 
         function saveToStorage() {
             localStorage.setItem('inventory_articles', JSON.stringify(articles));
@@ -1308,8 +1325,8 @@
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.getElementById('detail-page').classList.remove('hidden');
     
-    // NE PAS désactiver la navigation - garder les boutons actifs
-    // La navigation du pied de page reste fonctionnelle
+    // Utiliser navigateTo pour gérer correctement la navigation
+    navigateTo('detail');
     
     document.getElementById('detail-container').innerHTML = detailHtml;
 }
@@ -1639,8 +1656,8 @@
         document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
         document.getElementById('detail-page').classList.remove('hidden');
         
-        // NE PAS désactiver la navigation - laisser les boutons actifs
-        // Les boutons du pied de page restent fonctionnels
+        // Utiliser navigateTo pour gérer correctement la navigation
+        navigateTo('detail');
         
         currentArticleId = article.id;
         const articleObj = articles.find(a => a.id === article.id);
