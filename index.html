@@ -493,6 +493,11 @@
             color: #03dac6;
             margin-bottom: 12px;
         }
+		
+		#detail-page ~ .bottom-nav .nav-item {
+			opacity: 0.5;
+			pointer-events: none;
+		}
 
         .location-item {
             display: flex;
@@ -1136,13 +1141,14 @@ function prepareArticleDetail(articleId) {
             }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
         </div>
 
-        <div class="detail-section">
-            <div class="section-title">⚡ Actions rapides</div>
-            <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
-            <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
-            <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
-            <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
-        </div>
+        `<div class="detail-section">
+    <div class="section-title">⚡ Actions rapides</div>
+    <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+    <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+    <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+    <button class="btn-secondary btn-danger" onclick="deleteArticle('${articleObj.id}')">🗑️ Supprimer</button>
+    <button class="btn-secondary" onclick="returnToScanner()" style="margin-top: 12px;">🔙 Retour au scanner</button>
+</div>`
 
         ${articleHistory.length > 0 ? `
         <div class="detail-section">
@@ -1418,6 +1424,22 @@ function navigateTo(page) {
         function showAddLocationModal() {
             document.getElementById('add-location-modal').classList.add('active');
         }
+
+		function returnToScanner() {
+    // Réinitialiser le scanner
+    if (html5QrCode) {
+        html5QrCode.clear();
+        html5QrCode = null;
+    }
+    
+    // Retourner à la page scanner
+    navigateTo('scan');
+    
+    // Redémarrer le scanner après un court délai
+    setTimeout(() => {
+        initScanner();
+    }, 100);
+}
 
         function showMoveArticleModal() {
             const article = articles.find(a => a.id.toString() === currentArticleId);
