@@ -1074,6 +1074,7 @@
         let currentArticleId = null;
         let currentStockAction = null;
         let html5QrCode = null;
+        let isFromScanPage = false;
 
         if (locations.length === 0) {
             locations = [
@@ -1388,6 +1389,13 @@
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
             document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
+            
+            // Si on ferme le modal d'ajout d'article depuis la page de scan, reprendre le scanner
+            if (modalId === 'add-article-modal' && document.getElementById('scan-page').classList.contains('hidden') === false) {
+                if (html5QrCode) {
+                    html5QrCode.resume();
+                }
+            }
         }
 
         function saveArticle(event) {
@@ -1441,6 +1449,13 @@
             closeModal('add-article-modal');
             loadInventory();
             loadDashboard();
+            
+            // Si on était sur la page de scan, rester sur cette page et reprendre le scanner
+            if (document.getElementById('scan-page').classList.contains('hidden') === false) {
+                if (html5QrCode) {
+                    html5QrCode.resume();
+                }
+            }
         }
 
         function saveLocation(event) {
@@ -1600,6 +1615,7 @@
 
         function initScanner() {
             if (html5QrCode) {
+                html5QrCode.resume();
                 return;
             }
 
@@ -1647,8 +1663,16 @@
             const article = articles.find(a => a.barcode === scannedBarcode);
             
             if (article) {
+                // Mettre en pause le scanner et afficher les détails
+                if (html5QrCode) {
+                    html5QrCode.pause();
+                }
                 showArticleDetail(article.id);
             } else {
+                // Article non trouvé : afficher le modal de création
+                if (html5QrCode) {
+                    html5QrCode.pause();
+                }
                 showAddArticleModal();
                 document.getElementById('article-barcode').value = scannedBarcode;
                 document.getElementById('article-name').focus();
