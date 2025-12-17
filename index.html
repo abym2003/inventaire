@@ -1173,6 +1173,7 @@ function navigateTo(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     document.getElementById(`${page}-page`).classList.remove('hidden');
     
+    // TOUJOURS réactiver les onglets sauf si on est sur 'detail'
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     
     if (page !== 'detail') {
@@ -1802,8 +1803,8 @@ function navigateTo(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
         document.getElementById('detail-page').classList.remove('hidden');
         
-        // Désactiver tous les onglets
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        // NE PAS désactiver les onglets - garde-les actifs
+        // document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         
         // Afficher les détails
         currentArticleId = article.id;
