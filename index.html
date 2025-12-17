@@ -1076,35 +1076,39 @@
             saveToStorage();
         }
 
-        function navigateTo(page) {
-			if (html5QrCode && page !== 'scan') {
-				html5QrCode.pause();
-			}
+        // Dans navigateTo()
+function navigateTo(page) {
+    if (html5QrCode && page !== 'scan') {
+        html5QrCode.pause();
+    }
     
-			// Ne cacher que les pages, pas les modales
-			document.querySelectorAll('.page').forEach(p => {
-				if (!p.classList.contains('modal')) {
-					p.classList.add('hidden');
-				}
-			});
+    // Cacher TOUTES les pages (même détail)
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     
-			document.getElementById(`${page}-page`).classList.remove('hidden');
+    // Afficher uniquement la page demandée
+    document.getElementById(`${page}-page`).classList.remove('hidden');
     
-			document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    // Gestion des onglets : ne mettre actif que pour les pages qui ont un onglet
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     
-			document.querySelectorAll('.nav-item').forEach(item => {
-				if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
-					item.classList.add('active');
-				}
-			});
-
-			if (page === 'dashboard') loadDashboard();
-			if (page === 'inventory') loadInventory();
-			if (page === 'scan') initScanner();
-			if (page === 'search') loadSearchPage();
-			if (page === 'locations') loadLocations();
-			if (page === 'import-export') loadImportExport();
-		}
+    // Si ce n'est pas la page détail (qui n'a pas d'onglet), activer l'onglet approprié
+    if (page !== 'detail') {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
+                item.classList.add('active');
+            }
+        });
+    }
+    
+    // Charger les données si nécessaire
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'inventory') loadInventory();
+    if (page === 'scan') initScanner();
+    if (page === 'search') loadSearchPage();
+    if (page === 'locations') loadLocations();
+    if (page === 'import-export') loadImportExport();
+    // Pas de load pour 'detail' car géré par showArticleDetail()
+}
 
         function saveToStorage() {
             localStorage.setItem('inventory_articles', JSON.stringify(articles));
