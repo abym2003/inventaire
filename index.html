@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <title>Gestion d'Inventaire</title>
     <style>
+        /* [Tous les styles CSS précédents restent identiques] */
         * {
             margin: 0;
             padding: 0;
@@ -728,40 +729,80 @@
             color: #e0e0e0;
             font-weight: 500;
         }
-		
-		.scan-feedback {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			background: rgba(0, 0, 0, 0.8);
-			color: white;
-			padding: 20px;
-			border-radius: 12px;
-			text-align: center;
-			z-index: 10;
-			display: none;
-		}
+        
+        .scan-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 10;
+            display: none;
+        }
 
-		.scan-feedback.show {
-			display: block;
-			animation: pulse 0.5s ease;
-		}
+        .scan-feedback.show {
+            display: block;
+            animation: pulse 0.5s ease;
+        }
 
-		@keyframes pulse {
-			0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-			70% { transform: translate(-50%, -50%) scale(1.1); }
-			100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-		}
-		
-		.nav-item.detail-page-active {
-			background: transparent;
-		}
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            70% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
+        .nav-item.detail-page-active {
+            background: transparent;
+        }
 
-		.nav-item.detail-page-active .nav-icon,
-		.nav-item.detail-page-active .nav-label {
-			color: #888;
-		}
+        .nav-item.detail-page-active .nav-icon,
+        .nav-item.detail-page-active .nav-label {
+            color: #888;
+        }
+
+        /* Nouveau style pour les champs en édition */
+        .edit-field {
+            background: #252525;
+            border: 1px solid #bb86fc;
+            padding: 8px;
+            border-radius: 6px;
+            width: 100%;
+            color: #e0e0e0;
+        }
+        
+        .edit-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .edit-btn-small {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .edit-btn-small.save {
+            background: #bb86fc;
+            color: #000;
+        }
+        
+        .edit-btn-small.cancel {
+            background: #333;
+            color: #e0e0e0;
+        }
+        
+        .edit-mode {
+            background: #2a2a2a;
+            border-left: 3px solid #bb86fc;
+        }
     </style>
 </head>
 <body>
@@ -822,8 +863,8 @@
         </div>
         <div class="container">
             <div class="scanner-container" id="scanner-reader">
-				<div id="scan-feedback" class="scan-feedback"></div>
-			</div>
+                <div id="scan-feedback" class="scan-feedback"></div>
+            </div>
 
             <div class="detail-section">
                 <div class="section-title">📱 Scanner manuelle</div>
@@ -864,7 +905,13 @@
                 <div class="filters" id="search-location-filters"></div>
             </div>
 
-            <div class="article-list" id="search-results"></div>
+            <div class="article-list" id="search-results">
+                <!-- Vide par défaut -->
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -926,29 +973,7 @@
         </div>
     </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="navigateTo('dashboard')">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Accueil</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('inventory')">
-            <div class="nav-icon">📋</div>
-            <div class="nav-label">Inventaire</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('search')">
-            <div class="nav-icon">🔍</div>
-            <div class="nav-label">Recherche</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('locations')">
-            <div class="nav-icon">📍</div>
-            <div class="nav-label">Lieux</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('import-export')">
-            <div class="nav-icon">📊</div>
-            <div class="nav-label">Export</div>
-        </div>
-    </nav>
-
+    <!-- Modal Ajout Article -->
     <div id="add-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -958,27 +983,27 @@
             <form onsubmit="saveArticle(event)">
                 <div class="form-group">
                     <label class="form-label">Code-barre</label>
-                    <input type="text" class="form-input" id="article-barcode">
+                    <input type="text" class="form-input" id="article-barcode" placeholder="Facultatif">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Famille *</label>
-                    <input type="text" class="form-input" id="article-famille" required>
+                    <input type="text" class="form-input" id="article-famille" required value="boulonnerie">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Catégorie *</label>
-                    <input type="text" class="form-input" id="article-categorie" required>
+                    <input type="text" class="form-input" id="article-categorie" required value="vis">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Nom de l'article *</label>
-                    <input type="text" class="form-input" id="article-name" required>
+                    <input type="text" class="form-input" id="article-name" required value="hexa">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Taille</label>
-                    <input type="text" class="form-input" id="article-taille">
+                    <input type="text" class="form-input" id="article-taille" placeholder="ex: M6">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Longueur</label>
-                    <input type="text" class="form-input" id="article-longueur">
+                    <input type="text" class="form-input" id="article-longueur" placeholder="ex: 20mm">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Conditionnement *</label>
@@ -986,7 +1011,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Fournisseur</label>
-                    <input type="text" class="form-input" id="article-fournisseur">
+                    <input type="text" class="form-input" id="article-fournisseur" placeholder="ex: Fournisseur X">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Lieu de stockage *</label>
@@ -997,6 +1022,52 @@
                     <input type="number" class="form-input" id="article-nombre" required min="0" value="1">
                 </div>
                 <button type="submit" class="btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Modification Article -->
+    <div id="edit-article-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Modifier l'article</div>
+                <button class="close-btn" onclick="closeModal('edit-article-modal')">&times;</button>
+            </div>
+            <form onsubmit="updateArticle(event)">
+                <input type="hidden" id="edit-article-id">
+                <div class="form-group">
+                    <label class="form-label">Code-barre</label>
+                    <input type="text" class="form-input" id="edit-article-barcode">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Famille *</label>
+                    <input type="text" class="form-input" id="edit-article-famille" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Catégorie *</label>
+                    <input type="text" class="form-input" id="edit-article-categorie" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nom de l'article *</label>
+                    <input type="text" class="form-input" id="edit-article-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Taille</label>
+                    <input type="text" class="form-input" id="edit-article-taille">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Longueur</label>
+                    <input type="text" class="form-input" id="edit-article-longueur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Conditionnement *</label>
+                    <input type="number" class="form-input" id="edit-article-conditionnement" required min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fournisseur</label>
+                    <input type="text" class="form-input" id="edit-article-fournisseur">
+                </div>
+                <button type="submit" class="btn-primary">Mettre à jour</button>
             </form>
         </div>
     </div>
@@ -1059,8 +1130,7 @@
                 <div class="form-group">
                     <label class="form-label">Nombre</label>
                     <input type="number" class="form-input" id="stock-quantity" min="1" required>
-                </div>
-                <button type="submit" class="btn-primary" id="stock-action-btn">Confirmer</button>
+                </button>
             </form>
         </div>
     </div>
@@ -1145,7 +1215,7 @@
             const totalLocations = locations.length;
             const lowStock = articles.filter(art => {
                 const total = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-                return total <= 2;
+                return total <= 2 && total > 0;
             }).length;
 
             document.getElementById('total-locations').textContent = totalLocations;
@@ -1264,32 +1334,33 @@
 
                 <div class="detail-section">
                     <div class="section-title">📋 Informations</div>
-                    <div class="detail-info-grid">
+                    <div class="detail-info-grid" id="article-info-grid">
                         <div class="detail-info-item">
                             <div class="detail-info-label">Famille</div>
-                            <div class="detail-info-value">${article.famille || '-'}</div>
+                            <div class="detail-info-value" id="info-famille">${article.famille || '-'}</div>
                         </div>
                         <div class="detail-info-item">
                             <div class="detail-info-label">Catégorie</div>
-                            <div class="detail-info-value">${article.categorie || '-'}</div>
+                            <div class="detail-info-value" id="info-categorie">${article.categorie || '-'}</div>
                         </div>
                         <div class="detail-info-item">
                             <div class="detail-info-label">Taille</div>
-                            <div class="detail-info-value">${article.taille || '-'}</div>
+                            <div class="detail-info-value" id="info-taille">${article.taille || '-'}</div>
                         </div>
                         <div class="detail-info-item">
                             <div class="detail-info-label">Longueur</div>
-                            <div class="detail-info-value">${article.longueur || '-'}</div>
+                            <div class="detail-info-value" id="info-longueur">${article.longueur || '-'}</div>
                         </div>
                         <div class="detail-info-item">
                             <div class="detail-info-label">Conditionnement</div>
-                            <div class="detail-info-value">${article.conditionnement || '-'}</div>
+                            <div class="detail-info-value" id="info-conditionnement">${article.conditionnement || '-'}</div>
                         </div>
                         <div class="detail-info-item">
                             <div class="detail-info-label">Fournisseur</div>
-                            <div class="detail-info-value">${article.fournisseur || '-'}</div>
+                            <div class="detail-info-value" id="info-fournisseur">${article.fournisseur || '-'}</div>
                         </div>
                     </div>
+                    <button class="btn-secondary" onclick="showEditArticleModal('${article.id}')">✏️ Modifier les informations</button>
                 </div>
 
                 <div class="detail-section">
@@ -1344,6 +1415,61 @@
             ).join('');
             
             modal.classList.add('active');
+        }
+
+        function showEditArticleModal(articleId) {
+            const article = articles.find(a => a.id.toString() === articleId);
+            if (!article) return;
+            
+            document.getElementById('edit-article-id').value = article.id;
+            document.getElementById('edit-article-barcode').value = article.barcode || '';
+            document.getElementById('edit-article-famille').value = article.famille || '';
+            document.getElementById('edit-article-categorie').value = article.categorie || '';
+            document.getElementById('edit-article-name').value = article.name || '';
+            document.getElementById('edit-article-taille').value = article.taille || '';
+            document.getElementById('edit-article-longueur').value = article.longueur || '';
+            document.getElementById('edit-article-conditionnement').value = article.conditionnement || 1;
+            document.getElementById('edit-article-fournisseur').value = article.fournisseur || '';
+            
+            document.getElementById('edit-article-modal').classList.add('active');
+        }
+
+        function updateArticle(event) {
+            event.preventDefault();
+            
+            const articleId = document.getElementById('edit-article-id').value;
+            const article = articles.find(a => a.id.toString() === articleId);
+            
+            if (!article) return;
+            
+            // Mettre à jour les champs
+            article.barcode = document.getElementById('edit-article-barcode').value.trim();
+            article.famille = document.getElementById('edit-article-famille').value.trim();
+            article.categorie = document.getElementById('edit-article-categorie').value.trim();
+            article.name = document.getElementById('edit-article-name').value.trim();
+            article.taille = document.getElementById('edit-article-taille').value.trim();
+            article.longueur = document.getElementById('edit-article-longueur').value.trim();
+            article.conditionnement = parseInt(document.getElementById('edit-article-conditionnement').value);
+            article.fournisseur = document.getElementById('edit-article-fournisseur').value.trim();
+            
+            // Mettre à jour les quantités existantes avec le nouveau conditionnement
+            Object.keys(article.quantities || {}).forEach(locId => {
+                if (article.quantities[locId]) {
+                    // Conserver le nombre de paquets, mais mettre à jour le conditionnement
+                    article.quantities[locId].conditionnement = article.conditionnement;
+                }
+            });
+            
+            saveToStorage();
+            addHistory('Modification', article.name, 'Informations mises à jour');
+            closeModal('edit-article-modal');
+            
+            // Recharger la vue détail
+            showArticleDetail(articleId);
+            
+            // Recharger l'inventaire et le dashboard
+            loadInventory();
+            loadDashboard();
         }
 
         function showAddLocationModal() {
@@ -1413,9 +1539,27 @@
             const locationId = document.getElementById('article-location').value;
             const nombre = parseInt(document.getElementById('article-nombre').value);
 
-            let existingArticle = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
+            // Vérifier si un article similaire existe déjà (sans tenir compte du code-barre s'il est vide)
+            let existingArticle = null;
+            
+            if (barcode) {
+                // Si un code-barre est fourni, chercher par code-barre
+                existingArticle = articles.find(a => a.barcode === barcode);
+            } else {
+                // Sinon, chercher par les autres caractéristiques
+                existingArticle = articles.find(a => 
+                    a.name.toLowerCase() === name.toLowerCase() &&
+                    a.famille === famille &&
+                    a.categorie === categorie &&
+                    a.taille === taille &&
+                    a.longueur === longueur &&
+                    a.conditionnement === conditionnement &&
+                    a.fournisseur === fournisseur
+                );
+            }
 
             if (existingArticle) {
+                // Article existant trouvé, ajouter la quantité
                 if (!existingArticle.quantities) existingArticle.quantities = {};
                 
                 if (existingArticle.quantities[locationId]) {
@@ -1424,8 +1568,14 @@
                     existingArticle.quantities[locationId] = { nombre, conditionnement };
                 }
 
+                // Mettre à jour le code-barre si fourni et différent
+                if (barcode && existingArticle.barcode !== barcode) {
+                    existingArticle.barcode = barcode;
+                }
+
                 addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
             } else {
+                // Créer un nouvel article
                 const article = {
                     id: Date.now(),
                     name,
@@ -1443,7 +1593,7 @@
                 };
 
                 articles.push(article);
-                addHistory('Ajout', name, `${nombre * conditionnement} unités`);
+                addHistory('Ajout', name, `${nombre * conditionnement} unités (nouvel article)`);
             }
 
             saveToStorage();
@@ -1899,7 +2049,8 @@
                 'Déplacement': '🔄',
                 'Ajout stock': '📥',
                 'Retrait stock': '📤',
-                'Import': '📥'
+                'Import': '📥',
+                'Modification': '✏️'
             };
             return icons[action] || '📝';
         }
@@ -1920,7 +2071,14 @@
             const searchInput = document.getElementById('advanced-search-input');
             searchInput.value = '';
             searchInput.focus();
-            performAdvancedSearch();
+            
+            // Afficher l'état vide initial
+            document.getElementById('search-results').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div>
+                </div>
+            `;
             
             const filtersHtml = `
                 <div class="filter-chip active" data-location="all" onclick="filterSearchByLocation('all')">
@@ -1939,6 +2097,17 @@
             const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
             const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
             const activeLocation = document.querySelector('#search-page .filter-chip[data-location].active')?.dataset.location;
+            
+            // Si aucune recherche n'a été effectuée, afficher l'état vide
+            if (!searchTerm && (!activeFilter || activeFilter === 'all') && (!activeLocation || activeLocation === 'all')) {
+                document.getElementById('search-results').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div>
+                    </div>
+                `;
+                return;
+            }
             
             let filtered = articles.filter(art => {
                 const matchesText = 
@@ -1969,6 +2138,16 @@
         }
 
         function displaySearchResults(filtered) {
+            if (filtered.length === 0) {
+                document.getElementById('search-results').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <div class="empty-text">Aucun article trouvé</div>
+                    </div>
+                `;
+                return;
+            }
+            
             const resultsHtml = filtered.map(art => {
                 const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
                 const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
@@ -2002,7 +2181,7 @@
                         </div>
                     </div>
                 `;
-            }).join('') || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Aucun article trouvé</div></div>';
+            }).join('');
 
             document.getElementById('search-results').innerHTML = resultsHtml;
         }
@@ -2024,6 +2203,7 @@
         }
 
         function loadImportExport() {
+            // Fonction vide, déjà définie
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -2035,6 +2215,12 @@
             const advancedSearchInput = document.getElementById('advanced-search-input');
             if (advancedSearchInput) {
                 advancedSearchInput.addEventListener('input', performAdvancedSearch);
+            }
+            
+            // Initialiser les valeurs par défaut dans le modal d'ajout
+            const addArticleModal = document.getElementById('add-article-modal');
+            if (addArticleModal) {
+                // Les valeurs sont déjà préremplies dans le HTML
             }
         });
 
