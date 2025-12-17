@@ -1076,22 +1076,104 @@
             saveToStorage();
         }
 
-        // Dans navigateTo()
+// Ajoute cette fonction AVANT navigateTo()
+function prepareArticleDetail(articleId) {
+    currentArticleId = articleId;
+    const article = articles.find(a => a.id.toString() === articleId);
+    if (!article) return;
+
+    const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+    const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
+    const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
+
+    const detailHtml = `
+        <div class="detail-header">
+            <div class="detail-title">${article.name}</div>
+            ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">📋 Informations</div>
+            <div class="detail-info-grid">
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Famille</div>
+                    <div class="detail-info-value">${article.famille || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Catégorie</div>
+                    <div class="detail-info-value">${article.categorie || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Taille</div>
+                    <div class="detail-info-value">${article.taille || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Longueur</div>
+                    <div class="detail-info-value">${article.longueur || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Conditionnement</div>
+                    <div class="detail-info-value">${article.conditionnement || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Fournisseur</div>
+                    <div class="detail-info-value">${article.fournisseur || '-'}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
+            ${locs.map(([locId, qty]) => {
+                const loc = locations.find(l => l.id.toString() === locId);
+                const total = qty.nombre * qty.conditionnement;
+                return loc ? `
+                    <div class="location-item">
+                        <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
+                        <div class="location-qty">${total} unités</div>
+                    </div>
+                ` : '';
+            }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">⚡ Actions rapides</div>
+            <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+            <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+            <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+            <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+        </div>
+
+        ${articleHistory.length > 0 ? `
+        <div class="detail-section">
+            <div class="section-title">📜 Historique</div>
+            ${articleHistory.map(h => `
+                <div class="history-item">
+                    <div class="history-icon">${getActionIcon(h.action)}</div>
+                    <div class="history-content">
+                        <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
+                        <div class="history-date">${formatDate(h.date)}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        ` : ''}
+    `;
+
+    // Stocker dans un variable temporaire
+    window.tempArticleDetail = detailHtml;
+}
+
 function navigateTo(page) {
     if (html5QrCode && page !== 'scan') {
         html5QrCode.pause();
     }
     
-    // Cacher TOUTES les pages (même détail)
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-    
-    // Afficher uniquement la page demandée
     document.getElementById(`${page}-page`).classList.remove('hidden');
     
-    // Gestion des onglets : ne mettre actif que pour les pages qui ont un onglet
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     
-    // Si ce n'est pas la page détail (qui n'a pas d'onglet), activer l'onglet approprié
     if (page !== 'detail') {
         document.querySelectorAll('.nav-item').forEach(item => {
             if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
@@ -1100,14 +1182,19 @@ function navigateTo(page) {
         });
     }
     
-    // Charger les données si nécessaire
     if (page === 'dashboard') loadDashboard();
     if (page === 'inventory') loadInventory();
     if (page === 'scan') initScanner();
     if (page === 'search') loadSearchPage();
     if (page === 'locations') loadLocations();
     if (page === 'import-export') loadImportExport();
-    // Pas de load pour 'detail' car géré par showArticleDetail()
+    if (page === 'detail') {
+        // Injecter le HTML stocké
+        if (window.tempArticleDetail) {
+            document.getElementById('detail-container').innerHTML = window.tempArticleDetail;
+            window.tempArticleDetail = null;
+        }
+    }
 }
 
         function saveToStorage() {
@@ -1700,10 +1787,10 @@ function navigateTo(page) {
     const article = articles.find(a => a.barcode === scannedBarcode);
     
     if (article) {
-        // 1. Naviguer vers la page détail
+        // D'abord préparer le HTML
+        prepareArticleDetail(article.id);
+        // Puis naviguer
         navigateTo('detail');
-        // 2. PUIS afficher les détails
-        showArticleDetail(article.id);
     } else {
         // Ouvrir la modale SANS changer de page
         showAddArticleModal();
