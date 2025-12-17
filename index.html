@@ -728,6 +728,32 @@
             color: #e0e0e0;
             font-weight: 500;
         }
+		
+		.scan-feedback {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0, 0, 0, 0.8);
+			color: white;
+			padding: 20px;
+			border-radius: 12px;
+			text-align: center;
+			z-index: 10;
+			display: none;
+		}
+
+		.scan-feedback.show {
+			display: block;
+			animation: pulse 0.5s ease;
+		}
+
+		@keyframes pulse {
+			0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+			70% { transform: translate(-50%, -50%) scale(1.1); }
+			100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+		}
+		
     </style>
 </head>
 <body>
@@ -787,7 +813,9 @@
             <div class="header-subtitle">Scanner un code-barre</div>
         </div>
         <div class="container">
-            <div class="scanner-container" id="scanner-reader"></div>
+            <div class="scanner-container" id="scanner-reader">
+				<div id="scan-feedback" class="scan-feedback"></div>
+			</div>
 
             <div class="detail-section">
                 <div class="section-title">📱 Scanner manuelle</div>
@@ -1579,14 +1607,20 @@
                     );
                     
                     html5QrCode.render(
-                        (decodedText) => {
-                            document.getElementById('manual-barcode').value = decodedText;
-                            searchByBarcode();
-                        },
-                        (errorMessage) => {
-                            // Ignorer les erreurs continues
-                        }
-                    );
+						(decodedText) => {
+							// Mettre à jour le champ manuel (optionnel)
+							document.getElementById('manual-barcode').value = decodedText;
+        
+							// Lancer la recherche automatique avec le code scanné
+							searchByBarcode(decodedText);
+        
+							// Afficher une notification visuelle
+							showScanNotification(`Code scanné: ${decodedText}`);
+						},
+						(errorMessage) => {
+							// Ignorer les erreurs continues
+						}
+					);
                 })
                 .catch(function(err) {
                     alert("Erreur d'accès à la caméra : " + err.message + "\n\nVeuillez autoriser l'accès à la caméra dans les paramètres de votre navigateur.");
@@ -1596,29 +1630,94 @@
                 alert("Votre navigateur ne supporte pas l'accès à la caméra");
             }
         }
+		
+		function showScanNotification(message) {
+			// Créer ou récupérer l'élément de notification
+			let notification = document.getElementById('scan-notification');
+			if (!notification) {
+				notification = document.createElement('div');
+				notification.id = 'scan-notification';
+				notification.style.cssText = `
+					position: fixed;
+					top: 20px;
+					right: 20px;
+					background: #bb86fc;
+					color: #000;
+					padding: 12px 20px;
+					border-radius: 8px;
+					box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+					z-index: 1000;
+					font-weight: 600;
+					animation: slideIn 0.3s ease;
+				`;
+				document.body.appendChild(notification);
+        
+				// Ajouter l'animation CSS
+				const style = document.createElement('style');
+				style.textContent = `
+					@keyframes slideIn {
+						from { transform: translateX(100%); opacity: 0; }
+						to { transform: translateX(0); opacity: 1; }
+					}
+					@keyframes fadeOut {
+						from { opacity: 1; }
+						to { opacity: 0; }
+					}
+				`;
+				document.head.appendChild(style);
+			}
+    
+			notification.textContent = message;
+			notification.style.display = 'block';
+    
+			// Masquer après 3 secondes
+			setTimeout(() => {
+				notification.style.animation = 'fadeOut 0.5s ease';
+				setTimeout(() => {
+					notification.style.display = 'none';
+					notification.style.animation = '';
+				}, 500);
+			}, 3000);
+		}
 
-        function searchByBarcode() {
-            const barcode = document.getElementById('manual-barcode').value.trim();
-            if (!barcode) return;
+        function searchByBarcode(barcode = null) {
+			// Si barcode n'est pas fourni en paramètre, prendre depuis l'input
+			const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
+			if (!scannedBarcode) return;
 
-            const article = articles.find(a => a.barcode === barcode);
-            
-            if (article) {
-                showArticleDetail(article.id);
-            } else {
-                document.getElementById('scan-result').innerHTML = `
-                    <div class="detail-section">
-                        <div class="section-title">❌ Article non trouvé</div>
-                        <div style="text-align: center; padding: 20px; color: #888;">
-                            Aucun article avec le code "${barcode}"
-                        </div>
-                        <button class="btn-primary" onclick="createArticleFromBarcode('${barcode}')">
-                            ➕ Créer un nouvel article
-                        </button>
-                    </div>
-                `;
-            }
-        }
+			// Si le scanner est actif, on peut l'arrêter après détection
+			if (html5QrCode && html5QrCode.isScanning) {
+				html5QrCode.pause();
+			}
+
+			const article = articles.find(a => a.barcode === scannedBarcode);
+			
+			if (article) {
+				// Si l'article existe, ouvrir sa fiche
+				showArticleDetail(article.id);
+				// Naviguer vers la page détail
+				navigateTo('detail');
+			} else {
+				// Si l'article n'existe pas, ouvrir le formulaire de création
+				showAddArticleModal();
+				document.getElementById('article-barcode').value = scannedBarcode;
+				// Mettre le focus sur le champ nom
+				document.getElementById('article-name').focus();
+        
+				// Afficher un message d'info
+				if (!barcode) { // Seulement si c'est une recherche manuelle
+					document.getElementById('scan-result').innerHTML = `
+						<div class="detail-section">
+							<div class="section-title">❌ Article non trouvé</div>
+							<div style="text-align: center; padding: 20px; color: #888;">
+								Aucun article avec le code "${scannedBarcode}"
+								<br>Le formulaire de création a été ouvert.
+							</div>
+						</div>
+					`;
+				}
+			}
+		}
 
         function createArticleFromBarcode(barcode) {
             showAddArticleModal();
