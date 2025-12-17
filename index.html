@@ -1221,91 +1221,98 @@
         }
 
         function showArticleDetail(articleId) {
-            currentArticleId = articleId;
-            const article = articles.find(a => a.id.toString() === articleId);
-            if (!article) return;
+    currentArticleId = articleId;
+    const article = articles.find(a => a.id.toString() === articleId);
+    if (!article) return;
 
-            const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-            const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
+    const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+    const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
 
-            const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
+    const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
 
-            const detailHtml = `
-                <div class="detail-header">
-                    <div class="detail-title">${article.name}</div>
-                    ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
+    const detailHtml = `
+        <div class="detail-header">
+            <div class="detail-title">${article.name}</div>
+            ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">📋 Informations</div>
+            <div class="detail-info-grid">
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Famille</div>
+                    <div class="detail-info-value">${article.famille || '-'}</div>
                 </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Catégorie</div>
+                    <div class="detail-info-value">${article.categorie || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Taille</div>
+                    <div class="detail-info-value">${article.taille || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Longueur</div>
+                    <div class="detail-info-value">${article.longueur || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Conditionnement</div>
+                    <div class="detail-info-value">${article.conditionnement || '-'}</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Fournisseur</div>
+                    <div class="detail-info-value">${article.fournisseur || '-'}</div>
+                </div>
+            </div>
+        </div>
 
-                <div class="detail-section">
-                    <div class="section-title">📋 Informations</div>
-                    <div class="detail-info-grid">
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Famille</div>
-                            <div class="detail-info-value">${article.famille || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Catégorie</div>
-                            <div class="detail-info-value">${article.categorie || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Taille</div>
-                            <div class="detail-info-value">${article.taille || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Longueur</div>
-                            <div class="detail-info-value">${article.longueur || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Conditionnement</div>
-                            <div class="detail-info-value">${article.conditionnement || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Fournisseur</div>
-                            <div class="detail-info-value">${article.fournisseur || '-'}</div>
-                        </div>
+        <div class="detail-section">
+            <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
+            ${locs.map(([locId, qty]) => {
+                const loc = locations.find(l => l.id.toString() === locId);
+                const total = qty.nombre * qty.conditionnement;
+                return loc ? `
+                    <div class="location-item">
+                        <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
+                        <div class="location-qty">${total} unités</div>
+                    </div>
+                ` : '';
+            }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
+        </div>
+
+        <div class="detail-section">
+            <div class="section-title">⚡ Actions rapides</div>
+            <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+            <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+            <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+            <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+        </div>
+
+        ${articleHistory.length > 0 ? `
+        <div class="detail-section">
+            <div class="section-title">📜 Historique</div>
+            ${articleHistory.map(h => `
+                <div class="history-item">
+                    <div class="history-icon">${getActionIcon(h.action)}</div>
+                    <div class="history-content">
+                        <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
+                        <div class="history-date">${formatDate(h.date)}</div>
                     </div>
                 </div>
+            `).join('')}
+        </div>
+        ` : ''}
+    `;
 
-                <div class="detail-section">
-                    <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
-                    ${locs.map(([locId, qty]) => {
-                        const loc = locations.find(l => l.id.toString() === locId);
-                        const total = qty.nombre * qty.conditionnement;
-                        return loc ? `
-                            <div class="location-item">
-                                <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
-                                <div class="location-qty">${total} unités</div>
-                            </div>
-                        ` : '';
-                    }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
-                </div>
-
-                <div class="detail-section">
-                    <div class="section-title">⚡ Actions rapides</div>
-                    <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
-                    <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
-                    <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
-                    <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
-                </div>
-
-                ${articleHistory.length > 0 ? `
-                <div class="detail-section">
-                    <div class="section-title">📜 Historique</div>
-                    ${articleHistory.map(h => `
-                        <div class="history-item">
-                            <div class="history-icon">${getActionIcon(h.action)}</div>
-                            <div class="history-content">
-                                <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
-                                <div class="history-date">${formatDate(h.date)}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                ` : ''}
-            `;
-
-            document.getElementById('detail-container').innerHTML = detailHtml;
-        }
+    // Afficher la page détail
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    document.getElementById('detail-page').classList.remove('hidden');
+    
+    // NE PAS désactiver la navigation - garder les boutons actifs
+    // La navigation du pied de page reste fonctionnelle
+    
+    document.getElementById('detail-container').innerHTML = detailHtml;
+}
 
         function showAddArticleModal() {
             const modal = document.getElementById('add-article-modal');
@@ -1622,117 +1629,119 @@
         }
 
         function searchByBarcode(barcode = null) {
-            const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
-            if (!scannedBarcode) return;
+    const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
+    if (!scannedBarcode) return;
 
-            const article = articles.find(a => a.barcode === scannedBarcode);
-            
-            if (article) {
-                document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-                document.getElementById('detail-page').classList.remove('hidden');
-                
-                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                
-                currentArticleId = article.id;
-                const articleObj = articles.find(a => a.id === article.id);
-                
-                const totalQty = Object.values(articleObj.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
-                const locs = Object.entries(articleObj.quantities || {}).filter(([_, q]) => q.nombre > 0);
-                const articleHistory = history.filter(h => h.articleName === articleObj.name).slice(0, 10);
+    const article = articles.find(a => a.barcode === scannedBarcode);
+    
+    if (article) {
+        // Afficher directement la page de détails
+        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+        document.getElementById('detail-page').classList.remove('hidden');
+        
+        // NE PAS désactiver la navigation - laisser les boutons actifs
+        // Les boutons du pied de page restent fonctionnels
+        
+        currentArticleId = article.id;
+        const articleObj = articles.find(a => a.id === article.id);
+        
+        const totalQty = Object.values(articleObj.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
+        const locs = Object.entries(articleObj.quantities || {}).filter(([_, q]) => q.nombre > 0);
+        const articleHistory = history.filter(h => h.articleName === articleObj.name).slice(0, 10);
 
-                const detailHtml = `
-                    <div class="detail-header">
-                        <div class="detail-title">${articleObj.name}</div>
-                        ${articleObj.barcode ? `<div class="detail-code">Code: ${articleObj.barcode}</div>` : ''}
+        const detailHtml = `
+            <div class="detail-header">
+                <div class="detail-title">${articleObj.name}</div>
+                ${articleObj.barcode ? `<div class="detail-code">Code: ${articleObj.barcode}</div>` : ''}
+            </div>
+
+            <div class="detail-section">
+                <div class="section-title">📋 Informations</div>
+                <div class="detail-info-grid">
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Famille</div>
+                        <div class="detail-info-value">${articleObj.famille || '-'}</div>
                     </div>
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Catégorie</div>
+                        <div class="detail-info-value">${articleObj.categorie || '-'}</div>
+                    </div>
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Taille</div>
+                        <div class="detail-info-value">${articleObj.taille || '-'}</div>
+                    </div>
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Longueur</div>
+                        <div class="detail-info-value">${articleObj.longueur || '-'}</div>
+                    </div>
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Conditionnement</div>
+                        <div class="detail-info-value">${articleObj.conditionnement || '-'}</div>
+                    </div>
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Fournisseur</div>
+                        <div class="detail-info-value">${articleObj.fournisseur || '-'}</div>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="detail-section">
-                        <div class="section-title">📋 Informations</div>
-                        <div class="detail-info-grid">
-                            <div class="detail-info-item">
-                                <div class="detail-info-label">Famille</div>
-                                <div class="detail-info-value">${articleObj.famille || '-'}</div>
-                            </div>
-                            <div class="detail-info-item">
-                                <div class="detail-info-label">Catégorie</div>
-                                <div class="detail-info-value">${articleObj.categorie || '-'}</div>
-                            </div>
-                            <div class="detail-info-item">
-                                <div class="detail-info-label">Taille</div>
-                                <div class="detail-info-value">${articleObj.taille || '-'}</div>
-                            </div>
-                            <div class="detail-info-item">
-                                <div class="detail-info-label">Longueur</div>
-                                <div class="detail-info-value">${articleObj.longueur || '-'}</div>
-                            </div>
-                            <div class="detail-info-item">
-                                <div class="detail-info-label">Conditionnement</div>
-                                <div class="detail-info-value">${articleObj.conditionnement || '-'}</div>
-                            </div>
-                            <div class="detail-info-item">
-                                <div class="detail-info-label">Fournisseur</div>
-                                <div class="detail-info-value">${articleObj.fournisseur || '-'}</div>
-                            </div>
+            <div class="detail-section">
+                <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
+                ${locs.map(([locId, qty]) => {
+                    const loc = locations.find(l => l.id.toString() === locId);
+                    const total = qty.nombre * qty.conditionnement;
+                    return loc ? `
+                        <div class="location-item">
+                            <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
+                            <div class="location-qty">${total} unités</div>
+                        </div>
+                    ` : '';
+                }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
+            </div>
+
+            <div class="detail-section">
+                <div class="section-title">⚡ Actions rapides</div>
+                <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+                <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+                <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+                <button class="btn-secondary btn-danger" onclick="deleteArticle('${articleObj.id}')">🗑️ Supprimer</button>
+            </div>
+
+            ${articleHistory.length > 0 ? `
+            <div class="detail-section">
+                <div class="section-title">📜 Historique</div>
+                ${articleHistory.map(h => `
+                    <div class="history-item">
+                        <div class="history-icon">${getActionIcon(h.action)}</div>
+                        <div class="history-content">
+                            <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
+                                <div class="history-date">${formatDate(h.date)}</div>
                         </div>
                     </div>
-
-                    <div class="detail-section">
-                        <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
-                        ${locs.map(([locId, qty]) => {
-                            const loc = locations.find(l => l.id.toString() === locId);
-                            const total = qty.nombre * qty.conditionnement;
-                            return loc ? `
-                                <div class="location-item">
-                                    <div class="location-name">${loc.name}<br><span style="font-size: 12px; color: #888;">Nb: ${qty.nombre} × ${qty.conditionnement}</span></div>
-                                    <div class="location-qty">${total} unités</div>
-                                </div>
-                            ` : '';
-                        }).join('') || '<div style="text-align: center; color: #888; padding: 20px;">Aucun emplacement</div>'}
+                `).join('')}
+            </div>
+            ` : ''}
+        `;
+        
+        document.getElementById('detail-container').innerHTML = detailHtml;
+    } else {
+        showAddArticleModal();
+        document.getElementById('article-barcode').value = scannedBarcode;
+        document.getElementById('article-name').focus();
+        
+        if (!barcode) {
+            document.getElementById('scan-result').innerHTML = `
+                <div class="detail-section">
+                    <div class="section-title">❌ Article non trouvé</div>
+                    <div style="text-align: center; padding: 20px; color: #888;">
+                        Aucun article avec le code "${scannedBarcode}"
+                        <br>Le formulaire de création a été ouvert.
                     </div>
-
-                    <div class="detail-section">
-                        <div class="section-title">⚡ Actions rapides</div>
-                        <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
-                        <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
-                        <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
-                        <button class="btn-secondary btn-danger" onclick="deleteArticle('${articleObj.id}')">🗑️ Supprimer</button>
-                    </div>
-
-                    ${articleHistory.length > 0 ? `
-                    <div class="detail-section">
-                        <div class="section-title">📜 Historique</div>
-                        ${articleHistory.map(h => `
-                            <div class="history-item">
-                                <div class="history-icon">${getActionIcon(h.action)}</div>
-                                <div class="history-content">
-                                    <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
-                                    <div class="history-date">${formatDate(h.date)}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    ` : ''}
-                `;
-                
-                document.getElementById('detail-container').innerHTML = detailHtml;
-            } else {
-                showAddArticleModal();
-                document.getElementById('article-barcode').value = scannedBarcode;
-                document.getElementById('article-name').focus();
-                
-                if (!barcode) {
-                    document.getElementById('scan-result').innerHTML = `
-                        <div class="detail-section">
-                            <div class="section-title">❌ Article non trouvé</div>
-                            <div style="text-align: center; padding: 20px; color: #888;">
-                                Aucun article avec le code "${scannedBarcode}"
-                                <br>Le formulaire de création a été ouvert.
-                            </div>
-                        </div>
-                    `;
-                }
-            }
+                </div>
+            `;
         }
+    }
+}
 
         function exportToExcel() {
             const email = document.getElementById('export-email').value.trim();
