@@ -1074,6 +1074,7 @@
         let currentArticleId = null;
         let currentStockAction = null;
         let html5QrCode = null;
+        let isScannerActive = false;
 
         if (locations.length === 0) {
             locations = [
@@ -1085,39 +1086,42 @@
         }
 
         function navigateTo(page) {
-			if (html5QrCode && page !== 'scan') {
-				html5QrCode.pause();
-			}
-    
-			document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-			document.getElementById(`${page}-page`).classList.remove('hidden');
-    
-			document.querySelectorAll('.nav-item').forEach(item => {
-				item.classList.remove('active');
-				item.classList.remove('detail-page-active');
-			});
-    
-			if (page === 'detail') {
-				// Page détails : aucun bouton actif
-				document.querySelectorAll('.nav-item').forEach(item => {
-					item.classList.add('detail-page-active');
-				});
-			} else {
-				// Page normale : activer le bouton correspondant
-				document.querySelectorAll('.nav-item').forEach(item => {
-					if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
-						item.classList.add('active');
-					}
-				});
-			}
-    
-			if (page === 'dashboard') loadDashboard();
-			if (page === 'inventory') loadInventory();
-			if (page === 'scan') initScanner();
-			if (page === 'search') loadSearchPage();
-			if (page === 'locations') loadLocations();
-			if (page === 'import-export') loadImportExport();
-		}
+            console.log('Navigating to:', page);
+            
+            // Masquer toutes les pages
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            
+            // Afficher la page demandée
+            document.getElementById(`${page}-page`).classList.remove('hidden');
+            
+            // Gérer la navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.classList.remove('detail-page-active');
+            });
+            
+            if (page === 'detail') {
+                // Page détails : aucun bouton actif
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.add('detail-page-active');
+                });
+            } else {
+                // Page normale : activer le bouton correspondant
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+            
+            // Charger les données spécifiques à la page
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'inventory') loadInventory();
+            if (page === 'scan') initScanner();
+            if (page === 'search') loadSearchPage();
+            if (page === 'locations') loadLocations();
+            if (page === 'import-export') loadImportExport();
+        }
 
         function saveToStorage() {
             localStorage.setItem('inventory_articles', JSON.stringify(articles));
@@ -1238,13 +1242,18 @@
         }
 
         function showArticleDetail(articleId) {
+            console.log('showArticleDetail called with id:', articleId);
             currentArticleId = articleId;
             const article = articles.find(a => a.id.toString() === articleId);
-            if (!article) return;
+            console.log('Article found:', article);
+            
+            if (!article) {
+                console.log('Article not found!');
+                return;
+            }
 
             const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
             const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
-
             const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
 
             const detailHtml = `
@@ -1321,7 +1330,7 @@
                 ` : ''}
             `;
             
-            // Navigation et affichage
+            // Afficher la page de détails
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
         }
@@ -1388,15 +1397,6 @@
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
             document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
-            
-            // Si on ferme le modal d'ajout d'article depuis la page de scan, reprendre le scanner
-            if (modalId === 'add-article-modal' && document.getElementById('scan-page').classList.contains('hidden') === false) {
-                if (html5QrCode) {
-                    setTimeout(() => {
-                        html5QrCode.resume();
-                    }, 300);
-                }
-            }
         }
 
         function saveArticle(event) {
@@ -1450,15 +1450,6 @@
             closeModal('add-article-modal');
             loadInventory();
             loadDashboard();
-            
-            // Si on était sur la page de scan, rester sur cette page et reprendre le scanner
-            if (document.getElementById('scan-page').classList.contains('hidden') === false) {
-                if (html5QrCode) {
-                    setTimeout(() => {
-                        html5QrCode.resume();
-                    }, 300);
-                }
-            }
         }
 
         function saveLocation(event) {
@@ -1617,95 +1608,93 @@
         }
 
         function initScanner() {
+            console.log('Initializing scanner...');
+            
             if (html5QrCode) {
-                // Si le scanner existe déjà, on le redémarre
-                html5QrCode.clear();
-                document.getElementById('scanner-reader').innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
+                try {
+                    html5QrCode.clear();
+                } catch (e) {
+                    console.log('Error clearing scanner:', e);
+                }
             }
-
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" } 
-                })
-                .then(function(stream) {
-                    stream.getTracks().forEach(track => track.stop());
+            
+            // Nettoyer le conteneur du scanner
+            document.getElementById('scanner-reader').innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
+            
+            html5QrCode = new Html5QrcodeScanner(
+                "scanner-reader",
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 150 },
+                    aspectRatio: 1.0,
+                    rememberLastUsedCamera: true
+                },
+                false
+            );
+            
+            html5QrCode.render(
+                (decodedText) => {
+                    console.log('Code scanné:', decodedText);
                     
-                    html5QrCode = new Html5QrcodeScanner(
-                        "scanner-reader",
-                        { 
-                            fps: 10, 
-                            qrbox: { width: 250, height: 150 },
-                            aspectRatio: 1.0,
-                            rememberLastUsedCamera: true
-                        },
-                        false
-                    );
+                    // Mettre en pause le scanner
+                    html5QrCode.pause();
                     
-                    html5QrCode.render(
-                        (decodedText) => {
-                            // Mettre en pause le scanner quand un code est détecté
-                            html5QrCode.pause();
-                            document.getElementById('manual-barcode').value = decodedText;
-                            
-                            // Rechercher l'article avec le code-barre
-                            const article = articles.find(a => a.barcode === decodedText);
-                            
-                            if (article) {
-                                // Afficher directement les détails de l'article
-                                showArticleDetail(article.id);
-                            } else {
-                                // Article non trouvé : afficher le modal de création
-                                showAddArticleModal();
-                                document.getElementById('article-barcode').value = decodedText;
-                                document.getElementById('article-name').focus();
-                                
-                                // Afficher un message dans la page scan
-                                document.getElementById('scan-result').innerHTML = `
-                                    <div class="detail-section">
-                                        <div class="section-title">❌ Article non trouvé</div>
-                                        <div style="text-align: center; padding: 20px; color: #888;">
-                                            Aucun article avec le code "${decodedText}"
-                                            <br>Le formulaire de création a été ouvert.
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        },
-                        (errorMessage) => {
-                            // Gérer les erreurs silencieusement
-                        }
-                    );
-                })
-                .catch(function(err) {
-                    alert("Erreur d'accès à la caméra : " + err.message + "\n\nVeuillez autoriser l'accès à la caméra dans les paramètres de votre navigateur.");
-                    console.error("Camera error:", err);
-                });
-            } else {
-                alert("Votre navigateur ne supporte pas l'accès à la caméra");
-            }
+                    // Mettre le code dans le champ manuel
+                    document.getElementById('manual-barcode').value = decodedText;
+                    
+                    // Rechercher l'article
+                    const article = articles.find(a => a.barcode === decodedText);
+                    
+                    if (article) {
+                        console.log('Article trouvé:', article);
+                        // Afficher les détails de l'article
+                        showArticleDetail(article.id.toString());
+                    } else {
+                        console.log('Article non trouvé');
+                        // Afficher le modal de création
+                        showAddArticleModal();
+                        document.getElementById('article-barcode').value = decodedText;
+                        document.getElementById('article-name').focus();
+                        
+                        // Afficher un message
+                        document.getElementById('scan-result').innerHTML = `
+                            <div class="detail-section">
+                                <div class="section-title">❌ Article non trouvé</div>
+                                <div style="text-align: center; padding: 20px; color: #888;">
+                                    Aucun article avec le code "${decodedText}"
+                                    <br>Le formulaire de création a été ouvert.
+                                </div>
+                            </div>
+                        `;
+                    }
+                },
+                (errorMessage) => {
+                    console.log('Scanner error:', errorMessage);
+                }
+            );
+            
+            isScannerActive = true;
         }
 
         function searchByBarcode(barcode = null) {
             const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
             if (!scannedBarcode) return;
 
-            // Mettre en pause le scanner si on est sur la page scan
-            if (html5QrCode && document.getElementById('scan-page').classList.contains('hidden') === false) {
-                html5QrCode.pause();
-            }
-
+            console.log('Recherche manuelle de code-barre:', scannedBarcode);
             const article = articles.find(a => a.barcode === scannedBarcode);
             
             if (article) {
+                console.log('Article trouvé (manuel):', article);
                 // Afficher les détails de l'article
-                showArticleDetail(article.id);
+                showArticleDetail(article.id.toString());
             } else {
-                // Article non trouvé : afficher le modal de création
+                console.log('Article non trouvé (manuel)');
+                // Afficher le modal de création
                 showAddArticleModal();
                 document.getElementById('article-barcode').value = scannedBarcode;
                 document.getElementById('article-name').focus();
                 
-                // Afficher un message dans la page scan
+                // Afficher un message
                 if (!barcode) {
                     document.getElementById('scan-result').innerHTML = `
                         <div class="detail-section">
