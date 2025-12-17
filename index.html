@@ -1074,7 +1074,6 @@
         let currentArticleId = null;
         let currentStockAction = null;
         let html5QrCode = null;
-        let isFromScanPage = false;
 
         if (locations.length === 0) {
             locations = [
@@ -1393,7 +1392,9 @@
             // Si on ferme le modal d'ajout d'article depuis la page de scan, reprendre le scanner
             if (modalId === 'add-article-modal' && document.getElementById('scan-page').classList.contains('hidden') === false) {
                 if (html5QrCode) {
-                    html5QrCode.resume();
+                    setTimeout(() => {
+                        html5QrCode.resume();
+                    }, 300);
                 }
             }
         }
@@ -1453,7 +1454,9 @@
             // Si on était sur la page de scan, rester sur cette page et reprendre le scanner
             if (document.getElementById('scan-page').classList.contains('hidden') === false) {
                 if (html5QrCode) {
-                    html5QrCode.resume();
+                    setTimeout(() => {
+                        html5QrCode.resume();
+                    }, 300);
                 }
             }
         }
@@ -1615,8 +1618,9 @@
 
         function initScanner() {
             if (html5QrCode) {
-                html5QrCode.resume();
-                return;
+                // Si le scanner existe déjà, on le redémarre
+                html5QrCode.clear();
+                document.getElementById('scanner-reader').innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
             }
 
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -1639,11 +1643,36 @@
                     
                     html5QrCode.render(
                         (decodedText) => {
+                            // Mettre en pause le scanner quand un code est détecté
                             html5QrCode.pause();
                             document.getElementById('manual-barcode').value = decodedText;
-                            searchByBarcode(decodedText);
+                            
+                            // Rechercher l'article avec le code-barre
+                            const article = articles.find(a => a.barcode === decodedText);
+                            
+                            if (article) {
+                                // Afficher directement les détails de l'article
+                                showArticleDetail(article.id);
+                            } else {
+                                // Article non trouvé : afficher le modal de création
+                                showAddArticleModal();
+                                document.getElementById('article-barcode').value = decodedText;
+                                document.getElementById('article-name').focus();
+                                
+                                // Afficher un message dans la page scan
+                                document.getElementById('scan-result').innerHTML = `
+                                    <div class="detail-section">
+                                        <div class="section-title">❌ Article non trouvé</div>
+                                        <div style="text-align: center; padding: 20px; color: #888;">
+                                            Aucun article avec le code "${decodedText}"
+                                            <br>Le formulaire de création a été ouvert.
+                                        </div>
+                                    </div>
+                                `;
+                            }
                         },
                         (errorMessage) => {
+                            // Gérer les erreurs silencieusement
                         }
                     );
                 })
@@ -1660,23 +1689,23 @@
             const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
             if (!scannedBarcode) return;
 
+            // Mettre en pause le scanner si on est sur la page scan
+            if (html5QrCode && document.getElementById('scan-page').classList.contains('hidden') === false) {
+                html5QrCode.pause();
+            }
+
             const article = articles.find(a => a.barcode === scannedBarcode);
             
             if (article) {
-                // Mettre en pause le scanner et afficher les détails
-                if (html5QrCode) {
-                    html5QrCode.pause();
-                }
+                // Afficher les détails de l'article
                 showArticleDetail(article.id);
             } else {
                 // Article non trouvé : afficher le modal de création
-                if (html5QrCode) {
-                    html5QrCode.pause();
-                }
                 showAddArticleModal();
                 document.getElementById('article-barcode').value = scannedBarcode;
                 document.getElementById('article-name').focus();
                 
+                // Afficher un message dans la page scan
                 if (!barcode) {
                     document.getElementById('scan-result').innerHTML = `
                         <div class="detail-section">
