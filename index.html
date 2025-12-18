@@ -1460,6 +1460,8 @@
                 filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
             }
 
+			filtered.sort((a, b) => a.name.localeCompare(b.name));
+			
             const filtersHtml = `
                 <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
                      data-location="all" onclick="filterByLocation('all')">
@@ -2454,6 +2456,9 @@
                 
                 return true;
             });
+			
+			  // Trier par ordre alphabétique
+				filtered.sort((a, b) => a.name.localeCompare(b.name));
             
             displaySearchResults(filtered);
         }
