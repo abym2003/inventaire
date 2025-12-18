@@ -1486,7 +1486,7 @@
                     <div class="article-card" onclick="showArticleDetail('${art.id}')">
                         <div class="article-header">
                             <div>
-                                <div class="article-name">${art.name}</div>
+                                <div class="article-name">${art.name}${art.taille ? ' ' + art.taille : ''}${art.longueur ? ' ' + art.longueur : ''}</div>
                                 ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
                             </div>
                             <div class="article-quantity">${totalQty}</div>
@@ -1538,7 +1538,7 @@
 
             const detailHtml = `
                 <div class="detail-header">
-                    <div class="detail-title">${article.name}</div>
+                    <div class="detail-title">${article.name}${article.taille ? ' ' + article.taille : ''}${article.longueur ? ' ' + article.longueur : ''}</div>
                     ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
                 </div>
 
@@ -2484,7 +2484,7 @@
                     <div class="article-card" onclick="showArticleDetail('${art.id}')">
                         <div class="article-header">
                             <div>
-                                <div class="article-name">${art.name}</div>
+                                <div class="article-name">${art.name}${art.taille ? ' ' + art.taille : ''}${art.longueur ? ' ' + art.longueur : ''}</div>
                                 ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
                                 ${art.barcode ? `<div class="article-meta">🏷️ ${art.barcode}</div>` : ''}
                             </div>
