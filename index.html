@@ -8,7 +8,6 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <title>Gestion d'Inventaire</title>
     <style>
-        /* [Tous les styles CSS précédents restent identiques] */
         * {
             margin: 0;
             padding: 0;
@@ -462,30 +461,31 @@
 
         .detail-header {
             background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
-            padding: 24px;
+            padding: 16px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             border: 1px solid #333;
         }
 
         .detail-title {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             color: #bb86fc;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            line-height: 1.2;
         }
 
         .detail-code {
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
             font-family: 'Courier New', monospace;
         }
 
         .detail-section {
             background: #1e1e1e;
-            padding: 20px;
+            padding: 16px;
             border-radius: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             border: 1px solid #333;
         }
 
@@ -507,12 +507,12 @@
         }
 
         .location-name {
-            font-size: 15px;
+            font-size: 14px;
             color: #e0e0e0;
         }
 
         .location-qty {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: #bb86fc;
         }
@@ -527,14 +527,14 @@
         }
 
         .history-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: #2a2a2a;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             flex-shrink: 0;
         }
 
@@ -543,29 +543,29 @@
         }
 
         .history-action {
-            font-size: 14px;
+            font-size: 13px;
             color: #e0e0e0;
             margin-bottom: 4px;
         }
 
         .history-date {
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
         }
 
         .empty-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+            font-size: 48px;
+            margin-bottom: 12px;
             opacity: 0.3;
         }
 
         .empty-text {
-            font-size: 16px;
+            font-size: 14px;
             color: #888;
         }
 
@@ -667,7 +667,7 @@
         }
 
         .export-icon {
-            font-size: 48px;
+            font-size: 40px;
             text-align: center;
             margin-bottom: 16px;
         }
@@ -720,13 +720,13 @@
         }
 
         .detail-info-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
             margin-bottom: 4px;
         }
 
         .detail-info-value {
-            font-size: 15px;
+            font-size: 14px;
             color: #e0e0e0;
             font-weight: 500;
         }
@@ -805,10 +805,134 @@
             background: #2a2a2a;
             border-left: 3px solid #bb86fc;
         }
+        
+        /* Styles pour le bouton historique (même style que le bouton scanner) */
+        .history-btn {
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+            border: none;
+            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
+        }
+        
+        /* Conteneur de l'historique */
+        .history-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .history-container.expanded {
+            max-height: 500px;
+            margin-top: 12px;
+        }
+        
+        /* Filtres avancés */
+        .advanced-filters {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-dropdown {
+            position: relative;
+        }
+        
+        .filter-dropdown-btn {
+            width: 100%;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        
+        .filter-dropdown-btn:hover {
+            background: #333;
+            border-color: #bb86fc;
+        }
+        
+        .filter-dropdown-btn.active {
+            background: #bb86fc;
+            color: #000;
+            border-color: #bb86fc;
+        }
+        
+        .filter-dropdown-content {
+            display: none;
+            position: absolute;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: 5px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        
+        .filter-dropdown-content.show {
+            display: block;
+        }
+        
+        .filter-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin: 2px 0;
+            font-size: 14px;
+        }
+        
+        .filter-option:hover {
+            background: #333;
+        }
+        
+        .filter-option.selected {
+            background: #bb86fc;
+            color: #000;
+        }
+        
+        /* Bouton effacer filtres */
+        .clear-filters-btn {
+            grid-column: span 2;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .clear-filters-btn:hover {
+            background: #333;
+            border-color: #cf6679;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
-    <!-- [Tout le HTML reste identique] -->
     <div id="dashboard-page" class="page">
         <div class="header">
             <h1>📦 Gestion d'Inventaire</h1>
@@ -891,6 +1015,50 @@
                 <input type="text" class="search-input" id="advanced-search-input" placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie...">
             </div>
 
+            <!-- Nouveaux filtres avancés -->
+            <div class="advanced-filters">
+                <div class="filter-dropdown">
+                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('location')">
+                        📍 Lieux
+                    </button>
+                    <div class="filter-dropdown-content" id="location-filter-dropdown">
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="filter-dropdown">
+                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('famille')">
+                        📁 Familles
+                    </button>
+                    <div class="filter-dropdown-content" id="famille-filter-dropdown">
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="filter-dropdown">
+                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('categorie')">
+                        🏷️ Catégories
+                    </button>
+                    <div class="filter-dropdown-content" id="categorie-filter-dropdown">
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+                
+                <div class="filter-dropdown">
+                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('fournisseur')">
+                        🏢 Fournisseurs
+                    </button>
+                    <div class="filter-dropdown-content" id="fournisseur-filter-dropdown">
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+                
+                <button class="clear-filters-btn" onclick="clearAllFilters()">
+                    🗑️ Effacer tous les filtres
+                </button>
+            </div>
+
+            <!-- Filtres existants pour le stock -->
             <div class="filters">
                 <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
                     Tous
@@ -901,11 +1069,6 @@
                 <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
                     ❌ Rupture
                 </div>
-            </div>
-
-            <div class="detail-section">
-                <div class="section-title">📍 Filtrer par emplacement</div>
-                <div class="filters" id="search-location-filters"></div>
             </div>
 
             <div class="article-list" id="search-results">
@@ -1173,6 +1336,13 @@
         let currentStockAction = null;
         let html5QrCode = null;
         let isScannerActive = false;
+        
+        let currentFilters = {
+            location: null,
+            famille: null,
+            categorie: null,
+            fournisseur: null
+        };
 
         if (locations.length === 0) {
             locations = [
@@ -1355,6 +1525,16 @@
             const totalQty = Object.values(article.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
             const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
             const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
+            
+            const historyHtml = articleHistory.length > 0 ? articleHistory.map(h => `
+                <div class="history-item">
+                    <div class="history-icon">${getActionIcon(h.action)}</div>
+                    <div class="history-content">
+                        <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
+                        <div class="history-date">${formatDate(h.date)}</div>
+                    </div>
+                </div>
+            `).join('') : '<div style="text-align: center; padding: 20px; color: #888;">Aucun historique</div>';
 
             const detailHtml = `
                 <div class="detail-header">
@@ -1409,31 +1589,31 @@
 
                 <div class="detail-section">
                     <div class="section-title">⚡ Actions rapides</div>
-                    <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
-                    <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
-                    <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
-                    <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
+                        <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
+                        <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
+                        <button class="btn-secondary history-btn" onclick="toggleHistory()">📜 Historique</button>
+                        <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+                    </div>
                 </div>
 
-                ${articleHistory.length > 0 ? `
-                <div class="detail-section">
-                    <div class="section-title">📜 Historique</div>
-                    ${articleHistory.map(h => `
-                        <div class="history-item">
-                            <div class="history-icon">${getActionIcon(h.action)}</div>
-                            <div class="history-content">
-                                <div class="history-action">${h.action} ${h.details ? '- ' + h.details : ''}</div>
-                                <div class="history-date">${formatDate(h.date)}</div>
-                            </div>
-                        </div>
-                    `).join('')}
+                <div class="history-container" id="article-history-container">
+                    <div class="detail-section">
+                        <div class="section-title">📜 Historique des modifications</div>
+                        ${historyHtml}
+                    </div>
                 </div>
-                ` : ''}
             `;
             
             // Afficher la page de détails sans toucher à la navigation
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
+        }
+        
+        function toggleHistory() {
+            const container = document.getElementById('article-history-container');
+            container.classList.toggle('expanded');
         }
 
         function showAddArticleModal() {
@@ -2099,8 +2279,11 @@
 
         function loadSearchPage() {
             const searchInput = document.getElementById('advanced-search-input');
-            searchInput.value = '';
-            searchInput.focus();
+            // NE PAS mettre le focus automatiquement pour éviter l'ouverture du clavier
+            // searchInput.focus();
+            
+            // Initialiser les filtres
+            initializeFilters();
             
             // Afficher l'état vide initial
             document.getElementById('search-results').innerHTML = `
@@ -2109,37 +2292,134 @@
                     <div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div>
                 </div>
             `;
+        }
+        
+        function initializeFilters() {
+            // Collecter toutes les valeurs uniques pour chaque filtre
+            const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
+            const categories = [...new Set(articles.map(a => a.categorie).filter(Boolean))];
+            const fournisseurs = [...new Set(articles.map(a => a.fournisseur).filter(Boolean))];
             
-            const filtersHtml = `
-                <div class="filter-chip active" data-location="all" onclick="filterSearchByLocation('all')">
-                    Tous les emplacements
+            // Remplir les dropdowns
+            fillFilterDropdown('famille', familles);
+            fillFilterDropdown('categorie', categories);
+            fillFilterDropdown('fournisseur', fournisseurs);
+            fillLocationFilterDropdown();
+        }
+        
+        function fillFilterDropdown(type, values) {
+            const dropdown = document.getElementById(`${type}-filter-dropdown`);
+            dropdown.innerHTML = values.map(value => `
+                <div class="filter-option" onclick="selectFilter('${type}', '${value}')">
+                    ${value}
                 </div>
-                ${locations.map(loc => `
-                    <div class="filter-chip" data-location="${loc.id}" onclick="filterSearchByLocation('${loc.id}')">
-                        ${loc.name}
-                    </div>
-                `).join('')}
-            `;
-            document.getElementById('search-location-filters').innerHTML = filtersHtml;
+            `).join('');
+        }
+        
+        function fillLocationFilterDropdown() {
+            const dropdown = document.getElementById('location-filter-dropdown');
+            dropdown.innerHTML = locations.map(loc => `
+                <div class="filter-option" onclick="selectFilter('location', '${loc.id}')">
+                    ${loc.name}
+                </div>
+            `).join('');
+        }
+        
+        function toggleFilterDropdown(type) {
+            // Fermer tous les autres dropdowns
+            document.querySelectorAll('.filter-dropdown-content').forEach(d => {
+                d.classList.remove('show');
+            });
+            
+            // Basculer l'état actuel
+            const dropdown = document.getElementById(`${type}-filter-dropdown`);
+            dropdown.classList.toggle('show');
+            
+            // Fermer en cliquant à l'extérieur
+            setTimeout(() => {
+                document.addEventListener('click', function closeDropdown(e) {
+                    if (!dropdown.contains(e.target) && 
+                        !e.target.closest(`.filter-dropdown-btn[onclick*="${type}"]`)) {
+                        dropdown.classList.remove('show');
+                        document.removeEventListener('click', closeDropdown);
+                    }
+                });
+            }, 10);
+        }
+        
+        function selectFilter(type, value) {
+            currentFilters[type] = currentFilters[type] === value ? null : value;
+            
+            // Mettre à jour l'apparence du bouton
+            const btn = document.querySelector(`.filter-dropdown-btn[onclick*="${type}"]`);
+            if (currentFilters[type]) {
+                btn.classList.add('active');
+                // Ajouter un indicateur visuel
+                btn.innerHTML = `${getFilterIcon(type)} ${getFilterDisplayName(type, value)}`;
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = `${getFilterIcon(type)} ${getFilterLabel(type)}`;
+            }
+            
+            // Fermer le dropdown
+            document.getElementById(`${type}-filter-dropdown`).classList.remove('show');
+            
+            // Lancer la recherche
+            performAdvancedSearch();
+        }
+        
+        function getFilterIcon(type) {
+            const icons = {
+                location: '📍',
+                famille: '📁',
+                categorie: '🏷️',
+                fournisseur: '🏢'
+            };
+            return icons[type] || '🔍';
+        }
+        
+        function getFilterLabel(type) {
+            const labels = {
+                location: 'Lieux',
+                famille: 'Familles',
+                categorie: 'Catégories',
+                fournisseur: 'Fournisseurs'
+            };
+            return labels[type] || 'Filtre';
+        }
+        
+        function getFilterDisplayName(type, value) {
+            if (type === 'location') {
+                const loc = locations.find(l => l.id.toString() === value);
+                return loc ? loc.name.substring(0, 10) + (loc.name.length > 10 ? '...' : '') : value;
+            }
+            return value.length > 12 ? value.substring(0, 10) + '...' : value;
+        }
+        
+        function clearAllFilters() {
+            currentFilters = {
+                location: null,
+                famille: null,
+                categorie: null,
+                fournisseur: null
+            };
+            
+            // Réinitialiser les boutons
+            document.querySelectorAll('.filter-dropdown-btn').forEach(btn => {
+                btn.classList.remove('active');
+                const type = btn.onclick.toString().match(/'(\w+)'/)[1];
+                btn.innerHTML = `${getFilterIcon(type)} ${getFilterLabel(type)}`;
+            });
+            
+            performAdvancedSearch();
         }
 
         function performAdvancedSearch() {
             const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
             const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
-            const activeLocation = document.querySelector('#search-page .filter-chip[data-location].active')?.dataset.location;
-            
-            // Si aucune recherche n'a été effectuée, afficher l'état vide
-            if (!searchTerm && (!activeFilter || activeFilter === 'all') && (!activeLocation || activeLocation === 'all')) {
-                document.getElementById('search-results').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🔍</div>
-                        <div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div>
-                    </div>
-                `;
-                return;
-            }
             
             let filtered = articles.filter(art => {
+                // Filtre par recherche texte
                 const matchesText = 
                     art.name.toLowerCase().includes(searchTerm) ||
                     (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
@@ -2149,6 +2429,7 @@
                 
                 if (!matchesText) return false;
                 
+                // Filtre par stock
                 const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
                 
                 if (activeFilter === 'low') {
@@ -2157,9 +2438,19 @@
                     if (totalQty > 0) return false;
                 }
                 
-                if (activeLocation && activeLocation !== 'all') {
-                    if (!art.quantities || !art.quantities[activeLocation]) return false;
+                // Filtre par lieu
+                if (currentFilters.location) {
+                    if (!art.quantities || !art.quantities[currentFilters.location]) return false;
                 }
+                
+                // Filtre par famille
+                if (currentFilters.famille && art.famille !== currentFilters.famille) return false;
+                
+                // Filtre par catégorie
+                if (currentFilters.categorie && art.categorie !== currentFilters.categorie) return false;
+                
+                // Filtre par fournisseur
+                if (currentFilters.fournisseur && art.fournisseur !== currentFilters.fournisseur) return false;
                 
                 return true;
             });
