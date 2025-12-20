@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#bb86fc">
     <link rel="apple-touch-icon" href="icon-192.png">
     <title>Gestion d'Inventaire</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -756,25 +757,6 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
         
-        /* Styles pour les codes-barres */
-        .barcode-section {
-            margin-top: 10px;
-            text-align: center;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-        
-        .barcode-number {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #000 !important;
-            margin-top: 5px;
-        }
-        
         /* Supprimer les styles qui désactivent les icônes */
         .nav-item.detail-page-active {
             background: transparent;
@@ -949,6 +931,92 @@
             gap: 8px;
             margin-top: 8px;
         }
+        
+        /* Styles pour la génération de codes-barres */
+        .barcode-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .barcode-item {
+            background: #1e1e1e;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        
+        .barcode-info {
+            margin-bottom: 12px;
+        }
+        
+        .barcode-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+        
+        .barcode-code {
+            font-size: 13px;
+            color: #888;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 8px;
+        }
+        
+        .barcode-svg-container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+        }
+        
+        .barcode-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .print-controls {
+            background: #1e1e1e;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            margin-bottom: 16px;
+        }
+        
+        .print-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .print-option {
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #333;
+            transition: all 0.3s;
+        }
+        
+        .print-option:hover {
+            background: #333;
+            border-color: #bb86fc;
+        }
+        
+        .print-option.active {
+            background: #bb86fc;
+            border-color: #bb86fc;
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -1119,6 +1187,52 @@
         <button class="fab" onclick="showAddLocationModal()">+</button>
     </div>
 
+    <!-- NOUVELLE PAGE POUR LA GÉNÉRATION DE CODES-BARRES -->
+    <div id="barcode-page" class="page hidden">
+        <div class="header">
+            <h1>🏷️ Génération Codes-barres</h1>
+            <div class="header-subtitle">Créer et imprimer des codes-barres</div>
+        </div>
+        <div class="container">
+            <div class="print-controls">
+                <div class="section-title">Options de génération</div>
+                <div class="print-options">
+                    <div class="print-option active" onclick="setBarcodeFormat('CODE128')">
+                        <div style="font-size: 24px;">📏</div>
+                        <div style="font-size: 12px;">CODE128</div>
+                        <div style="font-size: 10px; color: #888;">Standard</div>
+                    </div>
+                    <div class="print-option" onclick="setBarcodeFormat('EAN13')">
+                        <div style="font-size: 24px;">🛒</div>
+                        <div style="font-size: 12px;">EAN13</div>
+                        <div style="font-size: 10px; color: #888;">Commerce</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Filtrer par famille</label>
+                    <select class="form-select" id="barcode-famille-filter" onchange="generateBarcodes()">
+                        <option value="">Toutes les familles</option>
+                    </select>
+                </div>
+                
+                <button class="btn-primary" onclick="generateBarcodes()">
+                    🏷️ Générer les codes-barres
+                </button>
+                <button class="btn-secondary" onclick="printBarcodes()" id="print-btn" style="display: none;">
+                    🖨️ Imprimer
+                </button>
+            </div>
+
+            <div id="barcode-list-container">
+                <div class="empty-state">
+                    <div class="empty-icon">🏷️</div>
+                    <div class="empty-text">Générez les codes-barres pour les articles</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="import-export-page" class="page hidden">
         <div class="header">
             <h1>📊 Import/Export</h1>
@@ -1134,7 +1248,6 @@
                 </div>
                 <button class="btn-primary" onclick="exportToExcel()">📧 Exporter et envoyer</button>
                 <button class="btn-secondary" onclick="downloadExcel()">💾 Télécharger Excel</button>
-                <button class="btn-secondary" onclick="printBarcodeLabels()">🏷️ Générer étiquettes codes-barres</button>
             </div>
 
             <div class="export-section">
@@ -1322,7 +1435,7 @@
         </div>
     </div>
 
-    <!-- NAVIGATION EN BAS - TOUJOURS VISIBLE -->
+    <!-- NAVIGATION EN BAS - AJOUT DU BOUTON CODES-BARRES -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="navigateTo('dashboard')">
             <div class="nav-icon">🏠</div>
@@ -1336,9 +1449,9 @@
             <div class="nav-icon">🔍</div>
             <div class="nav-label">Recherche</div>
         </div>
-        <div class="nav-item" onclick="navigateTo('locations')">
-            <div class="nav-icon">📍</div>
-            <div class="nav-label">Lieux</div>
+        <div class="nav-item" onclick="navigateTo('barcode')">
+            <div class="nav-icon">🏷️</div>
+            <div class="nav-label">Codes-barres</div>
         </div>
         <div class="nav-item" onclick="navigateTo('import-export')">
             <div class="nav-icon">📊</div>
@@ -1347,10 +1460,8 @@
     </nav>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Variables globales (SIMPLIFIÉES comme dans index_backup.html)
         let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
         let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
         let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
@@ -1358,6 +1469,7 @@
         let currentStockAction = null;
         let html5QrCode = null;
         let isScannerActive = false;
+        let currentBarcodeFormat = 'CODE128';
         
         let currentFilters = {
             location: null,
@@ -1366,7 +1478,6 @@
             fournisseur: null
         };
 
-        // Initialiser les emplacements par défaut si vide
         if (locations.length === 0) {
             locations = [
                 { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
@@ -1376,81 +1487,45 @@
             saveToStorage();
         }
 
-        // Fonction de navigation (SIMPLIFIÉE et TESTÉE)
         function navigateTo(page) {
-            console.log('Navigation vers:', page);
-            
-            // Arrêter le scanner si actif
-            if (isScannerActive && html5QrCode && page !== 'scan') {
-                try {
-                    html5QrCode.stop();
-                } catch(e) {
-                    console.log('Erreur arrêt scanner:', e);
-                }
-                isScannerActive = false;
-            }
+            console.log('Navigating to:', page);
             
             // Masquer toutes les pages
-            document.querySelectorAll('.page').forEach(p => {
-                p.classList.add('hidden');
-            });
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             
             // Afficher la page demandée
-            const pageElement = document.getElementById(`${page}-page`);
-            if (pageElement) {
-                pageElement.classList.remove('hidden');
-            } else {
-                console.error('Page non trouvée:', page);
-                return;
-            }
+            document.getElementById(`${page}-page`).classList.remove('hidden');
             
-            // Mettre à jour la navigation active
+            // Gérer la navigation - TOUJOURS ACTIVER LE BOUTON CORRESPONDANT
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // Pour la page détail, ne pas activer de navigation
-            if (page !== 'detail') {
-                // Activer l'élément de navigation correspondant
-                let navItem = null;
-                if (page === 'dashboard') navItem = document.querySelector('.nav-item[onclick*="dashboard"]');
-                else if (page === 'inventory') navItem = document.querySelector('.nav-item[onclick*="inventory"]');
-                else if (page === 'search') navItem = document.querySelector('.nav-item[onclick*="search"]');
-                else if (page === 'locations') navItem = document.querySelector('.nav-item[onclick*="locations"]');
-                else if (page === 'import-export') navItem = document.querySelector('.nav-item[onclick*="import-export"]');
-                
-                if (navItem) {
-                    navItem.classList.add('active');
-                }
+            // Activer le bouton correspondant à la page
+            if (page === 'detail') {
+                // Pour la page détail, activer l'inventaire car c'est de là qu'on vient
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (item.onclick && item.onclick.toString().includes(`navigateTo('inventory')`)) {
+                        item.classList.add('active');
+                    }
+                });
             } else {
-                // Pour la page détail, activer l'inventaire (page précédente)
-                document.querySelector('.nav-item[onclick*="inventory"]').classList.add('active');
+                // Page normale : activer le bouton correspondant
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
+                        item.classList.add('active');
+                    }
+                });
             }
             
-            // Charger les données de la page
-            switch(page) {
-                case 'dashboard':
-                    loadDashboard();
-                    break;
-                case 'inventory':
-                    loadInventory();
-                    break;
-                case 'scan':
-                    initScanner();
-                    break;
-                case 'search':
-                    loadSearchPage();
-                    break;
-                case 'locations':
-                    loadLocations();
-                    break;
-                case 'import-export':
-                    loadImportExport();
-                    break;
-                case 'detail':
-                    // La page détail est chargée par showArticleDetail
-                    break;
-            }
+            // Charger les données spécifiques à la page
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'inventory') loadInventory();
+            if (page === 'scan') initScanner();
+            if (page === 'search') loadSearchPage();
+            if (page === 'locations') loadLocations();
+            if (page === 'barcode') loadBarcodePage();
+            if (page === 'import-export') loadImportExport();
         }
 
         function saveToStorage() {
@@ -1496,21 +1571,18 @@
 
         function showLowStock() {
             navigateTo('search');
-            // Activer le filtre stock faible
-            setTimeout(() => {
-                document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
-                    chip.classList.remove('active');
-                    if (chip.dataset.filter === 'low') {
-                        chip.classList.add('active');
-                    }
-                });
-                performAdvancedSearch();
-            }, 100);
+            document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.dataset.filter === 'low') {
+                    chip.classList.add('active');
+                }
+            });
+            performAdvancedSearch();
         }
 
         function loadInventory() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const activeFilter = document.querySelector('#inventory-page .filter-chip.active')?.dataset?.location;
+            const activeFilter = document.querySelector('.filter-chip.active')?.dataset.location;
 
             let filtered = articles.filter(art => 
                 art.name.toLowerCase().includes(searchTerm) ||
@@ -1523,9 +1595,8 @@
                 filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
             }
 
-            // Trier par ordre alphabétique
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
-
+			filtered.sort((a, b) => a.name.localeCompare(b.name));
+			
             const filtersHtml = `
                 <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
                      data-location="all" onclick="filterByLocation('all')">
@@ -1559,7 +1630,7 @@
                         </div>
                         <div class="article-locations">
                             ${locs.map(([locId, qty]) => {
-                                const loc = locations.find(l => l.id.toString() === locId.toString());
+                                const loc = locations.find(l => l.id.toString() === locId);
                                 const total = qty.nombre * qty.conditionnement;
                                 return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
                             }).join('')}
@@ -1572,17 +1643,19 @@
         }
 
         function filterByLocation(locationId) {
-            document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => chip.classList.remove('active'));
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
             event.currentTarget.classList.add('active');
             loadInventory();
         }
 
         function showArticleDetail(articleId) {
+            console.log('showArticleDetail called with id:', articleId);
             currentArticleId = articleId;
-            const article = articles.find(a => a.id.toString() === articleId.toString());
+            const article = articles.find(a => a.id.toString() === articleId);
+            console.log('Article found:', article);
             
             if (!article) {
-                console.log('Article non trouvé!');
+                console.log('Article not found!');
                 return;
             }
 
@@ -1603,14 +1676,7 @@
             const detailHtml = `
                 <div class="detail-header">
                     <div class="detail-title">${article.name}${article.taille ? ' ' + article.taille : ''}${article.longueur ? ' ' + article.longueur : ''}</div>
-                    ${article.barcode ? `
-                        <div class="barcode-section">
-                            <svg id="barcode-svg-${article.id}" style="background: white; padding: 5px; border-radius: 8px; max-width: 100%; height: 60px;"></svg>
-                            <div class="barcode-number" style="text-align: center; font-family: monospace; font-size: 12px; margin-top: 4px; color: #000;">
-                                ${article.barcode}
-                            </div>
-                        </div>
-                    ` : ''}
+                    ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
                 </div>
 
                 <div class="detail-section">
@@ -1647,7 +1713,7 @@
                 <div class="detail-section">
                     <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
                     ${locs.map(([locId, qty]) => {
-                        const loc = locations.find(l => l.id.toString() === locId.toString());
+                        const loc = locations.find(l => l.id.toString() === locId);
                         const total = qty.nombre * qty.conditionnement;
                         return loc ? `
                             <div class="location-item">
@@ -1677,35 +1743,14 @@
                 </div>
             `;
             
-            // Afficher la page de détails
+            // Afficher la page de détails sans toucher à la navigation
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
-            
-            // Générer le code-barre après avoir inséré le HTML
-            if (article.barcode) {
-                setTimeout(() => {
-                    try {
-                        JsBarcode(`#barcode-svg-${article.id}`, article.barcode, {
-                            format: "CODE128",
-                            width: 1.5,
-                            height: 40,
-                            displayValue: false,
-                            background: "#ffffff",
-                            lineColor: "#000000",
-                            margin: 5
-                        });
-                    } catch (error) {
-                        console.error('Erreur génération code-barre:', error);
-                    }
-                }, 100);
-            }
         }
         
         function toggleHistory() {
             const container = document.getElementById('article-history-container');
-            if (container) {
-                container.classList.toggle('expanded');
-            }
+            container.classList.toggle('expanded');
         }
 
         function showAddArticleModal() {
@@ -1720,7 +1765,7 @@
         }
 
         function showEditArticleModal(articleId) {
-            const article = articles.find(a => a.id.toString() === articleId.toString());
+            const article = articles.find(a => a.id.toString() === articleId);
             if (!article) return;
             
             document.getElementById('edit-article-id').value = article.id;
@@ -1740,7 +1785,7 @@
             event.preventDefault();
             
             const articleId = document.getElementById('edit-article-id').value;
-            const article = articles.find(a => a.id.toString() === articleId.toString());
+            const article = articles.find(a => a.id.toString() === articleId);
             
             if (!article) return;
             
@@ -1754,9 +1799,10 @@
             article.conditionnement = parseInt(document.getElementById('edit-article-conditionnement').value);
             article.fournisseur = document.getElementById('edit-article-fournisseur').value.trim();
             
-            // Mettre à jour les quantités existantes
+            // Mettre à jour les quantités existantes avec le nouveau conditionnement
             Object.keys(article.quantities || {}).forEach(locId => {
                 if (article.quantities[locId]) {
+                    // Conserver le nombre de paquets, mais mettre à jour le conditionnement
                     article.quantities[locId].conditionnement = article.conditionnement;
                 }
             });
@@ -1767,6 +1813,10 @@
             
             // Recharger la vue détail
             showArticleDetail(articleId);
+            
+            // Recharger l'inventaire et le dashboard
+            loadInventory();
+            loadDashboard();
         }
 
         function showAddLocationModal() {
@@ -1774,12 +1824,12 @@
         }
 
         function showMoveArticleModal() {
-            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
+            const article = articles.find(a => a.id.toString() === currentArticleId);
             if (!article) return;
 
             const availableLocations = Object.entries(article.quantities || {})
                 .filter(([_, q]) => q.nombre > 0)
-                .map(([locId]) => locations.find(l => l.id.toString() === locId.toString()))
+                .map(([locId]) => locations.find(l => l.id.toString() === locId))
                 .filter(Boolean);
 
             document.getElementById('move-from').innerHTML = availableLocations.map(loc => {
@@ -1796,7 +1846,7 @@
 
         function showStockActionModal(action) {
             currentStockAction = action;
-            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
+            const article = articles.find(a => a.id.toString() === currentArticleId);
             if (!article) return;
 
             document.getElementById('stock-action-title').textContent = 
@@ -1806,10 +1856,10 @@
 
             const availableLocations = action === 'remove' 
                 ? Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0)
-                : locations.map(l => [l.id, 0]);
+                : locations.map(l => [l.id.toString(), 0]);
 
             document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
-                const loc = locations.find(l => l.id.toString() === locId.toString());
+                const loc = locations.find(l => l.id.toString() === locId);
                 const qty = article.quantities?.[locId];
                 return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' && qty ? ` (${qty.nombre} × ${qty.conditionnement})` : ''}</option>` : '';
             }).join('');
@@ -1836,12 +1886,14 @@
             const locationId = document.getElementById('article-location').value;
             const nombre = parseInt(document.getElementById('article-nombre').value);
 
-            // Vérifier si un article similaire existe
+            // Vérifier si un article similaire existe déjà (sans tenir compte du code-barre s'il est vide)
             let existingArticle = null;
             
             if (barcode) {
+                // Si un code-barre est fourni, chercher par code-barre
                 existingArticle = articles.find(a => a.barcode === barcode);
             } else {
+                // Sinon, chercher par les autres caractéristiques
                 existingArticle = articles.find(a => 
                     a.name.toLowerCase() === name.toLowerCase() &&
                     a.famille === famille &&
@@ -1854,7 +1906,7 @@
             }
 
             if (existingArticle) {
-                // Article existant trouvé
+                // Article existant trouvé, ajouter la quantité
                 if (!existingArticle.quantities) existingArticle.quantities = {};
                 
                 if (existingArticle.quantities[locationId]) {
@@ -1863,13 +1915,14 @@
                     existingArticle.quantities[locationId] = { nombre, conditionnement };
                 }
 
+                // Mettre à jour le code-barre si fourni et différent
                 if (barcode && existingArticle.barcode !== barcode) {
                     existingArticle.barcode = barcode;
                 }
 
                 addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
             } else {
-                // Nouvel article
+                // Créer un nouvel article
                 const article = {
                     id: Date.now(),
                     name,
@@ -1917,7 +1970,7 @@
         function moveArticle(event) {
             event.preventDefault();
             
-            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
+            const article = articles.find(a => a.id.toString() === currentArticleId);
             if (!article) return;
 
             const fromId = document.getElementById('move-from').value;
@@ -1956,7 +2009,7 @@
         function performStockAction(event) {
             event.preventDefault();
             
-            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
+            const article = articles.find(a => a.id.toString() === currentArticleId);
             if (!article) return;
 
             const locationId = document.getElementById('stock-location').value;
@@ -1988,8 +2041,8 @@
         function deleteArticle(articleId) {
             if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
             
-            const article = articles.find(a => a.id.toString() === articleId.toString());
-            articles = articles.filter(a => a.id.toString() !== articleId.toString());
+            const article = articles.find(a => a.id.toString() === articleId);
+            articles = articles.filter(a => a.id.toString() !== articleId);
             
             saveToStorage();
             addHistory('Suppression', article.name);
@@ -2023,21 +2076,17 @@
 
         function showLocationInventory(locationId) {
             navigateTo('inventory');
-            setTimeout(() => {
-                document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => {
-                    if (chip.dataset.location === locationId) {
-                        chip.classList.add('active');
-                    } else {
-                        chip.classList.remove('active');
-                    }
-                });
-                loadInventory();
-            }, 100);
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                if (chip.dataset.location === locationId) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            });
+            loadInventory();
         }
 
         function deleteLocation(locationId) {
-            event.stopPropagation();
-            
             const hasArticles = articles.some(art => 
                 art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
             );
@@ -2049,24 +2098,24 @@
 
             if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) return;
 
-            locations = locations.filter(l => l.id.toString() !== locationId.toString());
+            locations = locations.filter(l => l.id.toString() !== locationId);
             saveToStorage();
             loadLocations();
             loadDashboard();
         }
 
         function initScanner() {
-            console.log('Initialisation scanner...');
+            console.log('Initializing scanner...');
             
             if (html5QrCode) {
                 try {
                     html5QrCode.clear();
                 } catch (e) {
-                    console.log('Erreur nettoyage scanner:', e);
+                    console.log('Error clearing scanner:', e);
                 }
             }
             
-            // Nettoyer le conteneur
+            // Nettoyer le conteneur du scanner
             document.getElementById('scanner-reader').innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
             
             html5QrCode = new Html5QrcodeScanner(
@@ -2084,21 +2133,27 @@
                 (decodedText) => {
                     console.log('Code scanné:', decodedText);
                     
+                    // Mettre en pause le scanner
                     html5QrCode.pause();
                     
+                    // Mettre le code dans le champ manuel
                     document.getElementById('manual-barcode').value = decodedText;
                     
+                    // Rechercher l'article
                     const article = articles.find(a => a.barcode === decodedText);
                     
                     if (article) {
                         console.log('Article trouvé:', article);
-                        showArticleDetail(article.id);
+                        // Afficher les détails de l'article
+                        showArticleDetail(article.id.toString());
                     } else {
                         console.log('Article non trouvé');
+                        // Afficher le modal de création
                         showAddArticleModal();
                         document.getElementById('article-barcode').value = decodedText;
                         document.getElementById('article-name').focus();
                         
+                        // Afficher un message
                         document.getElementById('scan-result').innerHTML = `
                             <div class="detail-section">
                                 <div class="section-title">❌ Article non trouvé</div>
@@ -2111,7 +2166,7 @@
                     }
                 },
                 (errorMessage) => {
-                    console.log('Erreur scanner:', errorMessage);
+                    console.log('Scanner error:', errorMessage);
                 }
             );
             
@@ -2122,18 +2177,21 @@
             const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
             if (!scannedBarcode) return;
 
-            console.log('Recherche manuelle:', scannedBarcode);
+            console.log('Recherche manuelle de code-barre:', scannedBarcode);
             const article = articles.find(a => a.barcode === scannedBarcode);
             
             if (article) {
-                console.log('Article trouvé:', article);
-                showArticleDetail(article.id);
+                console.log('Article trouvé (manuel):', article);
+                // Afficher les détails de l'article
+                showArticleDetail(article.id.toString());
             } else {
-                console.log('Article non trouvé');
+                console.log('Article non trouvé (manuel)');
+                // Afficher le modal de création
                 showAddArticleModal();
                 document.getElementById('article-barcode').value = scannedBarcode;
                 document.getElementById('article-name').focus();
                 
+                // Afficher un message
                 if (!barcode) {
                     document.getElementById('scan-result').innerHTML = `
                         <div class="detail-section">
@@ -2165,13 +2223,8 @@
         }
 
         function downloadExcel() {
-            // Tri par nom
             const sortedArticles = [...articles].sort((a, b) => {
-                const nameCompare = a.name.localeCompare(b.name);
-                if (nameCompare !== 0) return nameCompare;
-                
                 if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
-                
                 return a.categorie.localeCompare(b.categorie);
             });
 
@@ -2189,164 +2242,31 @@
                 }
 
                 Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
-                    const loc = locations.find(l => l.id.toString() === locId.toString());
+                    const loc = locations.find(l => l.id.toString() === locId);
                     const total = qty.nombre * qty.conditionnement;
 
                     data.push({
                         'Nom': art.name,
                         'Code-barre': art.barcode || '',
-                        'Taille': art.taille || '',
-                        'Longueur': art.longueur || '',
                         'Famille': art.famille || '',
                         'Catégorie': art.categorie || '',
+                        'Taille': art.taille || '',
+                        'Longueur': art.longueur || '',
                         'Conditionnement': art.conditionnement || '',
-                        'Nombre paquets': qty.nombre,
-                        'Total unités': total,
+                        'Nombre': qty.nombre,
+                        'Total': total,
                         'Fournisseur': art.fournisseur || '',
-                        'Lieu': loc ? loc.name : '',
-                        'Emplacement détaillé': loc ? `${loc.name}${loc.description ? ' - ' + loc.description : ''}` : ''
+                        'Lieu': loc ? loc.name : ''
                     });
                 });
             });
 
-            // Onglet pour étiquettes
-            const labelData = sortedArticles
-                .filter(art => art.barcode)
-                .map(art => ({
-                    'Nom': art.name,
-                    'Code-barre': art.barcode,
-                    'Taille': art.taille || '',
-                    'Longueur': art.longueur || '',
-                    'Famille': art.famille || '',
-                    'Catégorie': art.categorie || '',
-                    'Conditionnement': art.conditionnement || '',
-                    'Fournisseur': art.fournisseur || '',
-                    'Instructions': 'Imprimer sur des étiquettes code-barre 50x25mm'
-                }));
-
-            const ws1 = XLSX.utils.json_to_sheet(data);
-            const ws2 = XLSX.utils.json_to_sheet(labelData);
+            const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            
-            XLSX.utils.book_append_sheet(wb, ws1, "Inventaire");
-            XLSX.utils.book_append_sheet(wb, ws2, "Étiquettes Codes-barres");
-            
-            const wscols = [
-                {wch: 25}, {wch: 20}, {wch: 10}, {wch: 10},
-                {wch: 15}, {wch: 15}, {wch: 15}, {wch: 12},
-                {wch: 12}, {wch: 15}, {wch: 20}, {wch: 25}
-            ];
-            ws1['!cols'] = wscols;
+            XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
             
             const fileName = `inventaire_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
-        }
-
-        function printBarcodeLabels() {
-            const articlesWithBarcode = articles.filter(art => art.barcode);
-            
-            if (articlesWithBarcode.length === 0) {
-                alert('Aucun article avec code-barre à imprimer');
-                return;
-            }
-            
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Étiquettes Codes-barres</title>
-                    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            margin: 20px;
-                        }
-                        .label-sheet {
-                            display: grid;
-                            grid-template-columns: repeat(3, 1fr);
-                            gap: 10px;
-                            margin-bottom: 20px;
-                        }
-                        .label {
-                            border: 1px dashed #ccc;
-                            padding: 10px;
-                            text-align: center;
-                            page-break-inside: avoid;
-                        }
-                        .label-name {
-                            font-size: 12px;
-                            font-weight: bold;
-                            margin-bottom: 5px;
-                        }
-                        .label-details {
-                            font-size: 10px;
-                            color: #666;
-                            margin-bottom: 5px;
-                        }
-                        .barcode-container {
-                            margin: 5px 0;
-                        }
-                        .barcode-number {
-                            font-family: monospace;
-                            font-size: 10px;
-                            margin-top: 2px;
-                        }
-                        @media print {
-                            .label {
-                                border: 1px solid #000;
-                            }
-                            .no-print {
-                                display: none;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1 class="no-print">Étiquettes Codes-barres</h1>
-                    <p class="no-print">${articlesWithBarcode.length} étiquette(s) à imprimer</p>
-                    <button class="no-print" onclick="window.print()">🖨️ Imprimer</button>
-                    <button class="no-print" onclick="window.close()">✖️ Fermer</button>
-                    
-                    <div class="label-sheet">
-                        ${articlesWithBarcode.map(art => `
-                            <div class="label">
-                                <div class="label-name">${art.name}${art.taille ? ' ' + art.taille : ''}${art.longueur ? ' ' + art.longueur : ''}</div>
-                                <div class="label-details">
-                                    ${art.famille ? art.famille + ' / ' + art.categorie : ''}
-                                </div>
-                                <div class="barcode-container">
-                                    <svg id="barcode-${art.id}" style="width: 100%; height: 40px;"></svg>
-                                </div>
-                                <div class="barcode-number">${art.barcode}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <script>
-                        ${articlesWithBarcode.map(art => `
-                            setTimeout(() => {
-                                try {
-                                    JsBarcode("#barcode-${art.id}", "${art.barcode}", {
-                                        format: "CODE128",
-                                        width: 1.2,
-                                        height: 30,
-                                        displayValue: false,
-                                        background: "#ffffff",
-                                        lineColor: "#000000",
-                                        margin: 2
-                                    });
-                                } catch(e) {
-                                    console.error("Erreur code-barre ${art.barcode}:", e);
-                                }
-                            }, 100);
-                        `).join('')}
-                    </script>
-                </body>
-                </html>
-            `);
-            
-            printWindow.document.close();
         }
 
         function importFromExcel(event) {
@@ -2386,7 +2306,7 @@
                             }
                         } else {
                             article = {
-                                id: Date.now(),
+                                id: Date.now() + Math.random(),
                                 name,
                                 barcode: row['Code-barre'] || '',
                                 famille: row['Famille'] || '',
@@ -2496,6 +2416,8 @@
 
         function loadSearchPage() {
             const searchInput = document.getElementById('advanced-search-input');
+            // NE PAS mettre le focus automatiquement pour éviter l'ouverture du clavier
+            // searchInput.focus();
             
             // Initialiser les filtres
             initializeFilters();
@@ -2510,7 +2432,7 @@
         }
         
         function initializeFilters() {
-            // Collecter toutes les valeurs uniques
+            // Collecter toutes les valeurs uniques pour chaque filtre
             const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
             const categories = [...new Set(articles.map(a => a.categorie).filter(Boolean))];
             const fournisseurs = [...new Set(articles.map(a => a.fournisseur).filter(Boolean))];
@@ -2525,7 +2447,7 @@
         function fillFilterDropdown(type, values) {
             const dropdown = document.getElementById(`${type}-filter-dropdown`);
             dropdown.innerHTML = values.map(value => `
-                <div class="filter-option" onclick="selectFilter('${type}', '${value.replace(/'/g, "\\'")}')">
+                <div class="filter-option" onclick="selectFilter('${type}', '${value}')">
                     ${value}
                 </div>
             `).join('');
@@ -2569,6 +2491,7 @@
             const btn = document.querySelector(`.filter-dropdown-btn[onclick*="${type}"]`);
             if (currentFilters[type]) {
                 btn.classList.add('active');
+                // Ajouter un indicateur visuel
                 btn.innerHTML = `${getFilterIcon(type)} ${getFilterDisplayName(type, value)}`;
             } else {
                 btn.classList.remove('active');
@@ -2630,7 +2553,7 @@
 
         function performAdvancedSearch() {
             const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
-            const activeFilter = document.querySelector('#search-page .filter-chip.active')?.dataset.filter;
+            const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
             
             let filtered = articles.filter(art => {
                 // Filtre par recherche texte
@@ -2668,9 +2591,9 @@
                 
                 return true;
             });
-            
-            // Trier par ordre alphabétique
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
+			
+			  // Trier par ordre alphabétique
+				filtered.sort((a, b) => a.name.localeCompare(b.name));
             
             displaySearchResults(filtered);
         }
@@ -2712,7 +2635,7 @@
                         </div>
                         <div class="article-locations">
                             ${locs.map(([locId, qty]) => {
-                                const loc = locations.find(l => l.id.toString() === locId.toString());
+                                const loc = locations.find(l => l.id.toString() === locId);
                                 const total = qty.nombre * qty.conditionnement;
                                 return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
                             }).join('')}
@@ -2732,13 +2655,211 @@
             performAdvancedSearch();
         }
 
+        function filterSearchByLocation(locationId) {
+            document.querySelectorAll('#search-page .filter-chip[data-location]').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            performAdvancedSearch();
+        }
+
         function loadImportExport() {
             // Fonction vide, déjà définie
         }
+        
+        // NOUVELLES FONCTIONS POUR LA GÉNÉRATION DE CODES-BARRES
+        function loadBarcodePage() {
+            // Remplir le filtre par famille
+            const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
+            const select = document.getElementById('barcode-famille-filter');
+            select.innerHTML = '<option value="">Toutes les familles</option>' +
+                familles.map(f => `<option value="${f}">${f}</option>`).join('');
+            
+            // Initialiser l'état vide
+            document.getElementById('barcode-list-container').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🏷️</div>
+                    <div class="empty-text">Générez les codes-barres pour les articles</div>
+                </div>
+            `;
+        }
+        
+        function setBarcodeFormat(format) {
+            currentBarcodeFormat = format;
+            document.querySelectorAll('.print-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+        
+        function generateBarcodes() {
+            const familleFilter = document.getElementById('barcode-famille-filter').value;
+            
+            // Filtrer les articles
+            let filtered = articles.filter(art => {
+                // Filtre par famille
+                if (familleFilter && art.famille !== familleFilter) return false;
+                // Uniquement les articles avec code-barres
+                if (!art.barcode || art.barcode.trim() === '') return false;
+                return true;
+            });
+            
+            if (filtered.length === 0) {
+                document.getElementById('barcode-list-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🏷️</div>
+                        <div class="empty-text">Aucun article avec code-barres trouvé</div>
+                    </div>
+                `;
+                document.getElementById('print-btn').style.display = 'none';
+                return;
+            }
+            
+            // Trier par nom
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Générer le HTML
+            let html = '<div class="barcode-container">';
+            
+            filtered.forEach((art, index) => {
+                html += `
+                    <div class="barcode-item" id="barcode-item-${index}">
+                        <div class="barcode-info">
+                            <div class="barcode-name">${art.name}${art.taille ? ' ' + art.taille : ''}${art.longueur ? ' ' + art.longueur : ''}</div>
+                            <div class="barcode-code">${art.barcode}</div>
+                            ${art.famille ? `<div style="font-size: 12px; color: #888;">Famille: ${art.famille} / ${art.categorie}</div>` : ''}
+                        </div>
+                        <div class="barcode-svg-container">
+                            <svg id="barcode-${index}" class="barcode-svg"></svg>
+                        </div>
+                        <div class="barcode-actions">
+                            <button class="btn-secondary" style="flex: 1;" onclick="downloadSingleBarcode(${index})">
+                                💾 Télécharger
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            document.getElementById('barcode-list-container').innerHTML = html;
+            document.getElementById('print-btn').style.display = 'block';
+            
+            // Générer les codes-barres avec JsBarcode
+            setTimeout(() => {
+                filtered.forEach((art, index) => {
+                    try {
+                        JsBarcode(`#barcode-${index}`, art.barcode, {
+                            format: currentBarcodeFormat,
+                            width: 2,
+                            height: 80,
+                            displayValue: true,
+                            fontSize: 16,
+                            background: "#ffffff",
+                            lineColor: "#000000",
+                            margin: 10
+                        });
+                    } catch (error) {
+                        console.error(`Erreur génération code-barre pour ${art.name}:`, error);
+                    }
+                });
+            }, 100);
+        }
+        
+        function downloadSingleBarcode(index) {
+            const svgElement = document.getElementById(`barcode-${index}`);
+            if (!svgElement) return;
+            
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = `codebarre_${index}.png`;
+                downloadLink.click();
+            };
+            
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        }
+        
+        function printBarcodes() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Imprimer codes-barres</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                margin: 20px; 
+                            }
+                            .barcode-print-item {
+                                page-break-inside: avoid;
+                                margin-bottom: 20px;
+                                padding: 10px;
+                                border: 1px solid #ccc;
+                                text-align: center;
+                            }
+                            .barcode-name {
+                                font-size: 14px;
+                                font-weight: bold;
+                                margin-bottom: 5px;
+                            }
+                            .barcode-code {
+                                font-size: 12px;
+                                color: #666;
+                                margin-bottom: 10px;
+                            }
+                            @media print {
+                                .barcode-print-item {
+                                    border: none;
+                                    margin-bottom: 30px;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Catalogue de codes-barres</h2>
+            `);
+            
+            const barcodeItems = document.querySelectorAll('.barcode-item');
+            barcodeItems.forEach((item, index) => {
+                const svgElement = item.querySelector('svg');
+                if (svgElement) {
+                    const svgData = new XMLSerializer().serializeToString(svgElement);
+                    const name = item.querySelector('.barcode-name').textContent;
+                    const code = item.querySelector('.barcode-code').textContent;
+                    
+                    printWindow.document.write(`
+                        <div class="barcode-print-item">
+                            <div class="barcode-name">${name}</div>
+                            <div class="barcode-code">${code}</div>
+                            <img src="data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}" 
+                                 style="max-width: 100%; height: auto;">
+                        </div>
+                    `);
+                }
+            });
+            
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+            
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
+        }
 
-        // Initialisation au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser les événements
+        document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('search-input');
             if (searchInput) {
                 searchInput.addEventListener('input', loadInventory);
@@ -2749,12 +2870,23 @@
                 advancedSearchInput.addEventListener('input', performAdvancedSearch);
             }
             
-            // Charger le dashboard au démarrage
-            loadDashboard();
+            // Initialiser les valeurs par défaut dans le modal d'ajout
+            const addArticleModal = document.getElementById('add-article-modal');
+            if (addArticleModal) {
+                // Les valeurs sont déjà préremplies dans le HTML
+            }
         });
 
-        // Initialiser la navigation
-        navigateTo('dashboard');
+        loadDashboard();
     </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.error('Service Worker error:', err));
+        }
+    </script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
