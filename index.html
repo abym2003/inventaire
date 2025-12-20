@@ -1069,13 +1069,13 @@
 
             <!-- Filtres existants pour le stock -->
             <div class="filters">
-                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all', event)">
+                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
                     Tous
                 </div>
-                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low', event)">
+                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
                     ⚠️ Stock faible
                 </div>
-                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero', event)">
+                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
                     ❌ Rupture
                 </div>
             </div>
@@ -1340,6 +1340,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        // Variables globales
         let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
         let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
         let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
@@ -1355,30 +1356,37 @@
             fournisseur: null
         };
 
+        // Initialiser les emplacements par défaut si vide
         if (locations.length === 0) {
             locations = [
-                { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
-                { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
-                { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
+                { id: '1', name: 'Entrepôt principal', description: 'Stockage principal' },
+                { id: '2', name: 'Bureau', description: 'Petit matériel de bureau' },
+                { id: '3', name: 'Atelier', description: 'Outils et équipements' }
             ];
             saveToStorage();
         }
 
+        // Fonction de navigation principale
         function navigateTo(page) {
-            console.log('Navigating to:', page);
+            console.log('Navigation vers:', page);
             
-            // Arrêter le scanner si on quitte la page scan
+            // Arrêter le scanner si actif
             if (isScannerActive && page !== 'scan') {
                 stopScanner();
             }
             
             // Masquer toutes les pages
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.add('hidden');
+            });
             
             // Afficher la page demandée
-            const pageElement = document.getElementById(`${page}-page`);
+            const pageElement = document.getElementById(page + '-page');
             if (pageElement) {
                 pageElement.classList.remove('hidden');
+            } else {
+                console.error('Page non trouvée:', page);
+                return;
             }
             
             // Mettre à jour la navigation active
@@ -1386,21 +1394,42 @@
                 item.classList.remove('active');
             });
             
-            // Activer le bon élément de navigation
-            if (page === 'detail') {
-                // Garder l'inventaire actif pour la page détail
-                document.querySelector('.nav-item[onclick*="inventory"]')?.classList.add('active');
-            } else {
-                document.querySelector(`.nav-item[onclick*="${page}"]`)?.classList.add('active');
+            // Activer l'élément de navigation correspondant
+            let navItem;
+            if (page === 'dashboard') navItem = document.querySelector('.nav-item[onclick*="dashboard"]');
+            else if (page === 'inventory') navItem = document.querySelector('.nav-item[onclick*="inventory"]');
+            else if (page === 'search') navItem = document.querySelector('.nav-item[onclick*="search"]');
+            else if (page === 'locations') navItem = document.querySelector('.nav-item[onclick*="locations"]');
+            else if (page === 'import-export') navItem = document.querySelector('.nav-item[onclick*="import-export"]');
+            
+            if (navItem) {
+                navItem.classList.add('active');
             }
             
-            // Charger les données spécifiques à la page
-            if (page === 'dashboard') loadDashboard();
-            if (page === 'inventory') loadInventory();
-            if (page === 'scan') initScanner();
-            if (page === 'search') loadSearchPage();
-            if (page === 'locations') loadLocations();
-            if (page === 'import-export') loadImportExport();
+            // Charger les données de la page
+            switch(page) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'inventory':
+                    loadInventory();
+                    break;
+                case 'scan':
+                    initScanner();
+                    break;
+                case 'search':
+                    loadSearchPage();
+                    break;
+                case 'locations':
+                    loadLocations();
+                    break;
+                case 'import-export':
+                    loadImportExport();
+                    break;
+                case 'detail':
+                    // La page détail est chargée par showArticleDetail
+                    break;
+            }
         }
 
         function stopScanner() {
@@ -1409,7 +1438,7 @@
                     html5QrCode.stop();
                     html5QrCode = null;
                 } catch (e) {
-                    console.log('Error stopping scanner:', e);
+                    console.log('Erreur arrêt scanner:', e);
                 }
             }
             isScannerActive = false;
@@ -1458,18 +1487,20 @@
 
         function showLowStock() {
             navigateTo('search');
-            document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
-                chip.classList.remove('active');
-                if (chip.dataset.filter === 'low') {
-                    chip.classList.add('active');
-                }
-            });
-            performAdvancedSearch();
+            setTimeout(() => {
+                document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+                    chip.classList.remove('active');
+                    if (chip.dataset.filter === 'low') {
+                        chip.classList.add('active');
+                    }
+                });
+                performAdvancedSearch();
+            }, 100);
         }
 
         function loadInventory() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const activeFilter = document.querySelector('#inventory-page .filter-chip.active')?.dataset.location;
+            const activeFilter = document.querySelector('#inventory-page .filter-chip.active')?.dataset?.location;
 
             let filtered = articles.filter(art => 
                 art.name.toLowerCase().includes(searchTerm) ||
@@ -1487,12 +1518,12 @@
 
             const filtersHtml = `
                 <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
-                     data-location="all" onclick="filterByLocation('all', event)">
+                     data-location="all" onclick="filterByLocation('all')">
                     Tous
                 </div>
                 ${locations.map(loc => `
-                    <div class="filter-chip ${activeFilter === loc.id.toString() ? 'active' : ''}" 
-                         data-location="${loc.id}" onclick="filterByLocation('${loc.id}', event)">
+                    <div class="filter-chip ${activeFilter === loc.id ? 'active' : ''}" 
+                         data-location="${loc.id}" onclick="filterByLocation('${loc.id}')">
                         ${loc.name}
                     </div>
                 `).join('')}
@@ -1518,7 +1549,7 @@
                         </div>
                         <div class="article-locations">
                             ${locs.map(([locId, qty]) => {
-                                const loc = locations.find(l => l.id.toString() === locId);
+                                const loc = locations.find(l => l.id === locId);
                                 const total = qty.nombre * qty.conditionnement;
                                 return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
                             }).join('')}
@@ -1530,23 +1561,18 @@
             document.getElementById('article-list').innerHTML = listHtml;
         }
 
-        function filterByLocation(locationId, event) {
-            if (event) {
-                event.stopPropagation();
-                document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => chip.classList.remove('active'));
-                event.currentTarget.classList.add('active');
-            }
+        function filterByLocation(locationId) {
+            document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => chip.classList.remove('active'));
+            event.currentTarget.classList.add('active');
             loadInventory();
         }
 
         function showArticleDetail(articleId) {
-            console.log('showArticleDetail called with id:', articleId);
             currentArticleId = articleId;
-            const article = articles.find(a => a.id.toString() === articleId);
-            console.log('Article found:', article);
+            const article = articles.find(a => a.id.toString() === articleId.toString());
             
             if (!article) {
-                console.log('Article not found!');
+                console.log('Article non trouvé!');
                 return;
             }
 
@@ -1611,7 +1637,7 @@
                 <div class="detail-section">
                     <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
                     ${locs.map(([locId, qty]) => {
-                        const loc = locations.find(l => l.id.toString() === locId);
+                        const loc = locations.find(l => l.id === locId);
                         const total = qty.nombre * qty.conditionnement;
                         return loc ? `
                             <div class="location-item">
@@ -1659,7 +1685,7 @@
                             margin: 5
                         });
                     } catch (error) {
-                        console.error('Erreur lors de la génération du code-barre:', error);
+                        console.error('Erreur génération code-barre:', error);
                     }
                 }, 100);
             }
@@ -1667,7 +1693,9 @@
         
         function toggleHistory() {
             const container = document.getElementById('article-history-container');
-            container.classList.toggle('expanded');
+            if (container) {
+                container.classList.toggle('expanded');
+            }
         }
 
         function showAddArticleModal() {
@@ -1682,7 +1710,7 @@
         }
 
         function showEditArticleModal(articleId) {
-            const article = articles.find(a => a.id.toString() === articleId);
+            const article = articles.find(a => a.id.toString() === articleId.toString());
             if (!article) return;
             
             document.getElementById('edit-article-id').value = article.id;
@@ -1702,7 +1730,7 @@
             event.preventDefault();
             
             const articleId = document.getElementById('edit-article-id').value;
-            const article = articles.find(a => a.id.toString() === articleId);
+            const article = articles.find(a => a.id.toString() === articleId.toString());
             
             if (!article) return;
             
@@ -1716,7 +1744,7 @@
             article.conditionnement = parseInt(document.getElementById('edit-article-conditionnement').value);
             article.fournisseur = document.getElementById('edit-article-fournisseur').value.trim();
             
-            // Mettre à jour les quantités existantes avec le nouveau conditionnement
+            // Mettre à jour les quantités existantes
             Object.keys(article.quantities || {}).forEach(locId => {
                 if (article.quantities[locId]) {
                     article.quantities[locId].conditionnement = article.conditionnement;
@@ -1729,10 +1757,6 @@
             
             // Recharger la vue détail
             showArticleDetail(articleId);
-            
-            // Recharger l'inventaire et le dashboard
-            loadInventory();
-            loadDashboard();
         }
 
         function showAddLocationModal() {
@@ -1740,12 +1764,12 @@
         }
 
         function showMoveArticleModal() {
-            const article = articles.find(a => a.id.toString() === currentArticleId);
+            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
             if (!article) return;
 
             const availableLocations = Object.entries(article.quantities || {})
                 .filter(([_, q]) => q.nombre > 0)
-                .map(([locId]) => locations.find(l => l.id.toString() === locId))
+                .map(([locId]) => locations.find(l => l.id === locId))
                 .filter(Boolean);
 
             document.getElementById('move-from').innerHTML = availableLocations.map(loc => {
@@ -1762,7 +1786,7 @@
 
         function showStockActionModal(action) {
             currentStockAction = action;
-            const article = articles.find(a => a.id.toString() === currentArticleId);
+            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
             if (!article) return;
 
             document.getElementById('stock-action-title').textContent = 
@@ -1772,10 +1796,10 @@
 
             const availableLocations = action === 'remove' 
                 ? Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0)
-                : locations.map(l => [l.id.toString(), 0]);
+                : locations.map(l => [l.id, 0]);
 
             document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
-                const loc = locations.find(l => l.id.toString() === locId);
+                const loc = locations.find(l => l.id === locId);
                 const qty = article.quantities?.[locId];
                 return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' && qty ? ` (${qty.nombre} × ${qty.conditionnement})` : ''}</option>` : '';
             }).join('');
@@ -1802,14 +1826,12 @@
             const locationId = document.getElementById('article-location').value;
             const nombre = parseInt(document.getElementById('article-nombre').value);
 
-            // Vérifier si un article similaire existe déjà
+            // Vérifier si un article similaire existe
             let existingArticle = null;
             
             if (barcode) {
-                // Si un code-barre est fourni, chercher par code-barre
                 existingArticle = articles.find(a => a.barcode === barcode);
             } else {
-                // Sinon, chercher par les autres caractéristiques
                 existingArticle = articles.find(a => 
                     a.name.toLowerCase() === name.toLowerCase() &&
                     a.famille === famille &&
@@ -1822,7 +1844,7 @@
             }
 
             if (existingArticle) {
-                // Article existant trouvé, ajouter la quantité
+                // Article existant trouvé
                 if (!existingArticle.quantities) existingArticle.quantities = {};
                 
                 if (existingArticle.quantities[locationId]) {
@@ -1831,16 +1853,15 @@
                     existingArticle.quantities[locationId] = { nombre, conditionnement };
                 }
 
-                // Mettre à jour le code-barre si fourni et différent
                 if (barcode && existingArticle.barcode !== barcode) {
                     existingArticle.barcode = barcode;
                 }
 
-                addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
+                addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id === locationId).name}`);
             } else {
-                // Créer un nouvel article
+                // Nouvel article
                 const article = {
-                    id: Date.now(),
+                    id: Date.now().toString(),
                     name,
                     barcode,
                     famille,
@@ -1872,7 +1893,7 @@
             const description = document.getElementById('location-description').value;
 
             locations.push({
-                id: Date.now(),
+                id: Date.now().toString(),
                 name,
                 description
             });
@@ -1886,7 +1907,7 @@
         function moveArticle(event) {
             event.preventDefault();
             
-            const article = articles.find(a => a.id.toString() === currentArticleId);
+            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
             if (!article) return;
 
             const fromId = document.getElementById('move-from').value;
@@ -1912,8 +1933,8 @@
                 article.quantities[toId].nombre += quantity;
             }
 
-            const fromLoc = locations.find(l => l.id.toString() === fromId);
-            const toLoc = locations.find(l => l.id.toString() === toId);
+            const fromLoc = locations.find(l => l.id === fromId);
+            const toLoc = locations.find(l => l.id === toId);
 
             saveToStorage();
             addHistory('Déplacement', article.name, `${quantity} de ${fromLoc.name} → ${toLoc.name}`);
@@ -1925,7 +1946,7 @@
         function performStockAction(event) {
             event.preventDefault();
             
-            const article = articles.find(a => a.id.toString() === currentArticleId);
+            const article = articles.find(a => a.id.toString() === currentArticleId.toString());
             if (!article) return;
 
             const locationId = document.getElementById('stock-location').value;
@@ -1937,7 +1958,7 @@
                 } else {
                     article.quantities[locationId].nombre += quantity;
                 }
-                addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
+                addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id === locationId).name}`);
             } else {
                 if (!article.quantities[locationId] || article.quantities[locationId].nombre < quantity) {
                     alert('Nombre insuffisant');
@@ -1945,7 +1966,7 @@
                 }
                 article.quantities[locationId].nombre -= quantity;
                 if (article.quantities[locationId].nombre === 0) delete article.quantities[locationId];
-                addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
+                addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id === locationId).name}`);
             }
 
             saveToStorage();
@@ -1957,8 +1978,8 @@
         function deleteArticle(articleId) {
             if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
             
-            const article = articles.find(a => a.id.toString() === articleId);
-            articles = articles.filter(a => a.id.toString() !== articleId);
+            const article = articles.find(a => a.id.toString() === articleId.toString());
+            articles = articles.filter(a => a.id.toString() !== articleId.toString());
             
             saveToStorage();
             addHistory('Suppression', article.name);
@@ -1992,17 +2013,21 @@
 
         function showLocationInventory(locationId) {
             navigateTo('inventory');
-            document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => {
-                if (chip.dataset.location === locationId) {
-                    chip.classList.add('active');
-                } else {
-                    chip.classList.remove('active');
-                }
-            });
-            loadInventory();
+            setTimeout(() => {
+                document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => {
+                    if (chip.dataset.location === locationId) {
+                        chip.classList.add('active');
+                    } else {
+                        chip.classList.remove('active');
+                    }
+                });
+                loadInventory();
+            }, 100);
         }
 
         function deleteLocation(locationId) {
+            event.stopPropagation();
+            
             const hasArticles = articles.some(art => 
                 art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
             );
@@ -2014,24 +2039,24 @@
 
             if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) return;
 
-            locations = locations.filter(l => l.id.toString() !== locationId);
+            locations = locations.filter(l => l.id !== locationId);
             saveToStorage();
             loadLocations();
             loadDashboard();
         }
 
         function initScanner() {
-            console.log('Initializing scanner...');
+            console.log('Initialisation scanner...');
             
             if (html5QrCode) {
                 try {
                     html5QrCode.clear();
                 } catch (e) {
-                    console.log('Error clearing scanner:', e);
+                    console.log('Erreur nettoyage scanner:', e);
                 }
             }
             
-            // Nettoyer le conteneur du scanner
+            // Nettoyer le conteneur
             document.getElementById('scanner-reader').innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
             
             html5QrCode = new Html5QrcodeScanner(
@@ -2049,27 +2074,21 @@
                 (decodedText) => {
                     console.log('Code scanné:', decodedText);
                     
-                    // Mettre en pause le scanner
                     html5QrCode.pause();
                     
-                    // Mettre le code dans le champ manuel
                     document.getElementById('manual-barcode').value = decodedText;
                     
-                    // Rechercher l'article
                     const article = articles.find(a => a.barcode === decodedText);
                     
                     if (article) {
                         console.log('Article trouvé:', article);
-                        // Afficher les détails de l'article
-                        showArticleDetail(article.id.toString());
+                        showArticleDetail(article.id);
                     } else {
                         console.log('Article non trouvé');
-                        // Afficher le modal de création
                         showAddArticleModal();
                         document.getElementById('article-barcode').value = decodedText;
                         document.getElementById('article-name').focus();
                         
-                        // Afficher un message
                         document.getElementById('scan-result').innerHTML = `
                             <div class="detail-section">
                                 <div class="section-title">❌ Article non trouvé</div>
@@ -2082,7 +2101,7 @@
                     }
                 },
                 (errorMessage) => {
-                    console.log('Scanner error:', errorMessage);
+                    console.log('Erreur scanner:', errorMessage);
                 }
             );
             
@@ -2093,21 +2112,18 @@
             const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
             if (!scannedBarcode) return;
 
-            console.log('Recherche manuelle de code-barre:', scannedBarcode);
+            console.log('Recherche manuelle:', scannedBarcode);
             const article = articles.find(a => a.barcode === scannedBarcode);
             
             if (article) {
-                console.log('Article trouvé (manuel):', article);
-                // Afficher les détails de l'article
-                showArticleDetail(article.id.toString());
+                console.log('Article trouvé:', article);
+                showArticleDetail(article.id);
             } else {
-                console.log('Article non trouvé (manuel)');
-                // Afficher le modal de création
+                console.log('Article non trouvé');
                 showAddArticleModal();
                 document.getElementById('article-barcode').value = scannedBarcode;
                 document.getElementById('article-name').focus();
                 
-                // Afficher un message
                 if (!barcode) {
                     document.getElementById('scan-result').innerHTML = `
                         <div class="detail-section">
@@ -2141,14 +2157,11 @@
         function downloadExcel() {
             // Tri par nom
             const sortedArticles = [...articles].sort((a, b) => {
-                // D'abord trier par nom
                 const nameCompare = a.name.localeCompare(b.name);
                 if (nameCompare !== 0) return nameCompare;
                 
-                // Ensuite par famille si même nom
                 if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
                 
-                // Ensuite par catégorie
                 return a.categorie.localeCompare(b.categorie);
             });
 
@@ -2166,7 +2179,7 @@
                 }
 
                 Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
-                    const loc = locations.find(l => l.id.toString() === locId);
+                    const loc = locations.find(l => l.id === locId);
                     const total = qty.nombre * qty.conditionnement;
 
                     data.push({
@@ -2186,9 +2199,9 @@
                 });
             });
 
-            // Créer un deuxième onglet pour les étiquettes de codes-barres
+            // Onglet pour étiquettes
             const labelData = sortedArticles
-                .filter(art => art.barcode) // Uniquement les articles avec code-barre
+                .filter(art => art.barcode)
                 .map(art => ({
                     'Nom': art.name,
                     'Code-barre': art.barcode,
@@ -2208,20 +2221,10 @@
             XLSX.utils.book_append_sheet(wb, ws1, "Inventaire");
             XLSX.utils.book_append_sheet(wb, ws2, "Étiquettes Codes-barres");
             
-            // Ajuster la largeur des colonnes pour le premier onglet
             const wscols = [
-                {wch: 25}, // Nom
-                {wch: 20}, // Code-barre
-                {wch: 10}, // Taille
-                {wch: 10}, // Longueur
-                {wch: 15}, // Famille
-                {wch: 15}, // Catégorie
-                {wch: 15}, // Conditionnement
-                {wch: 12}, // Nombre paquets
-                {wch: 12}, // Total unités
-                {wch: 15}, // Fournisseur
-                {wch: 20}, // Lieu
-                {wch: 25}  // Emplacement détaillé
+                {wch: 25}, {wch: 20}, {wch: 10}, {wch: 10},
+                {wch: 15}, {wch: 15}, {wch: 15}, {wch: 12},
+                {wch: 12}, {wch: 15}, {wch: 20}, {wch: 25}
             ];
             ws1['!cols'] = wscols;
             
@@ -2311,7 +2314,6 @@
                     </div>
                     
                     <script>
-                        // Générer les codes-barres
                         ${articlesWithBarcode.map(art => `
                             setTimeout(() => {
                                 try {
@@ -2329,9 +2331,6 @@
                                 }
                             }, 100);
                         `).join('')}
-                        
-                        // Auto-impression optionnelle
-                        // setTimeout(() => { window.print(); }, 1000);
                     </script>
                 </body>
                 </html>
@@ -2377,7 +2376,7 @@
                             }
                         } else {
                             article = {
-                                id: Date.now() + Math.random(),
+                                id: Date.now().toString(),
                                 name,
                                 barcode: row['Code-barre'] || '',
                                 famille: row['Famille'] || '',
@@ -2501,7 +2500,7 @@
         }
         
         function initializeFilters() {
-            // Collecter toutes les valeurs uniques pour chaque filtre
+            // Collecter toutes les valeurs uniques
             const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
             const categories = [...new Set(articles.map(a => a.categorie).filter(Boolean))];
             const fournisseurs = [...new Set(articles.map(a => a.fournisseur).filter(Boolean))];
@@ -2560,7 +2559,6 @@
             const btn = document.querySelector(`.filter-dropdown-btn[onclick*="${type}"]`);
             if (currentFilters[type]) {
                 btn.classList.add('active');
-                // Ajouter un indicateur visuel
                 btn.innerHTML = `${getFilterIcon(type)} ${getFilterDisplayName(type, value)}`;
             } else {
                 btn.classList.remove('active');
@@ -2704,7 +2702,7 @@
                         </div>
                         <div class="article-locations">
                             ${locs.map(([locId, qty]) => {
-                                const loc = locations.find(l => l.id.toString() === locId);
+                                const loc = locations.find(l => l.id === locId);
                                 const total = qty.nombre * qty.conditionnement;
                                 return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
                             }).join('')}
@@ -2716,14 +2714,11 @@
             document.getElementById('search-results').innerHTML = resultsHtml;
         }
 
-        function filterSearchResults(filterType, event) {
-            if (event) {
-                event.stopPropagation();
-                document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
-                    chip.classList.remove('active');
-                });
-                event.currentTarget.classList.add('active');
-            }
+        function filterSearchResults(filterType) {
+            document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
             performAdvancedSearch();
         }
 
@@ -2731,7 +2726,9 @@
             // Fonction vide, déjà définie
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser les événements
             const searchInput = document.getElementById('search-input');
             if (searchInput) {
                 searchInput.addEventListener('input', loadInventory);
@@ -2742,25 +2739,12 @@
                 advancedSearchInput.addEventListener('input', performAdvancedSearch);
             }
             
-            // Initialiser les valeurs par défaut dans le modal d'ajout
-            const addArticleModal = document.getElementById('add-article-modal');
-            if (addArticleModal) {
-                // Les valeurs sont déjà préremplies dans le HTML
-            }
-            
-            // Initialiser la navigation
-            navigateTo('dashboard');
+            // Charger le dashboard au démarrage
+            loadDashboard();
         });
 
-        loadDashboard();
-    </script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('Service Worker registered'))
-                .catch(err => console.error('Service Worker error:', err));
-        }
+        // Initialiser la navigation
+        navigateTo('dashboard');
     </script>
 </body>
 </html>
