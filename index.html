@@ -933,89 +933,78 @@
         }
         
         /* Styles pour la génération de codes-barres */
-        .barcode-container {
+        .barcode-catalogue-container {
             display: flex;
             flex-direction: column;
             gap: 16px;
             margin-top: 16px;
         }
         
-        .barcode-item {
+        .barcode-catalogue-item {
             background: #1e1e1e;
-            padding: 16px;
+            padding: 20px;
             border-radius: 12px;
             border: 1px solid #333;
-            text-align: center;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 20px;
+            align-items: center;
         }
         
-        .barcode-info {
-            margin-bottom: 12px;
-        }
-        
-        .barcode-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #e0e0e0;
-            margin-bottom: 4px;
-        }
-        
-        .barcode-code {
-            font-size: 13px;
-            color: #888;
-            font-family: 'Courier New', monospace;
-            margin-bottom: 8px;
-        }
-        
-        .barcode-svg-container {
+        .barcode-visual {
             background: white;
             padding: 15px;
             border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100px;
+            text-align: center;
+        }
+        
+        .barcode-svg {
+            width: 100%;
+            height: auto;
+        }
+        
+        .barcode-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .barcode-info-item {
+            margin-bottom: 8px;
+        }
+        
+        .barcode-info-label {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 2px;
+        }
+        
+        .barcode-info-value {
+            font-size: 14px;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+        
+        .barcode-code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 10px;
+            color: #000;
+            font-weight: bold;
         }
         
         .barcode-actions {
+            grid-column: span 2;
             display: flex;
             gap: 8px;
             margin-top: 12px;
         }
         
-        .print-controls {
-            background: #1e1e1e;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #333;
-            margin-bottom: 16px;
-        }
-        
-        .print-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+        .catalogue-controls {
+            display: flex;
             gap: 12px;
             margin-bottom: 16px;
-        }
-        
-        .print-option {
-            background: #2a2a2a;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            border: 1px solid #333;
-            transition: all 0.3s;
-        }
-        
-        .print-option:hover {
-            background: #333;
-            border-color: #bb86fc;
-        }
-        
-        .print-option.active {
-            background: #bb86fc;
-            border-color: #bb86fc;
-            color: #000;
         }
     </style>
 </head>
@@ -1187,58 +1176,30 @@
         <button class="fab" onclick="showAddLocationModal()">+</button>
     </div>
 
-    <!-- NOUVELLE PAGE POUR LA GÉNÉRATION DE CODES-BARRES -->
-    <div id="barcode-page" class="page hidden">
-        <div class="header">
-            <h1>🏷️ Génération Codes-barres</h1>
-            <div class="header-subtitle">Créer et imprimer des codes-barres</div>
-        </div>
-        <div class="container">
-            <div class="print-controls">
-                <div class="section-title">Options de génération</div>
-                <div class="print-options">
-                    <div class="print-option active" onclick="setBarcodeFormat('CODE128')">
-                        <div style="font-size: 24px;">📏</div>
-                        <div style="font-size: 12px;">CODE128</div>
-                        <div style="font-size: 10px; color: #888;">Standard</div>
-                    </div>
-                    <div class="print-option" onclick="setBarcodeFormat('EAN13')">
-                        <div style="font-size: 24px;">🛒</div>
-                        <div style="font-size: 12px;">EAN13</div>
-                        <div style="font-size: 10px; color: #888;">Commerce</div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Filtrer par famille</label>
-                    <select class="form-select" id="barcode-famille-filter" onchange="generateBarcodes()">
-                        <option value="">Toutes les familles</option>
-                    </select>
-                </div>
-                
-                <button class="btn-primary" onclick="generateBarcodes()">
-                    🏷️ Générer les codes-barres
-                </button>
-                <button class="btn-secondary" onclick="printBarcodes()" id="print-btn" style="display: none;">
-                    🖨️ Imprimer
-                </button>
-            </div>
-
-            <div id="barcode-list-container">
-                <div class="empty-state">
-                    <div class="empty-icon">🏷️</div>
-                    <div class="empty-text">Générez les codes-barres pour les articles</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="import-export-page" class="page hidden">
         <div class="header">
             <h1>📊 Import/Export</h1>
             <div class="header-subtitle">Gestion des données</div>
         </div>
         <div class="container">
+            <!-- Nouvelle section pour le catalogue de codes-barres -->
+            <div class="export-section">
+                <div class="export-icon">🏷️</div>
+                <div class="section-title">Catalogue de codes-barres</div>
+                <div class="form-group">
+                    <label class="form-label">Filtrer par famille</label>
+                    <select class="form-select" id="barcode-famille-filter" onchange="generateBarcodeCatalogue()">
+                        <option value="">Toutes les familles</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="generateBarcodeCatalogue()">
+                    🏷️ Générer le catalogue
+                </button>
+                <button class="btn-secondary" onclick="downloadBarcodeCatalogue()" id="download-catalogue-btn" style="display: none;">
+                    💾 Télécharger le catalogue
+                </button>
+            </div>
+
             <div class="export-section">
                 <div class="export-icon">📤</div>
                 <div class="section-title">Exporter l'inventaire</div>
@@ -1313,6 +1274,10 @@
                     <input type="text" class="form-input" id="article-fournisseur" placeholder="ex: Fournisseur X">
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Chantier Référence</label>
+                    <input type="text" class="form-input" id="article-chant-ref" placeholder="À définir ultérieurement">
+                </div>
+                <div class="form-group">
                     <label class="form-label">Lieu de stockage *</label>
                     <select class="form-select" id="article-location" required></select>
                 </div>
@@ -1365,6 +1330,10 @@
                 <div class="form-group">
                     <label class="form-label">Fournisseur</label>
                     <input type="text" class="form-input" id="edit-article-fournisseur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Chantier Référence</label>
+                    <input type="text" class="form-input" id="edit-article-chant-ref">
                 </div>
                 <button type="submit" class="btn-primary">Mettre à jour</button>
             </form>
@@ -1435,7 +1404,7 @@
         </div>
     </div>
 
-    <!-- NAVIGATION EN BAS - AJOUT DU BOUTON CODES-BARRES -->
+    <!-- NAVIGATION EN BAS - RETOUR À LA CONFIGURATION ORIGINALE -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="navigateTo('dashboard')">
             <div class="nav-icon">🏠</div>
@@ -1449,9 +1418,9 @@
             <div class="nav-icon">🔍</div>
             <div class="nav-label">Recherche</div>
         </div>
-        <div class="nav-item" onclick="navigateTo('barcode')">
-            <div class="nav-icon">🏷️</div>
-            <div class="nav-label">Codes-barres</div>
+        <div class="nav-item" onclick="navigateTo('locations')">
+            <div class="nav-icon">📍</div>
+            <div class="nav-label">Lieux</div>
         </div>
         <div class="nav-item" onclick="navigateTo('import-export')">
             <div class="nav-icon">📊</div>
@@ -1469,7 +1438,6 @@
         let currentStockAction = null;
         let html5QrCode = null;
         let isScannerActive = false;
-        let currentBarcodeFormat = 'CODE128';
         
         let currentFilters = {
             location: null,
@@ -1524,7 +1492,6 @@
             if (page === 'scan') initScanner();
             if (page === 'search') loadSearchPage();
             if (page === 'locations') loadLocations();
-            if (page === 'barcode') loadBarcodePage();
             if (page === 'import-export') loadImportExport();
         }
 
@@ -1706,6 +1673,10 @@
                             <div class="detail-info-label">Fournisseur</div>
                             <div class="detail-info-value" id="info-fournisseur">${article.fournisseur || '-'}</div>
                         </div>
+                        <div class="detail-info-item">
+                            <div class="detail-info-label">Chantier Réf.</div>
+                            <div class="detail-info-value" id="info-chant-ref">${article.chantRef || '-'}</div>
+                        </div>
                     </div>
                     <button class="btn-secondary" onclick="showEditArticleModal('${article.id}')">✏️ Modifier les informations</button>
                 </div>
@@ -1777,6 +1748,7 @@
             document.getElementById('edit-article-longueur').value = article.longueur || '';
             document.getElementById('edit-article-conditionnement').value = article.conditionnement || 1;
             document.getElementById('edit-article-fournisseur').value = article.fournisseur || '';
+            document.getElementById('edit-article-chant-ref').value = article.chantRef || '';
             
             document.getElementById('edit-article-modal').classList.add('active');
         }
@@ -1798,6 +1770,7 @@
             article.longueur = document.getElementById('edit-article-longueur').value.trim();
             article.conditionnement = parseInt(document.getElementById('edit-article-conditionnement').value);
             article.fournisseur = document.getElementById('edit-article-fournisseur').value.trim();
+            article.chantRef = document.getElementById('edit-article-chant-ref').value.trim();
             
             // Mettre à jour les quantités existantes avec le nouveau conditionnement
             Object.keys(article.quantities || {}).forEach(locId => {
@@ -1883,6 +1856,7 @@
             const longueur = document.getElementById('article-longueur').value.trim();
             const conditionnement = parseInt(document.getElementById('article-conditionnement').value);
             const fournisseur = document.getElementById('article-fournisseur').value.trim();
+            const chantRef = document.getElementById('article-chant-ref').value.trim();
             const locationId = document.getElementById('article-location').value;
             const nombre = parseInt(document.getElementById('article-nombre').value);
 
@@ -1901,7 +1875,8 @@
                     a.taille === taille &&
                     a.longueur === longueur &&
                     a.conditionnement === conditionnement &&
-                    a.fournisseur === fournisseur
+                    a.fournisseur === fournisseur &&
+                    a.chantRef === chantRef
                 );
             }
 
@@ -1933,6 +1908,7 @@
                     longueur,
                     conditionnement,
                     fournisseur,
+                    chantRef,
                     quantities: {
                         [locationId]: { nombre, conditionnement }
                     },
@@ -2256,6 +2232,7 @@
                         'Nombre': qty.nombre,
                         'Total': total,
                         'Fournisseur': art.fournisseur || '',
+                        'Chantier Réf.': art.chantRef || '',
                         'Lieu': loc ? loc.name : ''
                     });
                 });
@@ -2315,6 +2292,7 @@
                                 longueur: row['Longueur'] || '',
                                 conditionnement: parseInt(row['Conditionnement']) || 1,
                                 fournisseur: row['Fournisseur'] || '',
+                                chantRef: row['Chantier Réf.'] || '',
                                 quantities: {
                                     [location.id]: {
                                         nombre: parseInt(row['Nombre']) || 0,
@@ -2562,7 +2540,8 @@
                     (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
                     (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
                     (art.categorie && art.categorie.toLowerCase().includes(searchTerm)) ||
-                    (art.fournisseur && art.fournisseur.toLowerCase().includes(searchTerm));
+                    (art.fournisseur && art.fournisseur.toLowerCase().includes(searchTerm)) ||
+                    (art.chantRef && art.chantRef.toLowerCase().includes(searchTerm));
                 
                 if (!matchesText) return false;
                 
@@ -2664,35 +2643,18 @@
         }
 
         function loadImportExport() {
-            // Fonction vide, déjà définie
-        }
-        
-        // NOUVELLES FONCTIONS POUR LA GÉNÉRATION DE CODES-BARRES
-        function loadBarcodePage() {
-            // Remplir le filtre par famille
+            // Remplir le filtre par famille pour le catalogue
             const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
             const select = document.getElementById('barcode-famille-filter');
             select.innerHTML = '<option value="">Toutes les familles</option>' +
                 familles.map(f => `<option value="${f}">${f}</option>`).join('');
             
-            // Initialiser l'état vide
-            document.getElementById('barcode-list-container').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">🏷️</div>
-                    <div class="empty-text">Générez les codes-barres pour les articles</div>
-                </div>
-            `;
+            // Cacher le bouton télécharger
+            document.getElementById('download-catalogue-btn').style.display = 'none';
         }
         
-        function setBarcodeFormat(format) {
-            currentBarcodeFormat = format;
-            document.querySelectorAll('.print-option').forEach(opt => {
-                opt.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-        }
-        
-        function generateBarcodes() {
+        // NOUVELLES FONCTIONS POUR LE CATALOGUE DE CODES-BARRES
+        function generateBarcodeCatalogue() {
             const familleFilter = document.getElementById('barcode-famille-filter').value;
             
             // Filtrer les articles
@@ -2705,157 +2667,243 @@
             });
             
             if (filtered.length === 0) {
-                document.getElementById('barcode-list-container').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🏷️</div>
-                        <div class="empty-text">Aucun article avec code-barres trouvé</div>
+                document.querySelector('.container').innerHTML += `
+                    <div class="export-section">
+                        <div style="text-align: center; padding: 20px; color: #888;">
+                            🏷️ Aucun article avec code-barres trouvé
+                        </div>
                     </div>
                 `;
-                document.getElementById('print-btn').style.display = 'none';
+                document.getElementById('download-catalogue-btn').style.display = 'none';
                 return;
             }
             
             // Trier par nom
             filtered.sort((a, b) => a.name.localeCompare(b.name));
             
-            // Générer le HTML
-            let html = '<div class="barcode-container">';
+            // Créer un conteneur pour le catalogue
+            let catalogueContainer = document.querySelector('.barcode-catalogue-container');
+            if (!catalogueContainer) {
+                catalogueContainer = document.createElement('div');
+                catalogueContainer.className = 'barcode-catalogue-container';
+                document.querySelector('#import-export-page .container').appendChild(catalogueContainer);
+            } else {
+                catalogueContainer.innerHTML = '';
+            }
             
+            // Générer les éléments du catalogue
             filtered.forEach((art, index) => {
-                html += `
-                    <div class="barcode-item" id="barcode-item-${index}">
-                        <div class="barcode-info">
-                            <div class="barcode-name">${art.name}${art.taille ? ' ' + art.taille : ''}${art.longueur ? ' ' + art.longueur : ''}</div>
-                            <div class="barcode-code">${art.barcode}</div>
-                            ${art.famille ? `<div style="font-size: 12px; color: #888;">Famille: ${art.famille} / ${art.categorie}</div>` : ''}
-                        </div>
-                        <div class="barcode-svg-container">
-                            <svg id="barcode-${index}" class="barcode-svg"></svg>
-                        </div>
-                        <div class="barcode-actions">
-                            <button class="btn-secondary" style="flex: 1;" onclick="downloadSingleBarcode(${index})">
-                                💾 Télécharger
-                            </button>
-                        </div>
+                const item = document.createElement('div');
+                item.className = 'barcode-catalogue-item';
+                item.id = `barcode-item-${index}`;
+                
+                // Partie gauche : Code-barre
+                const barcodeVisual = document.createElement('div');
+                barcodeVisual.className = 'barcode-visual';
+                barcodeVisual.innerHTML = `
+                    <svg id="barcode-svg-${index}" class="barcode-svg"></svg>
+                    <div class="barcode-code-display">${art.barcode}</div>
+                `;
+                
+                // Partie droite : Informations
+                const infoGrid = document.createElement('div');
+                infoGrid.className = 'barcode-info-grid';
+                infoGrid.innerHTML = `
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Famille</div>
+                        <div class="barcode-info-value">${art.famille || '-'}</div>
+                    </div>
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Catégorie</div>
+                        <div class="barcode-info-value">${art.categorie || '-'}</div>
+                    </div>
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Nom</div>
+                        <div class="barcode-info-value">${art.name || '-'}</div>
+                    </div>
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Taille</div>
+                        <div class="barcode-info-value">${art.taille || '-'}</div>
+                    </div>
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Longueur</div>
+                        <div class="barcode-info-value">${art.longueur || '-'}</div>
+                    </div>
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Conditionnement</div>
+                        <div class="barcode-info-value">${art.conditionnement || '-'}</div>
+                    </div>
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Fournisseur</div>
+                        <div class="barcode-info-value">${art.fournisseur || '-'}</div>
+                    </div>
+                    <div class="barcode-info-item">
+                        <div class="barcode-info-label">Chantier Réf.</div>
+                        <div class="barcode-info-value">${art.chantRef || '-'}</div>
                     </div>
                 `;
+                
+                // Assembler l'élément
+                item.appendChild(barcodeVisual);
+                item.appendChild(infoGrid);
+                catalogueContainer.appendChild(item);
             });
             
-            html += '</div>';
+            // Afficher le bouton de téléchargement
+            document.getElementById('download-catalogue-btn').style.display = 'block';
             
-            document.getElementById('barcode-list-container').innerHTML = html;
-            document.getElementById('print-btn').style.display = 'block';
-            
-            // Générer les codes-barres avec JsBarcode
+            // Générer les codes-barres avec JsBarcode (format EAN13)
             setTimeout(() => {
                 filtered.forEach((art, index) => {
                     try {
-                        JsBarcode(`#barcode-${index}`, art.barcode, {
-                            format: currentBarcodeFormat,
+                        JsBarcode(`#barcode-svg-${index}`, art.barcode, {
+                            format: 'EAN13',
                             width: 2,
                             height: 80,
-                            displayValue: true,
-                            fontSize: 16,
+                            displayValue: false, // On affiche le code en-dessous manuellement
                             background: "#ffffff",
                             lineColor: "#000000",
-                            margin: 10
+                            margin: 0
                         });
                     } catch (error) {
                         console.error(`Erreur génération code-barre pour ${art.name}:`, error);
+                        // En cas d'erreur, essayer avec CODE128
+                        try {
+                            JsBarcode(`#barcode-svg-${index}`, art.barcode, {
+                                format: 'CODE128',
+                                width: 2,
+                                height: 80,
+                                displayValue: false,
+                                background: "#ffffff",
+                                lineColor: "#000000",
+                                margin: 0
+                            });
+                        } catch (e) {
+                            console.error(`Échec également avec CODE128:`, e);
+                        }
                     }
                 });
             }, 100);
         }
         
-        function downloadSingleBarcode(index) {
-            const svgElement = document.getElementById(`barcode-${index}`);
-            if (!svgElement) return;
+        function downloadBarcodeCatalogue() {
+            const catalogueContainer = document.querySelector('.barcode-catalogue-container');
+            if (!catalogueContainer || catalogueContainer.children.length === 0) {
+                alert('Aucun catalogue à télécharger');
+                return;
+            }
             
-            const svgData = new XMLSerializer().serializeToString(svgElement);
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-            
-            img.onload = function() {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                
-                const pngUrl = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pngUrl;
-                downloadLink.download = `codebarre_${index}.png`;
-                downloadLink.click();
-            };
-            
-            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-        }
-        
-        function printBarcodes() {
+            // Créer une nouvelle fenêtre pour l'impression/téléchargement
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <html>
                     <head>
-                        <title>Imprimer codes-barres</title>
+                        <title>Catalogue de codes-barres</title>
                         <style>
                             body { 
                                 font-family: Arial, sans-serif; 
                                 margin: 20px; 
                             }
-                            .barcode-print-item {
+                            .catalogue-item {
                                 page-break-inside: avoid;
-                                margin-bottom: 20px;
-                                padding: 10px;
+                                margin-bottom: 30px;
+                                padding: 20px;
                                 border: 1px solid #ccc;
+                                display: grid;
+                                grid-template-columns: 250px 1fr;
+                                gap: 20px;
+                                align-items: center;
+                            }
+                            .barcode-section {
                                 text-align: center;
+                                padding: 15px;
+                                background: white;
+                                border: 1px solid #ddd;
                             }
-                            .barcode-name {
-                                font-size: 14px;
-                                font-weight: bold;
-                                margin-bottom: 5px;
+                            .info-grid {
+                                display: grid;
+                                grid-template-columns: repeat(2, 1fr);
+                                gap: 10px;
                             }
-                            .barcode-code {
-                                font-size: 12px;
+                            .info-item {
+                                margin-bottom: 8px;
+                            }
+                            .info-label {
+                                font-size: 11px;
                                 color: #666;
-                                margin-bottom: 10px;
+                                margin-bottom: 2px;
+                            }
+                            .info-value {
+                                font-size: 14px;
+                                font-weight: 500;
+                            }
+                            .barcode-number {
+                                font-family: 'Courier New', monospace;
+                                font-size: 16px;
+                                font-weight: bold;
+                                margin-top: 10px;
                             }
                             @media print {
-                                .barcode-print-item {
+                                .catalogue-item {
                                     border: none;
-                                    margin-bottom: 30px;
+                                    margin-bottom: 40px;
                                 }
                             }
                         </style>
                     </head>
                     <body>
-                        <h2>Catalogue de codes-barres</h2>
+                        <h1>Catalogue de codes-barres</h1>
+                        <div>Généré le ${new Date().toLocaleDateString('fr-FR')}</div>
+                        <hr style="margin: 20px 0;">
             `);
             
-            const barcodeItems = document.querySelectorAll('.barcode-item');
-            barcodeItems.forEach((item, index) => {
-                const svgElement = item.querySelector('svg');
-                if (svgElement) {
-                    const svgData = new XMLSerializer().serializeToString(svgElement);
-                    const name = item.querySelector('.barcode-name').textContent;
-                    const code = item.querySelector('.barcode-code').textContent;
-                    
-                    printWindow.document.write(`
-                        <div class="barcode-print-item">
-                            <div class="barcode-name">${name}</div>
-                            <div class="barcode-code">${code}</div>
+            // Copier chaque élément du catalogue
+            const items = catalogueContainer.querySelectorAll('.barcode-catalogue-item');
+            items.forEach((item, index) => {
+                const barcodeSvg = item.querySelector('svg');
+                const barcodeNumber = item.querySelector('.barcode-code-display').textContent;
+                const infoItems = item.querySelectorAll('.barcode-info-item');
+                
+                let infoHtml = '';
+                infoItems.forEach(infoItem => {
+                    const label = infoItem.querySelector('.barcode-info-label').textContent;
+                    const value = infoItem.querySelector('.barcode-info-value').textContent;
+                    infoHtml += `
+                        <div class="info-item">
+                            <div class="info-label">${label}</div>
+                            <div class="info-value">${value}</div>
+                        </div>
+                    `;
+                });
+                
+                const svgData = new XMLSerializer().serializeToString(barcodeSvg);
+                
+                printWindow.document.write(`
+                    <div class="catalogue-item">
+                        <div class="barcode-section">
                             <img src="data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}" 
                                  style="max-width: 100%; height: auto;">
+                            <div class="barcode-number">${barcodeNumber}</div>
                         </div>
-                    `);
-                }
+                        <div class="info-grid">
+                            ${infoHtml}
+                        </div>
+                    </div>
+                `);
             });
             
             printWindow.document.write('</body></html>');
             printWindow.document.close();
             printWindow.focus();
             
+            // Proposer le téléchargement ou l'impression
             setTimeout(() => {
-                printWindow.print();
+                if (confirm('Voulez-vous imprimer le catalogue ou le télécharger en PDF ?')) {
+                    printWindow.print();
+                } else {
+                    // Option pour télécharger en PDF (simplifié)
+                    alert('Pour télécharger, utilisez "Imprimer en PDF" dans la fenêtre d\'impression');
+                }
             }, 500);
         }
 
