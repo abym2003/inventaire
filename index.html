@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -930,6 +930,25 @@
             gap: 8px;
             margin-top: 8px;
         }
+        
+        /* Styles pour les codes-barres */
+        .barcode-section {
+            margin-top: 10px;
+            text-align: center;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .barcode-number {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #000 !important;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -1115,6 +1134,7 @@
                 </div>
                 <button class="btn-primary" onclick="exportToExcel()">📧 Exporter et envoyer</button>
                 <button class="btn-secondary" onclick="downloadExcel()">💾 Télécharger Excel</button>
+                <button class="btn-secondary" onclick="printBarcodeLabels()">🏷️ Générer étiquettes codes-barres</button>
             </div>
 
             <div class="export-section">
@@ -1327,6 +1347,7 @@
     </nav>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
@@ -1460,8 +1481,9 @@
                 filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
             }
 
-			filtered.sort((a, b) => a.name.localeCompare(b.name));
-			
+            // Trier par ordre alphabétique
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+
             const filtersHtml = `
                 <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
                      data-location="all" onclick="filterByLocation('all')">
@@ -1541,7 +1563,14 @@
             const detailHtml = `
                 <div class="detail-header">
                     <div class="detail-title">${article.name}${article.taille ? ' ' + article.taille : ''}${article.longueur ? ' ' + article.longueur : ''}</div>
-                    ${article.barcode ? `<div class="detail-code">Code: ${article.barcode}</div>` : ''}
+                    ${article.barcode ? `
+                        <div class="barcode-section">
+                            <svg id="barcode-svg-${article.id}" style="background: white; padding: 5px; border-radius: 8px; max-width: 100%; height: 60px;"></svg>
+                            <div class="barcode-number" style="text-align: center; font-family: monospace; font-size: 12px; margin-top: 4px; color: #000;">
+                                ${article.barcode}
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
 
                 <div class="detail-section">
@@ -1611,6 +1640,25 @@
             // Afficher la page de détails sans toucher à la navigation
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
+            
+            // Générer le code-barre après avoir inséré le HTML
+            if (article.barcode) {
+                setTimeout(() => {
+                    try {
+                        JsBarcode(`#barcode-svg-${article.id}`, article.barcode, {
+                            format: "CODE128",
+                            width: 1.5,
+                            height: 40,
+                            displayValue: false, // Nous affichons le numéro manuellement
+                            background: "#ffffff",
+                            lineColor: "#000000",
+                            margin: 5
+                        });
+                    } catch (error) {
+                        console.error('Erreur lors de la génération du code-barre:', error);
+                    }
+                }, 100);
+            }
         }
         
         function toggleHistory() {
@@ -2088,8 +2136,16 @@
         }
 
         function downloadExcel() {
+            // Tri par nom
             const sortedArticles = [...articles].sort((a, b) => {
+                // D'abord trier par nom
+                const nameCompare = a.name.localeCompare(b.name);
+                if (nameCompare !== 0) return nameCompare;
+                
+                // Ensuite par famille si même nom
                 if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
+                
+                // Ensuite par catégorie
                 return a.categorie.localeCompare(b.categorie);
             });
 
@@ -2113,25 +2169,172 @@
                     data.push({
                         'Nom': art.name,
                         'Code-barre': art.barcode || '',
-                        'Famille': art.famille || '',
-                        'Catégorie': art.categorie || '',
                         'Taille': art.taille || '',
                         'Longueur': art.longueur || '',
+                        'Famille': art.famille || '',
+                        'Catégorie': art.categorie || '',
                         'Conditionnement': art.conditionnement || '',
-                        'Nombre': qty.nombre,
-                        'Total': total,
+                        'Nombre paquets': qty.nombre,
+                        'Total unités': total,
                         'Fournisseur': art.fournisseur || '',
-                        'Lieu': loc ? loc.name : ''
+                        'Lieu': loc ? loc.name : '',
+                        'Emplacement détaillé': loc ? `${loc.name}${loc.description ? ' - ' + loc.description : ''}` : ''
                     });
                 });
             });
 
-            const ws = XLSX.utils.json_to_sheet(data);
+            // Créer un deuxième onglet pour les étiquettes de codes-barres
+            const labelData = sortedArticles
+                .filter(art => art.barcode) // Uniquement les articles avec code-barre
+                .map(art => ({
+                    'Nom': art.name,
+                    'Code-barre': art.barcode,
+                    'Taille': art.taille || '',
+                    'Longueur': art.longueur || '',
+                    'Famille': art.famille || '',
+                    'Catégorie': art.categorie || '',
+                    'Conditionnement': art.conditionnement || '',
+                    'Fournisseur': art.fournisseur || '',
+                    'Instructions': 'Imprimer sur des étiquettes code-barre 50x25mm'
+                }));
+
+            const ws1 = XLSX.utils.json_to_sheet(data);
+            const ws2 = XLSX.utils.json_to_sheet(labelData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
+            
+            XLSX.utils.book_append_sheet(wb, ws1, "Inventaire");
+            XLSX.utils.book_append_sheet(wb, ws2, "Étiquettes Codes-barres");
+            
+            // Ajuster la largeur des colonnes pour le premier onglet
+            const wscols = [
+                {wch: 25}, // Nom
+                {wch: 20}, // Code-barre
+                {wch: 10}, // Taille
+                {wch: 10}, // Longueur
+                {wch: 15}, // Famille
+                {wch: 15}, // Catégorie
+                {wch: 15}, // Conditionnement
+                {wch: 12}, // Nombre paquets
+                {wch: 12}, // Total unités
+                {wch: 15}, // Fournisseur
+                {wch: 20}, // Lieu
+                {wch: 25}  // Emplacement détaillé
+            ];
+            ws1['!cols'] = wscols;
             
             const fileName = `inventaire_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
+        }
+
+        function printBarcodeLabels() {
+            const articlesWithBarcode = articles.filter(art => art.barcode);
+            
+            if (articlesWithBarcode.length === 0) {
+                alert('Aucun article avec code-barre à imprimer');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Étiquettes Codes-barres</title>
+                    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                        }
+                        .label-sheet {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            gap: 10px;
+                            margin-bottom: 20px;
+                        }
+                        .label {
+                            border: 1px dashed #ccc;
+                            padding: 10px;
+                            text-align: center;
+                            page-break-inside: avoid;
+                        }
+                        .label-name {
+                            font-size: 12px;
+                            font-weight: bold;
+                            margin-bottom: 5px;
+                        }
+                        .label-details {
+                            font-size: 10px;
+                            color: #666;
+                            margin-bottom: 5px;
+                        }
+                        .barcode-container {
+                            margin: 5px 0;
+                        }
+                        .barcode-number {
+                            font-family: monospace;
+                            font-size: 10px;
+                            margin-top: 2px;
+                        }
+                        @media print {
+                            .label {
+                                border: 1px solid #000;
+                            }
+                            .no-print {
+                                display: none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1 class="no-print">Étiquettes Codes-barres</h1>
+                    <p class="no-print">${articlesWithBarcode.length} étiquette(s) à imprimer</p>
+                    <button class="no-print" onclick="window.print()">🖨️ Imprimer</button>
+                    <button class="no-print" onclick="window.close()">✖️ Fermer</button>
+                    
+                    <div class="label-sheet">
+                        ${articlesWithBarcode.map(art => `
+                            <div class="label">
+                                <div class="label-name">${art.name}${art.taille ? ' ' + art.taille : ''}${art.longueur ? ' ' + art.longueur : ''}</div>
+                                <div class="label-details">
+                                    ${art.famille ? art.famille + ' / ' + art.categorie : ''}
+                                </div>
+                                <div class="barcode-container">
+                                    <svg id="barcode-${art.id}" style="width: 100%; height: 40px;"></svg>
+                                </div>
+                                <div class="barcode-number">${art.barcode}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <script>
+                        // Générer les codes-barres
+                        ${articlesWithBarcode.map(art => `
+                            setTimeout(() => {
+                                try {
+                                    JsBarcode("#barcode-${art.id}", "${art.barcode}", {
+                                        format: "CODE128",
+                                        width: 1.2,
+                                        height: 30,
+                                        displayValue: false,
+                                        background: "#ffffff",
+                                        lineColor: "#000000",
+                                        margin: 2
+                                    });
+                                } catch(e) {
+                                    console.error("Erreur code-barre ${art.barcode}:", e);
+                                }
+                            }, 100);
+                        `).join('')}
+                        
+                        // Auto-impression optionnelle
+                        // setTimeout(() => { window.print(); }, 1000);
+                    </script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
         }
 
         function importFromExcel(event) {
@@ -2456,9 +2659,9 @@
                 
                 return true;
             });
-			
-			  // Trier par ordre alphabétique
-				filtered.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Trier par ordre alphabétique
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
             
             displaySearchResults(filtered);
         }
