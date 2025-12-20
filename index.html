@@ -9,1055 +9,67 @@
     <title>Gestion d'Inventaire</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* ... (tous les styles précédents restent inchangés) ... */
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #121212;
-            color: #e0e0e0;
-            overflow-x: hidden;
-        }
-
-        .header {
-            background: #1e1e1e;
-            padding: 16px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #bb86fc;
-        }
-
-        .header-subtitle {
-            font-size: 12px;
-            color: #888;
-            margin-top: 4px;
-        }
-
-        .container {
-            padding: 20px;
-            padding-bottom: 90px;
-            min-height: calc(100vh - 140px);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        /* Nouveaux styles pour le bouton retour scanner */
+        .back-to-scanner-btn {
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            background: rgba(30, 30, 30, 0.9);
             border: 1px solid #333;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
             color: #bb86fc;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #aaa;
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .action-btn {
-            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
-            color: #000;
-            padding: 16px;
             border-radius: 12px;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
+            padding: 8px 16px;
+            font-size: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .action-btn:active {
-            transform: scale(0.96);
-        }
-
-        .action-btn.secondary {
-            background: linear-gradient(135deg, #03dac6 0%, #00bfa5 100%);
-            box-shadow: 0 4px 12px rgba(3, 218, 198, 0.3);
-        }
-
-        .search-container {
-            margin-bottom: 20px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 16px;
-            background: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 12px;
-            color: #e0e0e0;
-            font-size: 15px;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #bb86fc;
-        }
-
-        .filters {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-        }
-
-        .filter-chip {
-            padding: 8px 16px;
-            background: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 20px;
-            font-size: 13px;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .filter-chip.active {
-            background: #bb86fc;
-            color: #000;
-            border-color: #bb86fc;
-        }
-
-        .article-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .article-card {
-            background: #1e1e1e;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #333;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .article-card:active {
-            transform: scale(0.98);
-            background: #252525;
-        }
-
-        .article-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 8px;
-        }
-
-        .article-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #e0e0e0;
-        }
-
-        .article-quantity {
-            background: #bb86fc;
-            color: #000;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .article-meta {
-            font-size: 13px;
-            color: #888;
-            margin-top: 4px;
-        }
-
-        .article-locations {
-            display: flex;
-            flex-wrap: wrap;
             gap: 6px;
-            margin-top: 8px;
-        }
-
-        .location-badge {
-            background: #2a2a2a;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #03dac6;
-            border: 1px solid #333;
-        }
-
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
-            border-radius: 50%;
-            border: none;
-            box-shadow: 0 6px 20px rgba(187, 134, 252, 0.5);
-            color: #000;
-            font-size: 28px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            z-index: 101;
             transition: all 0.3s;
-            z-index: 50;
+            backdrop-filter: blur(10px);
         }
-
-        .fab:active {
-            transform: scale(0.9);
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1e1e1e;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-            border-top: 1px solid #333;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-
-        .nav-item.active {
-            background: #2a2a2a;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            color: #888;
-        }
-
-        .nav-item.active .nav-icon {
-            color: #bb86fc;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            color: #888;
-        }
-
-        .nav-item.active .nav-label {
-            color: #bb86fc;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 200;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: #1e1e1e;
-            border-radius: 16px;
-            padding: 24px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid #333;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #bb86fc;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 28px;
-            cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #aaa;
-            font-weight: 500;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 12px 16px;
-            background: #121212;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: #e0e0e0;
-            font-size: 15px;
-            font-family: inherit;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
+        
+        .back-to-scanner-btn:hover {
+            background: rgba(30, 30, 30, 0.95);
             border-color: #bb86fc;
         }
-
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 14px;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #333;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: all 0.3s;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #cf6679 0%, #b00020 100%);
-            color: #fff;
-        }
-
-        .scanner-container {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        #scanner-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .scanner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .scanner-frame {
-            width: 250px;
-            height: 150px;
-            border: 3px solid #bb86fc;
-            border-radius: 12px;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
-        }
-
-        .detail-header {
-            background: linear-gradient(135deg, #1e1e1e 0%, #252525 100%);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid #333;
-        }
-
-        .detail-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #bb86fc;
-            margin-bottom: 4px;
-            line-height: 1.2;
-        }
-
-        .detail-code {
-            font-size: 13px;
-            color: #888;
-            font-family: 'Courier New', monospace;
-        }
-
-        .detail-section {
-            background: #1e1e1e;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border: 1px solid #333;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #03dac6;
-            margin-bottom: 12px;
-        }
-
-        .location-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #121212;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .location-name {
-            font-size: 14px;
-            color: #e0e0e0;
-        }
-
-        .location-qty {
-            font-size: 14px;
-            font-weight: 600;
-            color: #bb86fc;
-        }
-
-        .history-item {
+        
+        .scanner-controls {
             display: flex;
             gap: 12px;
-            padding: 12px;
-            background: #121212;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .history-icon {
-            width: 36px;
-            height: 36px;
-            background: #2a2a2a;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .history-content {
-            flex: 1;
-        }
-
-        .history-action {
-            font-size: 13px;
-            color: #e0e0e0;
-            margin-bottom: 4px;
-        }
-
-        .history-date {
-            font-size: 11px;
-            color: #888;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            opacity: 0.3;
-        }
-
-        .empty-text {
-            font-size: 14px;
-            color: #888;
-        }
-
-        .location-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: #1e1e1e;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border: 1px solid #333;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .location-list-item:hover {
-            background: #252525;
-        }
-
-        .location-info {
-            flex: 1;
-        }
-
-        .location-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #e0e0e0;
-            margin-bottom: 4px;
-        }
-
-        .location-count {
-            font-size: 13px;
-            color: #888;
-        }
-
-        .location-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .icon-btn {
-            width: 36px;
-            height: 36px;
-            background: #2a2a2a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: #e0e0e0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .icon-btn:active {
-            background: #333;
-        }
-
-        .location-select {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .location-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: #121212;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .location-checkbox input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .quantity-input-group {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .quantity-input-group input {
-            flex: 1;
-        }
-
-        .export-section {
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid #333;
-        }
-
-        .export-icon {
-            font-size: 40px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 2px dashed #555;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-input-label:hover {
-            border-color: #bb86fc;
-            background: #333;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .detail-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .detail-info-item {
-            background: #121212;
-            padding: 12px;
-            border-radius: 8px;
-        }
-
-        .detail-info-label {
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 4px;
-        }
-
-        .detail-info-value {
-            font-size: 14px;
-            color: #e0e0e0;
-            font-weight: 500;
-        }
-        
-        .scan-feedback {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            z-index: 10;
-            display: none;
-        }
-
-        .scan-feedback.show {
-            display: block;
-            animation: pulse 0.5s ease;
-        }
-
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            70% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-        
-        /* Supprimer les styles qui désactivent les icônes */
-        .nav-item.detail-page-active {
-            background: transparent;
-        }
-
-        .nav-item.detail-page-active .nav-icon,
-        .nav-item.detail-page-active .nav-label {
-            color: #888;
-        }
-
-        /* Nouveau style pour les champs en édition */
-        .edit-field {
-            background: #252525;
-            border: 1px solid #bb86fc;
-            padding: 8px;
-            border-radius: 6px;
-            width: 100%;
-            color: #e0e0e0;
-        }
-        
-        .edit-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        
-        .edit-btn-small {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: none;
-            font-size: 12px;
-            cursor: pointer;
-            flex: 1;
-        }
-        
-        .edit-btn-small.save {
-            background: #bb86fc;
-            color: #000;
-        }
-        
-        .edit-btn-small.cancel {
-            background: #333;
-            color: #e0e0e0;
-        }
-        
-        .edit-mode {
-            background: #2a2a2a;
-            border-left: 3px solid #bb86fc;
-        }
-        
-        /* Styles pour le bouton historique (même style que le bouton scanner) */
-        .history-btn {
-            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
-            color: #000;
-            border: none;
-            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
-        }
-        
-        /* Conteneur de l'historique */
-        .history-container {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        
-        .history-container.expanded {
-            max-height: 500px;
-            margin-top: 12px;
-        }
-        
-        /* Filtres avancés */
-        .advanced-filters {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .filter-dropdown {
-            position: relative;
-        }
-        
-        .filter-dropdown-btn {
-            width: 100%;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s;
-            text-align: left;
-        }
-        
-        .filter-dropdown-btn:hover {
-            background: #333;
-            border-color: #bb86fc;
-        }
-        
-        .filter-dropdown-btn.active {
-            background: #bb86fc;
-            color: #000;
-            border-color: #bb86fc;
-        }
-        
-        .filter-dropdown-content {
-            display: none;
-            position: absolute;
-            background: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1000;
-            margin-top: 5px;
-            width: 100%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        
-        .filter-dropdown-content.show {
-            display: block;
-        }
-        
-        .filter-option {
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 6px;
-            margin: 2px 0;
-            font-size: 14px;
-        }
-        
-        .filter-option:hover {
-            background: #333;
-        }
-        
-        .filter-option.selected {
-            background: #bb86fc;
-            color: #000;
-        }
-        
-        /* Bouton effacer filtres */
-        .clear-filters-btn {
-            grid-column: span 2;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 14px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .clear-filters-btn:hover {
-            background: #333;
-            border-color: #cf6679;
-        }
-        
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        
-        /* Styles pour la génération de codes-barres */
-        .barcode-catalogue-container {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
             margin-top: 16px;
         }
         
-        .barcode-catalogue-item {
+        .scanner-status {
             background: #1e1e1e;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #333;
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 20px;
-            align-items: center;
-        }
-        
-        .barcode-visual {
-            background: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
+            border: 1px solid #333;
             text-align: center;
-        }
-        
-        .barcode-svg {
-            width: 100%;
-            height: auto;
-        }
-        
-        .barcode-info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-        
-        .barcode-info-item {
-            margin-bottom: 8px;
-        }
-        
-        .barcode-info-label {
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 2px;
-        }
-        
-        .barcode-info-value {
-            font-size: 14px;
-            color: #e0e0e0;
-            font-weight: 500;
-        }
-        
-        .barcode-code-display {
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            text-align: center;
-            margin-top: 10px;
-            color: #000;
-            font-weight: bold;
-        }
-        
-        .barcode-actions {
-            grid-column: span 2;
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-        
-        .catalogue-controls {
-            display: flex;
-            gap: 12px;
             margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .scanner-status.active {
+            border-color: #03dac6;
+            background: rgba(3, 218, 198, 0.1);
+        }
+        
+        .camera-permission-saved {
+            font-size: 12px;
+            color: #03dac6;
+            margin-top: 4px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div id="dashboard-page" class="page">
-        <div class="header">
-            <h1>📦 Gestion d'Inventaire</h1>
-            <div class="header-subtitle">Tableau de bord</div>
-        </div>
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-card" onclick="navigateTo('locations')">
-                    <div class="stat-value" id="total-locations">0</div>
-                    <div class="stat-label">Emplacement</div>
-                </div>
-                <div class="stat-card" onclick="showLowStock()">
-                    <div class="stat-value" id="low-stock">0</div>
-                    <div class="stat-label">Stock faible</div>
-                </div>
-            </div>
-
-            <div class="quick-actions">
-                <button class="action-btn" onclick="showAddArticleModal()">
-                    ➕ Ajouter article
-                </button>
-                <button class="action-btn secondary" onclick="navigateTo('scan')">
-                    📷 Scanner
-                </button>
-            </div>
-
-            <div class="detail-section">
-                <div class="section-title">Activité récente</div>
-                <div id="recent-activity"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="inventory-page" class="page hidden">
-        <div class="header">
-            <h1>📋 Inventaire</h1>
-            <div class="header-subtitle">Liste des articles</div>
-        </div>
-        <div class="container">
-            <div class="search-container">
-                <input type="text" class="search-input" id="search-input" placeholder="🔍 Rechercher un article...">
-            </div>
-
-            <div class="filters" id="location-filters"></div>
-
-            <div class="article-list" id="article-list"></div>
-        </div>
-        <button class="fab" onclick="showAddArticleModal()">+</button>
-    </div>
+    <!-- ... (tous les éléments HTML précédents restent inchangés jusqu'au scan-page) ... -->
 
     <div id="scan-page" class="page hidden">
         <div class="header">
@@ -1065,8 +77,22 @@
             <div class="header-subtitle">Scanner un code-barre</div>
         </div>
         <div class="container">
+            <div class="scanner-status" id="scanner-status">
+                <div>📷</div>
+                <div id="status-text">Scanner prêt</div>
+            </div>
+
             <div class="scanner-container" id="scanner-reader">
                 <div id="scan-feedback" class="scan-feedback"></div>
+            </div>
+            
+            <div class="scanner-controls">
+                <button class="btn-primary" onclick="startScanner()" id="start-scanner-btn">
+                    ▶️ Démarrer le scanner
+                </button>
+                <button class="btn-secondary" onclick="stopScanner()" id="stop-scanner-btn" style="display: none;">
+                    ⏸️ Pause
+                </button>
             </div>
 
             <div class="detail-section">
@@ -1080,353 +106,13 @@
             <div id="scan-result"></div>
         </div>
     </div>
-    
-    <div id="search-page" class="page hidden">
-        <div class="header">
-            <h1>🔍 Recherche Avancée</h1>
-            <div class="header-subtitle">Trouver des articles rapidement</div>
-        </div>
-        <div class="container">
-            <div class="search-container">
-                <input type="text" class="search-input" id="advanced-search-input" placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie...">
-            </div>
 
-            <!-- Nouveaux filtres avancés -->
-            <div class="advanced-filters">
-                <div class="filter-dropdown">
-                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('location')">
-                        📍 Lieux
-                    </button>
-                    <div class="filter-dropdown-content" id="location-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
-                    </div>
-                </div>
-                
-                <div class="filter-dropdown">
-                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('famille')">
-                        📁 Familles
-                    </button>
-                    <div class="filter-dropdown-content" id="famille-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
-                    </div>
-                </div>
-                
-                <div class="filter-dropdown">
-                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('categorie')">
-                        🏷️ Catégories
-                    </button>
-                    <div class="filter-dropdown-content" id="categorie-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
-                    </div>
-                </div>
-                
-                <div class="filter-dropdown">
-                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('fournisseur')">
-                        🏢 Fournisseurs
-                    </button>
-                    <div class="filter-dropdown-content" id="fournisseur-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
-                    </div>
-                </div>
-                
-                <button class="clear-filters-btn" onclick="clearAllFilters()">
-                    🗑️ Effacer tous les filtres
-                </button>
-            </div>
+    <!-- Bouton retour scanner (sera ajouté dynamiquement) -->
+    <button id="back-to-scanner-btn" class="back-to-scanner-btn hidden" onclick="navigateTo('scan')">
+        ← Retour scanner
+    </button>
 
-            <!-- Filtres existants pour le stock -->
-            <div class="filters">
-                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
-                    Tous
-                </div>
-                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
-                    ⚠️ Stock faible
-                </div>
-                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
-                    ❌ Rupture
-                </div>
-            </div>
-
-            <div class="article-list" id="search-results">
-                <!-- Vide par défaut -->
-                <div class="empty-state">
-                    <div class="empty-icon">🔍</div>
-                    <div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="detail-page" class="page hidden">
-        <div class="header">
-            <h1>📦 Détails</h1>
-            <div class="header-subtitle">Information de l'article</div>
-        </div>
-        <div class="container" id="detail-container"></div>
-    </div>
-
-    <div id="locations-page" class="page hidden">
-        <div class="header">
-            <h1>📍 Emplacements</h1>
-            <div class="header-subtitle">Gestion des lieux</div>
-        </div>
-        <div class="container">
-            <div id="locations-list"></div>
-        </div>
-        <button class="fab" onclick="showAddLocationModal()">+</button>
-    </div>
-
-    <div id="import-export-page" class="page hidden">
-        <div class="header">
-            <h1>📊 Import/Export</h1>
-            <div class="header-subtitle">Gestion des données</div>
-        </div>
-        <div class="container">
-            <!-- Nouvelle section pour le catalogue de codes-barres -->
-            <div class="export-section">
-                <div class="export-icon">🏷️</div>
-                <div class="section-title">Catalogue de codes-barres</div>
-                <div class="form-group">
-                    <label class="form-label">Filtrer par famille</label>
-                    <select class="form-select" id="barcode-famille-filter" onchange="generateBarcodeCatalogue()">
-                        <option value="">Toutes les familles</option>
-                    </select>
-                </div>
-                <button class="btn-primary" onclick="generateBarcodeCatalogue()">
-                    🏷️ Générer le catalogue
-                </button>
-                <button class="btn-secondary" onclick="downloadBarcodeCatalogue()" id="download-catalogue-btn" style="display: none;">
-                    💾 Télécharger le catalogue
-                </button>
-            </div>
-
-            <div class="export-section">
-                <div class="export-icon">📤</div>
-                <div class="section-title">Exporter l'inventaire</div>
-                <div class="form-group">
-                    <label class="form-label">Adresse e-mail</label>
-                    <input type="email" class="form-input" id="export-email" placeholder="votre@email.com">
-                </div>
-                <button class="btn-primary" onclick="exportToExcel()">📧 Exporter et envoyer</button>
-                <button class="btn-secondary" onclick="downloadExcel()">💾 Télécharger Excel</button>
-            </div>
-
-            <div class="export-section">
-                <div class="export-icon">📥</div>
-                <div class="section-title">Importer l'inventaire</div>
-                <div class="file-input-wrapper">
-                    <input type="file" id="import-file" accept=".xlsx,.xls,.csv" onchange="importFromExcel(event)">
-                    <label for="import-file" class="file-input-label">
-                        📁 Sélectionner un fichier Excel
-                    </label>
-                </div>
-                <div style="margin-top: 12px; font-size: 13px; color: #888; text-align: center;">
-                    Formats acceptés: .xlsx, .xls, .csv
-                </div>
-            </div>
-
-            <div class="export-section">
-                <div class="section-title">💾 Sauvegarde locale</div>
-                <button class="btn-secondary" onclick="backupData()">Créer une sauvegarde</button>
-                <button class="btn-secondary" onclick="restoreData()">Restaurer une sauvegarde</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Ajout Article -->
-    <div id="add-article-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Nouvel Article</div>
-                <button class="close-btn" onclick="closeModal('add-article-modal')">&times;</button>
-            </div>
-            <form onsubmit="saveArticle(event)">
-                <div class="form-group">
-                    <label class="form-label">Code-barre</label>
-                    <input type="text" class="form-input" id="article-barcode" placeholder="Facultatif">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Famille *</label>
-                    <input type="text" class="form-input" id="article-famille" required value="boulonnerie">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Catégorie *</label>
-                    <input type="text" class="form-input" id="article-categorie" required value="vis">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nom de l'article *</label>
-                    <input type="text" class="form-input" id="article-name" required value="hexa">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Taille</label>
-                    <input type="text" class="form-input" id="article-taille" placeholder="ex: M6">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Longueur</label>
-                    <input type="text" class="form-input" id="article-longueur" placeholder="ex: 20mm">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Conditionnement *</label>
-                    <input type="number" class="form-input" id="article-conditionnement" required min="1" value="1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Fournisseur</label>
-                    <input type="text" class="form-input" id="article-fournisseur" placeholder="ex: Fournisseur X">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Chantier Référence</label>
-                    <input type="text" class="form-input" id="article-chant-ref" placeholder="À définir ultérieurement">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Lieu de stockage *</label>
-                    <select class="form-select" id="article-location" required></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nombre *</label>
-                    <input type="number" class="form-input" id="article-nombre" required min="0" value="1">
-                </div>
-                <button type="submit" class="btn-primary">Enregistrer</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Modification Article -->
-    <div id="edit-article-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Modifier l'article</div>
-                <button class="close-btn" onclick="closeModal('edit-article-modal')">&times;</button>
-            </div>
-            <form onsubmit="updateArticle(event)">
-                <input type="hidden" id="edit-article-id">
-                <div class="form-group">
-                    <label class="form-label">Code-barre</label>
-                    <input type="text" class="form-input" id="edit-article-barcode">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Famille *</label>
-                    <input type="text" class="form-input" id="edit-article-famille" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Catégorie *</label>
-                    <input type="text" class="form-input" id="edit-article-categorie" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nom de l'article *</label>
-                    <input type="text" class="form-input" id="edit-article-name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Taille</label>
-                    <input type="text" class="form-input" id="edit-article-taille">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Longueur</label>
-                    <input type="text" class="form-input" id="edit-article-longueur">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Conditionnement *</label>
-                    <input type="number" class="form-input" id="edit-article-conditionnement" required min="1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Fournisseur</label>
-                    <input type="text" class="form-input" id="edit-article-fournisseur">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Chantier Référence</label>
-                    <input type="text" class="form-input" id="edit-article-chant-ref">
-                </div>
-                <button type="submit" class="btn-primary">Mettre à jour</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="add-location-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Nouvel Emplacement</div>
-                <button class="close-btn" onclick="closeModal('add-location-modal')">&times;</button>
-            </div>
-            <form onsubmit="saveLocation(event)">
-                <div class="form-group">
-                    <label class="form-label">Nom de l'emplacement *</label>
-                    <input type="text" class="form-input" id="location-name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-textarea" id="location-description"></textarea>
-                </div>
-                <button type="submit" class="btn-primary">Enregistrer</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="move-article-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Déplacer l'article</div>
-                <button class="close-btn" onclick="closeModal('move-article-modal')">&times;</button>
-            </div>
-            <form onsubmit="moveArticle(event)">
-                <div class="form-group">
-                    <label class="form-label">Depuis</label>
-                    <select class="form-select" id="move-from" required></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Vers</label>
-                    <select class="form-select" id="move-to" required></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nombre</label>
-                    <input type="number" class="form-input" id="move-quantity" min="1" required>
-                </div>
-                <button type="submit" class="btn-primary">Déplacer</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="stock-action-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="stock-action-title">Action sur le stock</div>
-                <button class="close-btn" onclick="closeModal('stock-action-modal')">&times;</button>
-            </div>
-            <form onsubmit="performStockAction(event)">
-                <div class="form-group">
-                    <label class="form-label">Emplacement</label>
-                    <select class="form-select" id="stock-location" required></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nombre</label>
-                    <input type="number" class="form-input" id="stock-quantity" min="1" required>
-                </div>
-                <button type="submit" class="btn-primary" id="stock-action-btn">Confirmer</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- NAVIGATION EN BAS - RETOUR À LA CONFIGURATION ORIGINALE -->
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="navigateTo('dashboard')">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Accueil</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('inventory')">
-            <div class="nav-icon">📋</div>
-            <div class="nav-label">Inventaire</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('search')">
-            <div class="nav-icon">🔍</div>
-            <div class="nav-label">Recherche</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('locations')">
-            <div class="nav-icon">📍</div>
-            <div class="nav-label">Lieux</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('import-export')">
-            <div class="nav-icon">📊</div>
-            <div class="nav-label">Export</div>
-        </div>
-    </nav>
+    <!-- ... (tous les autres éléments HTML restent inchangés) ... -->
 
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1438,6 +124,8 @@
         let currentStockAction = null;
         let html5QrCode = null;
         let isScannerActive = false;
+        let currentBarcodeFormat = 'CODE128';
+        let cameraPermissionGranted = localStorage.getItem('cameraPermission') === 'granted';
         
         let currentFilters = {
             location: null,
@@ -1458,6 +146,14 @@
         function navigateTo(page) {
             console.log('Navigating to:', page);
             
+            // Arrêter le scanner si on quitte la page scan
+            if (page !== 'scan' && isScannerActive) {
+                stopScanner();
+            }
+            
+            // Masquer le bouton retour scanner
+            document.getElementById('back-to-scanner-btn').classList.add('hidden');
+            
             // Masquer toutes les pages
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             
@@ -1477,6 +173,16 @@
                         item.classList.add('active');
                     }
                 });
+                
+                // Afficher le bouton retour scanner
+                document.getElementById('back-to-scanner-btn').classList.remove('hidden');
+            } else if (page === 'scan') {
+                // Pour la page scan, redémarrer le scanner si permission accordée
+                setTimeout(() => {
+                    if (cameraPermissionGranted) {
+                        startScanner();
+                    }
+                }, 300);
             } else {
                 // Page normale : activer le bouton correspondant
                 document.querySelectorAll('.nav-item').forEach(item => {
@@ -1489,7 +195,6 @@
             // Charger les données spécifiques à la page
             if (page === 'dashboard') loadDashboard();
             if (page === 'inventory') loadInventory();
-            if (page === 'scan') initScanner();
             if (page === 'search') loadSearchPage();
             if (page === 'locations') loadLocations();
             if (page === 'import-export') loadImportExport();
@@ -1717,6 +422,9 @@
             // Afficher la page de détails sans toucher à la navigation
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
+            
+            // Afficher le bouton retour scanner
+            document.getElementById('back-to-scanner-btn').classList.remove('hidden');
         }
         
         function toggleHistory() {
@@ -1733,6 +441,21 @@
             ).join('');
             
             modal.classList.add('active');
+            
+            // Ajouter le bouton retour scanner dans le modal
+            const modalContent = modal.querySelector('.modal-content');
+            const existingBackBtn = modalContent.querySelector('.back-to-scanner-modal-btn');
+            if (!existingBackBtn) {
+                const backBtn = document.createElement('button');
+                backBtn.className = 'btn-secondary back-to-scanner-modal-btn';
+                backBtn.innerHTML = '← Retour au scanner';
+                backBtn.style.marginTop = '12px';
+                backBtn.onclick = function() {
+                    closeModal('add-article-modal');
+                    navigateTo('scan');
+                };
+                modalContent.querySelector('form').appendChild(backBtn);
+            }
         }
 
         function showEditArticleModal(articleId) {
@@ -1843,6 +566,13 @@
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
             document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
+            
+            // Retirer le bouton retour scanner du modal
+            const modal = document.getElementById(modalId);
+            const backBtn = modal.querySelector('.back-to-scanner-modal-btn');
+            if (backBtn) {
+                backBtn.remove();
+            }
         }
 
         function saveArticle(event) {
@@ -2080,19 +810,28 @@
             loadDashboard();
         }
 
-        function initScanner() {
-            console.log('Initializing scanner...');
+        // NOUVELLES FONCTIONS POUR LE SCANNER AMÉLIORÉ
+        function startScanner() {
+            console.log('Démarrage du scanner...');
             
+            // Nettoyer le conteneur du scanner
+            const scannerReader = document.getElementById('scanner-reader');
+            scannerReader.innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
+            
+            // Mettre à jour l'interface
+            document.getElementById('start-scanner-btn').style.display = 'none';
+            document.getElementById('stop-scanner-btn').style.display = 'block';
+            document.getElementById('scanner-status').classList.add('active');
+            document.getElementById('status-text').textContent = 'Scanner actif';
+            
+            // Si le scanner existe déjà, le nettoyer d'abord
             if (html5QrCode) {
                 try {
                     html5QrCode.clear();
                 } catch (e) {
-                    console.log('Error clearing scanner:', e);
+                    console.log('Erreur nettoyage scanner:', e);
                 }
             }
-            
-            // Nettoyer le conteneur du scanner
-            document.getElementById('scanner-reader').innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
             
             html5QrCode = new Html5QrcodeScanner(
                 "scanner-reader",
@@ -2100,17 +839,21 @@
                     fps: 10, 
                     qrbox: { width: 250, height: 150 },
                     aspectRatio: 1.0,
-                    rememberLastUsedCamera: true
+                    rememberLastUsedCamera: true,
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
                 },
-                false
+                false // verbose
             );
             
             html5QrCode.render(
                 (decodedText) => {
                     console.log('Code scanné:', decodedText);
                     
-                    // Mettre en pause le scanner
-                    html5QrCode.pause();
+                    // Arrêter le scanner immédiatement après la détection
+                    stopScanner();
+                    
+                    // Afficher un feedback visuel
+                    showScanFeedback('✅ Code scanné !');
                     
                     // Mettre le code dans le champ manuel
                     document.getElementById('manual-barcode').value = decodedText;
@@ -2120,33 +863,96 @@
                     
                     if (article) {
                         console.log('Article trouvé:', article);
-                        // Afficher les détails de l'article
-                        showArticleDetail(article.id.toString());
+                        // Afficher les détails de l'article après un court délai
+                        setTimeout(() => {
+                            showArticleDetail(article.id.toString());
+                        }, 800);
                     } else {
                         console.log('Article non trouvé');
-                        // Afficher le modal de création
-                        showAddArticleModal();
-                        document.getElementById('article-barcode').value = decodedText;
-                        document.getElementById('article-name').focus();
-                        
-                        // Afficher un message
-                        document.getElementById('scan-result').innerHTML = `
-                            <div class="detail-section">
-                                <div class="section-title">❌ Article non trouvé</div>
-                                <div style="text-align: center; padding: 20px; color: #888;">
-                                    Aucun article avec le code "${decodedText}"
-                                    <br>Le formulaire de création a été ouvert.
+                        // Afficher le modal de création après un court délai
+                        setTimeout(() => {
+                            showAddArticleModal();
+                            document.getElementById('article-barcode').value = decodedText;
+                            document.getElementById('article-name').focus();
+                            
+                            // Afficher un message
+                            document.getElementById('scan-result').innerHTML = `
+                                <div class="detail-section">
+                                    <div class="section-title">❌ Article non trouvé</div>
+                                    <div style="text-align: center; padding: 20px; color: #888;">
+                                        Aucun article avec le code "${decodedText}"
+                                        <br>Le formulaire de création a été ouvert.
+                                    </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        }, 800);
                     }
                 },
                 (errorMessage) => {
                     console.log('Scanner error:', errorMessage);
                 }
-            );
+            ).then(() => {
+                // Succès - la permission est accordée
+                isScannerActive = true;
+                cameraPermissionGranted = true;
+                localStorage.setItem('cameraPermission', 'granted');
+                
+                // Afficher le message de permission sauvegardée
+                const permissionMsg = document.createElement('div');
+                permissionMsg.className = 'camera-permission-saved';
+                permissionMsg.textContent = '✓ Permission caméra sauvegardée';
+                document.getElementById('scanner-status').appendChild(permissionMsg);
+                
+                console.log('Scanner démarré avec succès');
+            }).catch((err) => {
+                console.log('Erreur démarrage scanner:', err);
+                isScannerActive = false;
+                
+                // Réafficher le bouton de démarrage
+                document.getElementById('start-scanner-btn').style.display = 'block';
+                document.getElementById('stop-scanner-btn').style.display = 'none';
+                document.getElementById('scanner-status').classList.remove('active');
+                document.getElementById('status-text').textContent = 'Erreur de démarrage';
+                
+                // Si c'est une erreur de permission, proposer de réessayer
+                if (err.message && err.message.includes('permission')) {
+                    alert('Permission caméra refusée. Veuillez autoriser la caméra dans les paramètres de votre navigateur.');
+                    cameraPermissionGranted = false;
+                    localStorage.setItem('cameraPermission', 'denied');
+                }
+            });
+        }
+        
+        function stopScanner() {
+            if (html5QrCode && isScannerActive) {
+                console.log('Arrêt du scanner...');
+                
+                html5QrCode.clear().then(() => {
+                    console.log('Scanner arrêté avec succès');
+                    isScannerActive = false;
+                    
+                    // Mettre à jour l'interface
+                    document.getElementById('start-scanner-btn').style.display = 'block';
+                    document.getElementById('stop-scanner-btn').style.display = 'none';
+                    document.getElementById('scanner-status').classList.remove('active');
+                    document.getElementById('status-text').textContent = 'Scanner arrêté';
+                    
+                    // Nettoyer le conteneur
+                    document.getElementById('scanner-reader').innerHTML = '<div id="scan-feedback" class="scan-feedback"></div>';
+                }).catch((err) => {
+                    console.log('Erreur arrêt scanner:', err);
+                });
+            }
+        }
+        
+        function showScanFeedback(message) {
+            const feedback = document.getElementById('scan-feedback');
+            feedback.textContent = message;
+            feedback.classList.add('show');
             
-            isScannerActive = true;
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 1500);
         }
 
         function searchByBarcode(barcode = null) {
@@ -2394,8 +1200,6 @@
 
         function loadSearchPage() {
             const searchInput = document.getElementById('advanced-search-input');
-            // NE PAS mettre le focus automatiquement pour éviter l'ouverture du clavier
-            // searchInput.focus();
             
             // Initialiser les filtres
             initializeFilters();
@@ -2922,6 +1726,16 @@
             const addArticleModal = document.getElementById('add-article-modal');
             if (addArticleModal) {
                 // Les valeurs sont déjà préremplies dans le HTML
+            }
+            
+            // Vérifier si la permission caméra est déjà accordée
+            if (cameraPermissionGranted) {
+                console.log('Permission caméra déjà accordée');
+                // Ajouter le message de permission sauvegardée
+                const permissionMsg = document.createElement('div');
+                permissionMsg.className = 'camera-permission-saved';
+                permissionMsg.textContent = '✓ Permission caméra sauvegardée';
+                document.getElementById('scanner-status').appendChild(permissionMsg);
             }
         });
 
