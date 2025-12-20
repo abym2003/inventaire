@@ -756,6 +756,25 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
         
+        /* Styles pour les codes-barres */
+        .barcode-section {
+            margin-top: 10px;
+            text-align: center;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .barcode-number {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #000 !important;
+            margin-top: 5px;
+        }
+        
         /* Supprimer les styles qui désactivent les icônes */
         .nav-item.detail-page-active {
             background: transparent;
@@ -929,25 +948,6 @@
             flex-direction: column;
             gap: 8px;
             margin-top: 8px;
-        }
-        
-        /* Styles pour les codes-barres */
-        .barcode-section {
-            margin-top: 10px;
-            text-align: center;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-        
-        .barcode-number {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #000 !important;
-            margin-top: 5px;
         }
     </style>
 </head>
@@ -1350,7 +1350,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Variables globales
+        // Variables globales (SIMPLIFIÉES comme dans index_backup.html)
         let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
         let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
         let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
@@ -1369,20 +1369,25 @@
         // Initialiser les emplacements par défaut si vide
         if (locations.length === 0) {
             locations = [
-                { id: Date.now().toString(), name: 'Entrepôt principal', description: 'Stockage principal' },
-                { id: (Date.now() + 1).toString(), name: 'Bureau', description: 'Petit matériel de bureau' },
-                { id: (Date.now() + 2).toString(), name: 'Atelier', description: 'Outils et équipements' }
+                { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
+                { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
+                { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
             ];
             saveToStorage();
         }
 
-        // Fonction de navigation principale
+        // Fonction de navigation (SIMPLIFIÉE et TESTÉE)
         function navigateTo(page) {
             console.log('Navigation vers:', page);
             
             // Arrêter le scanner si actif
-            if (isScannerActive && page !== 'scan') {
-                stopScanner();
+            if (isScannerActive && html5QrCode && page !== 'scan') {
+                try {
+                    html5QrCode.stop();
+                } catch(e) {
+                    console.log('Erreur arrêt scanner:', e);
+                }
+                isScannerActive = false;
             }
             
             // Masquer toutes les pages
@@ -1404,16 +1409,22 @@
                 item.classList.remove('active');
             });
             
-            // Activer l'élément de navigation correspondant
-            let navItem;
-            if (page === 'dashboard') navItem = document.querySelector('.nav-item[onclick*="dashboard"]');
-            else if (page === 'inventory') navItem = document.querySelector('.nav-item[onclick*="inventory"]');
-            else if (page === 'search') navItem = document.querySelector('.nav-item[onclick*="search"]');
-            else if (page === 'locations') navItem = document.querySelector('.nav-item[onclick*="locations"]');
-            else if (page === 'import-export') navItem = document.querySelector('.nav-item[onclick*="import-export"]');
-            
-            if (navItem) {
-                navItem.classList.add('active');
+            // Pour la page détail, ne pas activer de navigation
+            if (page !== 'detail') {
+                // Activer l'élément de navigation correspondant
+                let navItem = null;
+                if (page === 'dashboard') navItem = document.querySelector('.nav-item[onclick*="dashboard"]');
+                else if (page === 'inventory') navItem = document.querySelector('.nav-item[onclick*="inventory"]');
+                else if (page === 'search') navItem = document.querySelector('.nav-item[onclick*="search"]');
+                else if (page === 'locations') navItem = document.querySelector('.nav-item[onclick*="locations"]');
+                else if (page === 'import-export') navItem = document.querySelector('.nav-item[onclick*="import-export"]');
+                
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+            } else {
+                // Pour la page détail, activer l'inventaire (page précédente)
+                document.querySelector('.nav-item[onclick*="inventory"]').classList.add('active');
             }
             
             // Charger les données de la page
@@ -1440,18 +1451,6 @@
                     // La page détail est chargée par showArticleDetail
                     break;
             }
-        }
-
-        function stopScanner() {
-            if (html5QrCode) {
-                try {
-                    html5QrCode.stop();
-                    html5QrCode = null;
-                } catch (e) {
-                    console.log('Erreur arrêt scanner:', e);
-                }
-            }
-            isScannerActive = false;
         }
 
         function saveToStorage() {
@@ -1497,6 +1496,7 @@
 
         function showLowStock() {
             navigateTo('search');
+            // Activer le filtre stock faible
             setTimeout(() => {
                 document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
                     chip.classList.remove('active');
@@ -1532,7 +1532,7 @@
                     Tous
                 </div>
                 ${locations.map(loc => `
-                    <div class="filter-chip ${activeFilter === loc.id ? 'active' : ''}" 
+                    <div class="filter-chip ${activeFilter === loc.id.toString() ? 'active' : ''}" 
                          data-location="${loc.id}" onclick="filterByLocation('${loc.id}')">
                         ${loc.name}
                     </div>
@@ -1559,7 +1559,7 @@
                         </div>
                         <div class="article-locations">
                             ${locs.map(([locId, qty]) => {
-                                const loc = locations.find(l => l.id === locId);
+                                const loc = locations.find(l => l.id.toString() === locId.toString());
                                 const total = qty.nombre * qty.conditionnement;
                                 return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
                             }).join('')}
@@ -1647,7 +1647,7 @@
                 <div class="detail-section">
                     <div class="section-title">📍 Emplacements (Total: ${totalQty})</div>
                     ${locs.map(([locId, qty]) => {
-                        const loc = locations.find(l => l.id === locId);
+                        const loc = locations.find(l => l.id.toString() === locId.toString());
                         const total = qty.nombre * qty.conditionnement;
                         return loc ? `
                             <div class="location-item">
@@ -1779,7 +1779,7 @@
 
             const availableLocations = Object.entries(article.quantities || {})
                 .filter(([_, q]) => q.nombre > 0)
-                .map(([locId]) => locations.find(l => l.id === locId))
+                .map(([locId]) => locations.find(l => l.id.toString() === locId.toString()))
                 .filter(Boolean);
 
             document.getElementById('move-from').innerHTML = availableLocations.map(loc => {
@@ -1809,7 +1809,7 @@
                 : locations.map(l => [l.id, 0]);
 
             document.getElementById('stock-location').innerHTML = availableLocations.map(([locId]) => {
-                const loc = locations.find(l => l.id === locId);
+                const loc = locations.find(l => l.id.toString() === locId.toString());
                 const qty = article.quantities?.[locId];
                 return loc ? `<option value="${loc.id}">${loc.name}${action === 'remove' && qty ? ` (${qty.nombre} × ${qty.conditionnement})` : ''}</option>` : '';
             }).join('');
@@ -1867,11 +1867,11 @@
                     existingArticle.barcode = barcode;
                 }
 
-                addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id === locationId).name}`);
+                addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
             } else {
                 // Nouvel article
                 const article = {
-                    id: Date.now().toString(),
+                    id: Date.now(),
                     name,
                     barcode,
                     famille,
@@ -1903,7 +1903,7 @@
             const description = document.getElementById('location-description').value;
 
             locations.push({
-                id: Date.now().toString(),
+                id: Date.now(),
                 name,
                 description
             });
@@ -1943,8 +1943,8 @@
                 article.quantities[toId].nombre += quantity;
             }
 
-            const fromLoc = locations.find(l => l.id === fromId);
-            const toLoc = locations.find(l => l.id === toId);
+            const fromLoc = locations.find(l => l.id.toString() === fromId);
+            const toLoc = locations.find(l => l.id.toString() === toId);
 
             saveToStorage();
             addHistory('Déplacement', article.name, `${quantity} de ${fromLoc.name} → ${toLoc.name}`);
@@ -1968,7 +1968,7 @@
                 } else {
                     article.quantities[locationId].nombre += quantity;
                 }
-                addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id === locationId).name}`);
+                addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
             } else {
                 if (!article.quantities[locationId] || article.quantities[locationId].nombre < quantity) {
                     alert('Nombre insuffisant');
@@ -1976,7 +1976,7 @@
                 }
                 article.quantities[locationId].nombre -= quantity;
                 if (article.quantities[locationId].nombre === 0) delete article.quantities[locationId];
-                addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id === locationId).name}`);
+                addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
             }
 
             saveToStorage();
@@ -2049,7 +2049,7 @@
 
             if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) return;
 
-            locations = locations.filter(l => l.id !== locationId);
+            locations = locations.filter(l => l.id.toString() !== locationId.toString());
             saveToStorage();
             loadLocations();
             loadDashboard();
@@ -2189,7 +2189,7 @@
                 }
 
                 Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
-                    const loc = locations.find(l => l.id === locId);
+                    const loc = locations.find(l => l.id.toString() === locId.toString());
                     const total = qty.nombre * qty.conditionnement;
 
                     data.push({
@@ -2386,7 +2386,7 @@
                             }
                         } else {
                             article = {
-                                id: Date.now().toString(),
+                                id: Date.now(),
                                 name,
                                 barcode: row['Code-barre'] || '',
                                 famille: row['Famille'] || '',
@@ -2712,7 +2712,7 @@
                         </div>
                         <div class="article-locations">
                             ${locs.map(([locId, qty]) => {
-                                const loc = locations.find(l => l.id === locId);
+                                const loc = locations.find(l => l.id.toString() === locId.toString());
                                 const total = qty.nombre * qty.conditionnement;
                                 return loc ? `<span class="location-badge">${loc.name}: ${total}</span>` : '';
                             }).join('')}
