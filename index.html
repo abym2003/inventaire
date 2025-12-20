@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -756,16 +756,6 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
         
-        /* Supprimer les styles qui désactivent les icônes */
-        .nav-item.detail-page-active {
-            background: transparent;
-        }
-
-        .nav-item.detail-page-active .nav-icon,
-        .nav-item.detail-page-active .nav-label {
-            color: #888;
-        }
-
         /* Nouveau style pour les champs en édition */
         .edit-field {
             background: #252525;
@@ -806,7 +796,7 @@
             border-left: 3px solid #bb86fc;
         }
         
-        /* Styles pour le bouton historique (même style que le bouton scanner) */
+        /* Styles pour le bouton historique */
         .history-btn {
             background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
             color: #000;
@@ -1079,13 +1069,13 @@
 
             <!-- Filtres existants pour le stock -->
             <div class="filters">
-                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
+                <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all', event)">
                     Tous
                 </div>
-                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low')">
+                <div class="filter-chip" data-filter="low" onclick="filterSearchResults('low', event)">
                     ⚠️ Stock faible
                 </div>
-                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero')">
+                <div class="filter-chip" data-filter="zero" onclick="filterSearchResults('zero', event)">
                     ❌ Rupture
                 </div>
             </div>
@@ -1377,32 +1367,31 @@
         function navigateTo(page) {
             console.log('Navigating to:', page);
             
+            // Arrêter le scanner si on quitte la page scan
+            if (isScannerActive && page !== 'scan') {
+                stopScanner();
+            }
+            
             // Masquer toutes les pages
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             
             // Afficher la page demandée
-            document.getElementById(`${page}-page`).classList.remove('hidden');
+            const pageElement = document.getElementById(`${page}-page`);
+            if (pageElement) {
+                pageElement.classList.remove('hidden');
+            }
             
-            // Gérer la navigation - TOUJOURS ACTIVER LE BOUTON CORRESPONDANT
+            // Mettre à jour la navigation active
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // Activer le bouton correspondant à la page
+            // Activer le bon élément de navigation
             if (page === 'detail') {
-                // Pour la page détail, activer l'inventaire car c'est de là qu'on vient
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    if (item.onclick && item.onclick.toString().includes(`navigateTo('inventory')`)) {
-                        item.classList.add('active');
-                    }
-                });
+                // Garder l'inventaire actif pour la page détail
+                document.querySelector('.nav-item[onclick*="inventory"]')?.classList.add('active');
             } else {
-                // Page normale : activer le bouton correspondant
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
-                        item.classList.add('active');
-                    }
-                });
+                document.querySelector(`.nav-item[onclick*="${page}"]`)?.classList.add('active');
             }
             
             // Charger les données spécifiques à la page
@@ -1412,6 +1401,18 @@
             if (page === 'search') loadSearchPage();
             if (page === 'locations') loadLocations();
             if (page === 'import-export') loadImportExport();
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                try {
+                    html5QrCode.stop();
+                    html5QrCode = null;
+                } catch (e) {
+                    console.log('Error stopping scanner:', e);
+                }
+            }
+            isScannerActive = false;
         }
 
         function saveToStorage() {
@@ -1468,7 +1469,7 @@
 
         function loadInventory() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const activeFilter = document.querySelector('.filter-chip.active')?.dataset.location;
+            const activeFilter = document.querySelector('#inventory-page .filter-chip.active')?.dataset.location;
 
             let filtered = articles.filter(art => 
                 art.name.toLowerCase().includes(searchTerm) ||
@@ -1486,12 +1487,12 @@
 
             const filtersHtml = `
                 <div class="filter-chip ${!activeFilter || activeFilter === 'all' ? 'active' : ''}" 
-                     data-location="all" onclick="filterByLocation('all')">
+                     data-location="all" onclick="filterByLocation('all', event)">
                     Tous
                 </div>
                 ${locations.map(loc => `
                     <div class="filter-chip ${activeFilter === loc.id.toString() ? 'active' : ''}" 
-                         data-location="${loc.id}" onclick="filterByLocation('${loc.id}')">
+                         data-location="${loc.id}" onclick="filterByLocation('${loc.id}', event)">
                         ${loc.name}
                     </div>
                 `).join('')}
@@ -1529,9 +1530,12 @@
             document.getElementById('article-list').innerHTML = listHtml;
         }
 
-        function filterByLocation(locationId) {
-            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        function filterByLocation(locationId, event) {
+            if (event) {
+                event.stopPropagation();
+                document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => chip.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+            }
             loadInventory();
         }
 
@@ -1637,7 +1641,7 @@
                 </div>
             `;
             
-            // Afficher la page de détails sans toucher à la navigation
+            // Afficher la page de détails
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
             
@@ -1649,7 +1653,7 @@
                             format: "CODE128",
                             width: 1.5,
                             height: 40,
-                            displayValue: false, // Nous affichons le numéro manuellement
+                            displayValue: false,
                             background: "#ffffff",
                             lineColor: "#000000",
                             margin: 5
@@ -1715,7 +1719,6 @@
             // Mettre à jour les quantités existantes avec le nouveau conditionnement
             Object.keys(article.quantities || {}).forEach(locId => {
                 if (article.quantities[locId]) {
-                    // Conserver le nombre de paquets, mais mettre à jour le conditionnement
                     article.quantities[locId].conditionnement = article.conditionnement;
                 }
             });
@@ -1799,7 +1802,7 @@
             const locationId = document.getElementById('article-location').value;
             const nombre = parseInt(document.getElementById('article-nombre').value);
 
-            // Vérifier si un article similaire existe déjà (sans tenir compte du code-barre s'il est vide)
+            // Vérifier si un article similaire existe déjà
             let existingArticle = null;
             
             if (barcode) {
@@ -1989,7 +1992,7 @@
 
         function showLocationInventory(locationId) {
             navigateTo('inventory');
-            document.querySelectorAll('.filter-chip').forEach(chip => {
+            document.querySelectorAll('#inventory-page .filter-chip').forEach(chip => {
                 if (chip.dataset.location === locationId) {
                     chip.classList.add('active');
                 } else {
@@ -2484,8 +2487,6 @@
 
         function loadSearchPage() {
             const searchInput = document.getElementById('advanced-search-input');
-            // NE PAS mettre le focus automatiquement pour éviter l'ouverture du clavier
-            // searchInput.focus();
             
             // Initialiser les filtres
             initializeFilters();
@@ -2515,7 +2516,7 @@
         function fillFilterDropdown(type, values) {
             const dropdown = document.getElementById(`${type}-filter-dropdown`);
             dropdown.innerHTML = values.map(value => `
-                <div class="filter-option" onclick="selectFilter('${type}', '${value}')">
+                <div class="filter-option" onclick="selectFilter('${type}', '${value.replace(/'/g, "\\'")}')">
                     ${value}
                 </div>
             `).join('');
@@ -2621,7 +2622,7 @@
 
         function performAdvancedSearch() {
             const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
-            const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
+            const activeFilter = document.querySelector('#search-page .filter-chip.active')?.dataset.filter;
             
             let filtered = articles.filter(art => {
                 // Filtre par recherche texte
@@ -2715,19 +2716,14 @@
             document.getElementById('search-results').innerHTML = resultsHtml;
         }
 
-        function filterSearchResults(filterType) {
-            document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
-                chip.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            performAdvancedSearch();
-        }
-
-        function filterSearchByLocation(locationId) {
-            document.querySelectorAll('#search-page .filter-chip[data-location]').forEach(chip => {
-                chip.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
+        function filterSearchResults(filterType, event) {
+            if (event) {
+                event.stopPropagation();
+                document.querySelectorAll('#search-page .filter-chip[data-filter]').forEach(chip => {
+                    chip.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+            }
             performAdvancedSearch();
         }
 
@@ -2751,6 +2747,9 @@
             if (addArticleModal) {
                 // Les valeurs sont déjà préremplies dans le HTML
             }
+            
+            // Initialiser la navigation
+            navigateTo('dashboard');
         });
 
         loadDashboard();
@@ -2763,6 +2762,5 @@
                 .catch(err => console.error('Service Worker error:', err));
         }
     </script>
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
