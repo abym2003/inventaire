@@ -2025,6 +2025,14 @@
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
             document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
+            
+            // Si on ferme le modal d'ajout d'article et qu'on est sur la page scan, redémarrer le scanner
+            if (modalId === 'add-article-modal' && 
+                !document.getElementById('scan-page').classList.contains('hidden')) {
+                setTimeout(() => {
+                    startScanner();
+                }, 300); // Petit délai pour laisser le modal se fermer complètement
+            }
         }
 
         function saveArticle(event) {
@@ -2103,8 +2111,14 @@
 
             saveToStorage();
             closeModal('add-article-modal');
-            loadInventory();
-            loadDashboard();
+            
+            // Si on était sur la page scan, retourner dessus et redémarrer le scanner
+            if (!document.getElementById('scan-page').classList.contains('hidden')) {
+                navigateTo('scan');
+            } else {
+                loadInventory();
+                loadDashboard();
+            }
         }
 
         function saveLocation(event) {
@@ -2268,6 +2282,7 @@
             
             // Masquer le résultat et les erreurs
             document.getElementById('scanner-error').style.display = 'none';
+            document.getElementById('scan-result').innerHTML = '';
             
             // Mettre à jour le statut
             document.getElementById('status-text').textContent = 'Scanner en cours...';
@@ -2281,7 +2296,11 @@
                 } catch (e) {
                     console.log('Erreur lors de l\'arrêt du scanner:', e);
                 }
+                isScannerActive = false;
             }
+            
+            // Attendre un peu avant de redémarrer
+            await new Promise(resolve => setTimeout(resolve, 100));
             
             // Créer une nouvelle instance du scanner
             html5QrCode = new Html5Qrcode("scanner-reader");
@@ -2297,7 +2316,7 @@
             try {
                 // Démarrer le scanner
                 await html5QrCode.start(
-                    { facingMode: "environment" }, // Caméra arrière si disponible
+                    { facingMode: "environment" },
                     config,
                     onScanSuccess,
                     onScanError
