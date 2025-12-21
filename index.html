@@ -9,6 +9,7 @@
     <title>Gestion d'Inventaire</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
+        /* (Tous les styles existants restent identiques) */
         * {
             margin: 0;
             padding: 0;
@@ -1080,6 +1081,36 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(187, 134, 252, 0.3);
         }
+        
+        /* Nouveau style pour le bouton scanner à nouveau */
+        .scan-again-btn {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 9998;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.4);
+        }
+        
+        .scan-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(187, 134, 252, 0.5);
+        }
+        
+        .scan-again-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -1153,15 +1184,6 @@
 
             <div class="error-message" id="scanner-error">
                 Erreur de scanner. Veuillez vérifier les permissions de la caméra.
-            </div>
-
-            <div class="scan-result-container" id="scan-result-container">
-                <div class="scan-result-icon">✅</div>
-                <div class="scan-result-message">Code-barres détecté !</div>
-                <div class="scan-result-code" id="scan-result-code"></div>
-                <button class="btn-primary" onclick="restartScanner()">OK - Scanner à nouveau</button>
-                <button class="btn-secondary" onclick="searchScannedBarcode()">🔍 Rechercher ce code</button>
-                <button class="btn-secondary" onclick="addScannedBarcode()">➕ Ajouter nouvel article</button>
             </div>
 
             <div class="detail-section">
@@ -1258,6 +1280,10 @@
             <div class="header-subtitle">Information de l'article</div>
         </div>
         <div class="container" id="detail-container"></div>
+        <!-- Bouton Scanner à nouveau sur la page détail -->
+        <button class="scan-again-btn" id="detail-scan-again-btn" onclick="returnToScanner()">
+            📷 Scanner à nouveau
+        </button>
     </div>
 
     <div id="locations-page" class="page hidden">
@@ -1381,6 +1407,10 @@
                     <input type="number" class="form-input" id="article-nombre" required min="0" value="1">
                 </div>
                 <button type="submit" class="btn-primary">Enregistrer</button>
+                <!-- Bouton Scanner à nouveau dans le modal -->
+                <button type="button" class="btn-secondary" onclick="restartScannerFromModal()">
+                    📷 Scanner à nouveau
+                </button>
             </form>
         </div>
     </div>
@@ -1499,11 +1529,6 @@
         </div>
     </div>
 
-    <!-- Bouton retour scanner (sera ajouté dynamiquement) -->
-    <button id="back-to-scanner-btn" class="back-to-scanner-btn hidden" onclick="returnToScanner()">
-        ← Retour scanner
-    </button>
-
     <!-- NAVIGATION EN BAS - RETOUR À LA CONFIGURATION ORIGINALE -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="navigateTo('dashboard')">
@@ -1567,7 +1592,10 @@
             }
             
             // Masquer le bouton retour scanner
-            document.getElementById('back-to-scanner-btn').classList.add('hidden');
+            document.getElementById('back-to-scanner-btn')?.classList.add('hidden');
+            
+            // Masquer le bouton scanner à nouveau sur la page détail
+            document.getElementById('detail-scan-again-btn')?.classList.add('hidden');
             
             // Masquer toutes les pages
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -1589,8 +1617,14 @@
                     }
                 });
                 
-                // Afficher le bouton retour scanner
-                document.getElementById('back-to-scanner-btn').classList.remove('hidden');
+                // Afficher le bouton scanner à nouveau sur la page détail
+                setTimeout(() => {
+                    const scanAgainBtn = document.getElementById('detail-scan-again-btn');
+                    if (scanAgainBtn) {
+                        scanAgainBtn.classList.remove('hidden');
+                        scanAgainBtn.style.display = 'flex';
+                    }
+                }, 100);
             } else if (page === 'scan') {
                 // Pour la page scan, démarrer le scanner automatiquement
                 setTimeout(() => {
@@ -1621,8 +1655,15 @@
         }
 
         function returnToScanner() {
-            // Nettoyer le conteneur de détails
+            // Masquer le conteneur de détails
             document.getElementById('detail-container').innerHTML = '';
+            // Retourner au scanner
+            navigateTo('scan');
+        }
+
+        function restartScannerFromModal() {
+            // Fermer le modal
+            closeModal('add-article-modal');
             // Retourner au scanner
             navigateTo('scan');
         }
@@ -1850,12 +1891,13 @@
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
             
-            // Afficher le bouton retour scanner avec un délai pour s'assurer qu'il est visible
+            // Afficher le bouton scanner à nouveau sur la page détail
             setTimeout(() => {
-                const backBtn = document.getElementById('back-to-scanner-btn');
-                backBtn.classList.remove('hidden');
-                backBtn.style.display = 'flex'; // Forcer l'affichage
-                backBtn.style.opacity = '1'; // S'assurer qu'il est visible
+                const scanAgainBtn = document.getElementById('detail-scan-again-btn');
+                if (scanAgainBtn) {
+                    scanAgainBtn.classList.remove('hidden');
+                    scanAgainBtn.style.display = 'flex';
+                }
             }, 100);
         }
         
@@ -2225,7 +2267,6 @@
             console.log('Démarrage du scanner...');
             
             // Masquer le résultat et les erreurs
-            document.getElementById('scan-result-container').style.display = 'none';
             document.getElementById('scanner-error').style.display = 'none';
             
             // Mettre à jour le statut
@@ -2280,8 +2321,8 @@
             // Arrêter le scanner
             stopScanner();
             
-            // Afficher le résultat
-            showScanResult(decodedText);
+            // Rechercher automatiquement l'article
+            handleScannedBarcode(decodedText);
         }
         
         function onScanError(errorMessage) {
@@ -2305,13 +2346,6 @@
             }
         }
         
-        function showScanResult(code) {
-            document.getElementById('scan-result-code').textContent = code;
-            document.getElementById('scan-result-container').style.display = 'block';
-            document.getElementById('status-text').textContent = 'Code détecté ✓';
-            document.getElementById('status-text').style.color = '#4caf50';
-        }
-        
         function showScannerError(message) {
             document.getElementById('scanner-error').textContent = message;
             document.getElementById('scanner-error').style.display = 'block';
@@ -2320,80 +2354,42 @@
             document.getElementById('scanner-status').classList.remove('active');
         }
         
-        function restartScanner() {
-            // Masquer le résultat
-            document.getElementById('scan-result-container').style.display = 'none';
-            
-            // Redémarrer le scanner après un court délai
-            setTimeout(startScanner, 500);
-        }
-        
-        function searchScannedBarcode() {
-            if (!lastScannedCode) return;
+        function handleScannedBarcode(code) {
+            console.log('Traitement automatique du code:', code);
             
             // Rechercher l'article avec ce code-barre
-            const article = articles.find(a => a.barcode === lastScannedCode);
+            const article = articles.find(a => a.barcode === code);
             
             if (article) {
+                console.log('Article trouvé:', article.name);
                 // Afficher les détails de l'article
                 showArticleDetail(article.id.toString());
             } else {
-                // Afficher un message d'erreur
+                console.log('Article non trouvé, ouverture du formulaire de création');
+                // Afficher le modal d'ajout d'article avec le code-barres pré-rempli
+                showAddArticleModal();
+                document.getElementById('article-barcode').value = code;
+                document.getElementById('article-name').focus();
+                
+                // Afficher un message informatif
                 document.getElementById('scan-result').innerHTML = `
                     <div class="detail-section">
-                        <div class="section-title">❌ Article non trouvé</div>
+                        <div class="section-title">Nouvel article détecté</div>
                         <div style="text-align: center; padding: 20px; color: #888;">
-                            Aucun article avec le code "${lastScannedCode}"
-                            <br>Utilisez le bouton "Ajouter nouvel article"
+                            Le code-barres "${code}" n'existe pas encore dans l'inventaire.
+                            <br>Le formulaire de création a été ouvert.
                         </div>
                     </div>
                 `;
             }
         }
         
-        function addScannedBarcode() {
-            if (!lastScannedCode) return;
-            
-            // Afficher le modal d'ajout d'article
-            showAddArticleModal();
-            document.getElementById('article-barcode').value = lastScannedCode;
-            document.getElementById('article-name').focus();
-            
-            // Masquer le résultat du scanner
-            document.getElementById('scan-result-container').style.display = 'none';
-        }
-
         function searchByBarcode(barcode = null) {
             const scannedBarcode = barcode || document.getElementById('manual-barcode').value.trim();
             if (!scannedBarcode) return;
 
             console.log('Recherche manuelle de code-barre:', scannedBarcode);
-            const article = articles.find(a => a.barcode === scannedBarcode);
-            
-            if (article) {
-                console.log('Article trouvé (manuel):', article);
-                // Afficher les détails de l'article
-                showArticleDetail(article.id.toString());
-            } else {
-                console.log('Article non trouvé (manuel)');
-                // Afficher le modal de création
-                showAddArticleModal();
-                document.getElementById('article-barcode').value = scannedBarcode;
-                document.getElementById('article-name').focus();
-                
-                // Afficher un message
-                if (!barcode) {
-                    document.getElementById('scan-result').innerHTML = `
-                        <div class="detail-section">
-                            <div class="section-title">❌ Article non trouvé</div>
-                            <div style="text-align: center; padding: 20px; color: #888;">
-                                Aucun article avec le code "${scannedBarcode}"
-                                <br>Le formulaire de création a été ouvert.
-                            </div>
-                        </div>
-                    `;
-                }
-            }
+            handleScannedBarcode(scannedBarcode);
         }
 
         function exportToExcel() {
@@ -3154,4 +3150,5 @@
                 .catch(err => console.error('Service Worker error:', err));
         }
     </script>
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9a725f727c0be112","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","
+</body>
+</html>
