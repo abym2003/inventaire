@@ -989,55 +989,89 @@
         
         .barcode-catalogue-item {
             background: #1e1e1e;
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
             border: 1px solid #333;
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 20px;
-            align-items: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         
         .barcode-visual {
             background: white;
-            padding: 15px;
+            padding: 10px;
             border-radius: 8px;
             text-align: center;
+            flex-shrink: 0;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         .barcode-svg {
             width: 100%;
-            height: auto;
+            height: 60px;
+            max-height: 60px;
+        }
+        
+        .no-barcode-visual {
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            border-radius: 4px;
+            border: 2px dashed #999;
+        }
+        
+        .no-barcode-icon {
+            font-size: 24px;
+            color: #999;
         }
         
         .barcode-info-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            flex-grow: 1;
         }
         
         .barcode-info-item {
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         .barcode-info-label {
-            font-size: 11px;
+            font-size: 10px;
             color: #888;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
         
         .barcode-info-value {
-            font-size: 14px;
+            font-size: 12px;
             color: #e0e0e0;
             font-weight: 500;
+            word-break: break-word;
         }
         
         .barcode-code-display {
             font-family: 'Courier New', monospace;
-            font-size: 16px;
+            font-size: 14px;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 8px;
             color: #000;
+            font-weight: bold;
+            word-break: break-all;
+        }
+        
+        .no-barcode-display {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 8px;
+            color: #666;
             font-weight: bold;
         }
         
@@ -1182,6 +1216,149 @@
         /* Masquer les éléments vides dans la grille d'information */
         .detail-info-item.empty {
             display: none;
+        }
+        
+        /* Styles pour l'affichage du catalogue (3 par ligne) */
+        .catalogue-page {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            break-inside: avoid;
+        }
+        
+        .catalogue-family-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        .catalogue-category-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #666;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 3px;
+        }
+        
+        .catalogue-items-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .catalogue-item {
+            page-break-inside: avoid;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #f9f9f9;
+            min-height: 180px;
+        }
+        
+        .catalogue-barcode-section {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .catalogue-info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4px;
+            flex-grow: 1;
+        }
+        
+        .catalogue-info-item {
+            margin-bottom: 2px;
+        }
+        
+        .catalogue-info-label {
+            font-size: 8px;
+            color: #666;
+            margin-bottom: 1px;
+        }
+        
+        .catalogue-info-value {
+            font-size: 10px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .catalogue-barcode-number {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+        
+        .catalogue-no-barcode {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: #999;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .catalogue-no-barcode-visual {
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            border-radius: 3px;
+            border: 1px dashed #ccc;
+            margin-bottom: 5px;
+        }
+        
+        .catalogue-no-barcode-icon {
+            font-size: 24px;
+            color: #bbb;
+        }
+        
+        /* Styles d'impression */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .catalogue-page {
+                margin: 0;
+                padding: 15px;
+                break-after: page;
+            }
+            
+            .catalogue-items-grid {
+                gap: 10px;
+            }
+            
+            .catalogue-item {
+                border: 1px solid #ccc;
+                min-height: 160px;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -1384,7 +1561,7 @@
                 <button class="btn-primary" onclick="generateBarcodeCatalogue()">
                     🏷️ Générer le catalogue
                 </button>
-                <button class="btn-secondary" onclick="downloadBarcodeCatalogue()" id="download-catalogue-btn" style="display: none;">
+                <button class="btn-secondary" onclick="downloadBarcodeCatalogue()" id="download-catalogue-btn" style="display: none;" class="no-print">
                     💾 Télécharger le catalogue
                 </button>
             </div>
@@ -1414,6 +1591,9 @@
                 <button class="btn-secondary" onclick="backupData()">Créer une sauvegarde</button>
                 <button class="btn-secondary" onclick="restoreData()">Restaurer une sauvegarde</button>
             </div>
+            
+            <!-- Conteneur pour le catalogue -->
+            <div id="catalogue-preview"></div>
         </div>
     </div>
 
@@ -2911,6 +3091,9 @@
             
             // Cacher le bouton télécharger
             document.getElementById('download-catalogue-btn').style.display = 'none';
+            
+            // Vider la prévisualisation
+            document.getElementById('catalogue-preview').innerHTML = '';
         }
         
         function generateBarcodeCatalogue() {
@@ -2920,263 +3103,253 @@
     let filtered = articles.filter(art => {
         // Filtre par famille
         if (familleFilter && art.famille !== familleFilter) return false;
-        // Uniquement les articles avec code-barres
-        if (!art.barcode || art.barcode.trim() === '') return false;
         return true;
     });
     
-    // Tri par ordre alphabétique : famille, catégorie, nom, taille, longueur, conditionnement
-    filtered.sort((a, b) => {
-        // Famille
-        if (a.famille < b.famille) return -1;
-        if (a.famille > b.famille) return 1;
+    // Grouper les articles par famille et catégorie
+    const groupedByFamily = {};
+    
+    filtered.forEach(art => {
+        const famille = art.famille || 'Sans famille';
+        const categorie = art.categorie || 'Sans catégorie';
         
-        // Catégorie
-        if (a.categorie < b.categorie) return -1;
-        if (a.categorie > b.categorie) return 1;
+        if (!groupedByFamily[famille]) {
+            groupedByFamily[famille] = {};
+        }
         
-        // Nom
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
+        if (!groupedByFamily[famille][categorie]) {
+            groupedByFamily[famille][categorie] = [];
+        }
         
-        // Taille
-        if (a.taille < b.taille) return -1;
-        if (a.taille > b.taille) return 1;
-        
-        // Longueur
-        if (a.longueur < b.longueur) return -1;
-        if (a.longueur > b.longueur) return 1;
-        
-        // Conditionnement
-        if (a.conditionnement < b.conditionnement) return -1;
-        if (a.conditionnement > b.conditionnement) return 1;
-        
-        return 0;
+        groupedByFamily[famille][categorie].push(art);
+    });
+    
+    // Trier les familles, catégories et articles
+    const sortedFamilies = Object.keys(groupedByFamily).sort();
+    
+    sortedFamilies.forEach(famille => {
+        const categories = Object.keys(groupedByFamily[famille]).sort();
+        categories.forEach(categorie => {
+            groupedByFamily[famille][categorie].sort((a, b) => {
+                // Tri par ordre alphabétique : nom, taille, longueur, conditionnement
+                if (a.name < b.name) return -1;
+                if (a.name > b.name) return 1;
+                
+                if (a.taille < b.taille) return -1;
+                if (a.taille > b.taille) return 1;
+                
+                if (a.longueur < b.longueur) return -1;
+                if (a.longueur > b.longueur) return 1;
+                
+                if (a.conditionnement < b.conditionnement) return -1;
+                if (a.conditionnement > b.conditionnement) return 1;
+                
+                return 0;
+            });
+        });
     });
     
     if (filtered.length === 0) {
-        // Créer un message d'erreur temporaire
-        const tempMsg = document.createElement('div');
-        tempMsg.innerHTML = `
+        document.getElementById('catalogue-preview').innerHTML = `
             <div class="export-section">
                 <div style="text-align: center; padding: 20px; color: #888;">
-                    🏷️ Aucun article avec code-barres trouvé
+                    🏷️ Aucun article trouvé
                 </div>
             </div>
         `;
-        
-        // Retirer l'ancien catalogue s'il existe
-        const oldCatalogue = document.querySelector('.barcode-catalogue-container');
-        if (oldCatalogue) oldCatalogue.remove();
-        
-        // Ajouter le message
-        const container = document.querySelector('#import-export-page .container');
-        const firstSection = container.querySelector('.export-section');
-        container.insertBefore(tempMsg, firstSection.nextSibling);
         
         document.getElementById('download-catalogue-btn').style.display = 'none';
         return;
     }
     
-    // Créer ou vider le conteneur pour le catalogue
-    let catalogueContainer = document.querySelector('.barcode-catalogue-container');
-    if (!catalogueContainer) {
-        catalogueContainer = document.createElement('div');
-        catalogueContainer.className = 'barcode-catalogue-container';
-        
-        // Insérer après la première section (celle du catalogue)
-        const container = document.querySelector('#import-export-page .container');
-        const firstSection = container.querySelector('.export-section');
-        container.insertBefore(catalogueContainer, firstSection.nextSibling);
-    } else {
-        catalogueContainer.innerHTML = '';
-    }
+    // Générer le catalogue en HTML
+    let catalogueHtml = '';
     
-    // Appliquer le style pour 2 articles par ligne
-    catalogueContainer.style.display = 'grid';
-    catalogueContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    catalogueContainer.style.gap = '16px';
-    catalogueContainer.style.marginTop = '16px';
-    
-    // Modifier le style des éléments du catalogue pour qu'ils s'adaptent à 2 par ligne
-    const style = document.createElement('style');
-    style.textContent = `
-        .barcode-catalogue-item {
-            background: #1e1e1e;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            height: 100%;
-        }
+    sortedFamilies.forEach((famille, familleIndex) => {
+        const categories = Object.keys(groupedByFamily[famille]).sort();
         
-        .barcode-visual {
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        
-        .barcode-svg {
-            width: 100%;
-            height: auto;
-            max-height: 80px;
-        }
-        
-        .barcode-info-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 6px;
-            flex-grow: 1;
-        }
-        
-        .barcode-info-item {
-            margin-bottom: 4px;
-        }
-        
-        .barcode-info-label {
-            font-size: 10px;
-            color: #888;
-            margin-bottom: 1px;
-        }
-        
-        .barcode-info-value {
-            font-size: 12px;
-            color: #e0e0e0;
-            font-weight: 500;
-            word-break: break-word;
-        }
-        
-        .barcode-code-display {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            text-align: center;
-            margin-top: 8px;
-            color: #000;
-            font-weight: bold;
-            word-break: break-all;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Générer les éléments du catalogue (2 par ligne)
-    filtered.forEach((art, index) => {
-        const item = document.createElement('div');
-        item.className = 'barcode-catalogue-item';
-        item.id = `barcode-item-${index}`;
-        
-        // Partie supérieure : Code-barre
-        const barcodeVisual = document.createElement('div');
-        barcodeVisual.className = 'barcode-visual';
-        barcodeVisual.innerHTML = `
-            <svg id="barcode-svg-${index}" class="barcode-svg"></svg>
-            <div class="barcode-code-display">${art.barcode}</div>
+        catalogueHtml += `
+            <div class="catalogue-page" id="catalogue-page-${familleIndex}">
+                <div class="catalogue-family-title">Catalogue codes-barres : ${famille}</div>
+                
+                <hr style="border: 1px solid black; margin: 10px 0;">
         `;
         
-        // Partie inférieure : Informations
-        const infoGrid = document.createElement('div');
-        infoGrid.className = 'barcode-info-grid';
-        infoGrid.innerHTML = `
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Famille</div>
-                <div class="barcode-info-value">${art.famille || '-'}</div>
-            </div>
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Catégorie</div>
-                <div class="barcode-info-value">${art.categorie || '-'}</div>
-            </div>
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Nom</div>
-                <div class="barcode-info-value">${art.name || '-'}</div>
-            </div>
-            ${art.taille ? `
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Taille</div>
-                <div class="barcode-info-value">${art.taille}</div>
-            </div>
-            ` : ''}
-            ${art.longueur ? `
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Longueur</div>
-                <div class="barcode-info-value">${art.longueur}</div>
-            </div>
-            ` : ''}
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Conditionnement</div>
-                <div class="barcode-info-value">${art.conditionnement || '-'}</div>
-            </div>
-            ${art.fournisseur ? `
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Fournisseur</div>
-                <div class="barcode-info-value">${art.fournisseur}</div>
-            </div>
-            ` : ''}
-            ${art.chantRef ? `
-            <div class="barcode-info-item">
-                <div class="barcode-info-label">Chantier Réf.</div>
-                <div class="barcode-info-value">${art.chantRef}</div>
-            </div>
-            ` : ''}
-        `;
+        categories.forEach(categorie => {
+            const articlesInCategory = groupedByFamily[famille][categorie];
+            
+            catalogueHtml += `
+                <div class="catalogue-category-title">${categorie}</div>
+                <div class="catalogue-items-grid">
+            `;
+            
+            // Diviser les articles en groupes de 3 pour la disposition
+            for (let i = 0; i < articlesInCategory.length; i += 3) {
+                const rowArticles = articlesInCategory.slice(i, i + 3);
+                
+                // Assurer qu'il y a toujours 3 éléments dans la ligne
+                while (rowArticles.length < 3) {
+                    rowArticles.push(null); // Article vide pour remplir
+                }
+                
+                rowArticles.forEach((art, indexInRow) => {
+                    if (!art) {
+                        // Article vide pour remplir la grille
+                        catalogueHtml += `
+                            <div class="catalogue-item" style="visibility: hidden;"></div>
+                        `;
+                        return;
+                    }
+                    
+                    const hasBarcode = art.barcode && art.barcode.trim() !== '';
+                    const barcodeId = `catalogue-barcode-svg-${art.id}-${familleIndex}-${i}-${indexInRow}`;
+                    
+                    catalogueHtml += `
+                        <div class="catalogue-item">
+                            <div class="catalogue-barcode-section">
+                                ${hasBarcode ? 
+                                    `<svg id="${barcodeId}" class="barcode-svg"></svg>` : 
+                                    `<div class="catalogue-no-barcode-visual">
+                                        <div class="catalogue-no-barcode-icon">🏷️</div>
+                                    </div>`
+                                }
+                            </div>
+                            <div class="catalogue-info-grid">
+                                <div class="catalogue-info-item">
+                                    <div class="catalogue-info-label">Code-barre</div>
+                                    <div class="catalogue-info-value" style="font-family: 'Courier New', monospace; font-weight: bold; font-size: 11px;">
+                                        ${hasBarcode ? art.barcode : '--------'}
+                                    </div>
+                                </div>
+                                <div class="catalogue-info-item">
+                                    <div class="catalogue-info-label">Nom</div>
+                                    <div class="catalogue-info-value">${art.name || '-'}</div>
+                                </div>
+                                ${art.taille ? `
+                                <div class="catalogue-info-item">
+                                    <div class="catalogue-info-label">Taille</div>
+                                    <div class="catalogue-info-value">${art.taille}</div>
+                                </div>
+                                ` : ''}
+                                ${art.longueur ? `
+                                <div class="catalogue-info-item">
+                                    <div class="catalogue-info-label">Longueur</div>
+                                    <div class="catalogue-info-value">${art.longueur}</div>
+                                </div>
+                                ` : ''}
+                                <div class="catalogue-info-item">
+                                    <div class="catalogue-info-label">Conditionnement</div>
+                                    <div class="catalogue-info-value">${art.conditionnement || '-'}</div>
+                                </div>
+                                ${art.fournisseur ? `
+                                <div class="catalogue-info-item">
+                                    <div class="catalogue-info-label">Fournisseur</div>
+                                    <div class="catalogue-info-value">${art.fournisseur}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            catalogueHtml += `
+                </div>
+            `;
+        });
         
-        // Assembler l'élément
-        item.appendChild(barcodeVisual);
-        item.appendChild(infoGrid);
-        catalogueContainer.appendChild(item);
+        catalogueHtml += `</div>`;
     });
+    
+    document.getElementById('catalogue-preview').innerHTML = catalogueHtml;
     
     // Afficher le bouton de téléchargement
     document.getElementById('download-catalogue-btn').style.display = 'block';
     
-    // Générer les codes-barres avec JsBarcode
+    // Générer les codes-barres avec JsBarcode - CORRECTION : AFFICHER LES CHIFFRES
     setTimeout(() => {
-        filtered.forEach((art, index) => {
-            try {
-                JsBarcode(`#barcode-svg-${index}`, art.barcode, {
-                    format: 'CODE128', // Utiliser CODE128 qui est plus flexible
-                    width: 2,
-                    height: 60,
-                    displayValue: false,
-                    background: "#ffffff",
-                    lineColor: "#000000",
-                    margin: 5
-                });
-            } catch (error) {
-                console.error(`Erreur génération code-barre pour ${art.name}:`, error);
-                // Essayer avec EAN13
+        filtered.forEach(art => {
+            if (art.barcode && art.barcode.trim() !== '') {
                 try {
-                    JsBarcode(`#barcode-svg-${index}`, art.barcode, {
-                        format: 'EAN13',
-                        width: 2,
-                        height: 60,
-                        displayValue: false,
-                        background: "#ffffff",
-                        lineColor: "#000000",
-                        margin: 5
+                    // Détection du format de code-barres
+                    let format = 'CODE128'; // Par défaut
+                    
+                    // Vérifier si c'est un EAN13 (13 chiffres exactement)
+                    if (/^\d{13}$/.test(art.barcode)) {
+                        format = 'EAN13';
+                    }
+                    
+                    console.log(`Génération code-barre ${art.barcode} avec format ${format}`);
+                    
+                    // Trouver tous les éléments SVG pour cet article
+                    const svgElements = document.querySelectorAll(`[id^="catalogue-barcode-svg-${art.id}"]`);
+                    
+                    svgElements.forEach(svgElement => {
+                        try {
+                            // IMPORTANT: displayValue: true pour afficher les chiffres
+                            JsBarcode(svgElement, art.barcode, {
+                                format: format,
+                                width: format === 'EAN13' ? 1.5 : 2, // EAN13 nécessite une largeur plus fine
+                                height: 50,
+                                displayValue: true, // CHANGÉ À true POUR AFFICHER LES CHIFFRES
+                                fontOptions: 'bold',
+                                font: 'Arial, sans-serif',
+                                fontSize: 12,
+                                textMargin: 2,
+                                background: "#ffffff",
+                                lineColor: "#000000",
+                                margin: 5,
+                                // Options spécifiques pour EAN13
+                                ...(format === 'EAN13' && {
+                                    flat: true,
+                                    lastChar: '>'
+                                })
+                            });
+                        } catch (svgError) {
+                            console.error(`Erreur sur SVG ${svgElement.id}:`, svgError);
+                            // Essayer avec CODE128 en cas d'erreur
+                            try {
+                                JsBarcode(svgElement, art.barcode, {
+                                    format: 'CODE128',
+                                    width: 2,
+                                    height: 50,
+                                    displayValue: true, // CHANGÉ À true
+                                    fontOptions: 'bold',
+                                    font: 'Arial, sans-serif',
+                                    fontSize: 12,
+                                    textMargin: 2,
+                                    background: "#ffffff",
+                                    lineColor: "#000000",
+                                    margin: 5
+                                });
+                            } catch (fallbackError) {
+                                console.error(`Échec également avec CODE128:`, fallbackError);
+                            }
+                        }
                     });
-                } catch (e) {
-                    console.error(`Échec également avec EAN13:`, e);
+                    
+                } catch (error) {
+                    console.error(`Erreur génération code-barre pour ${art.name} (${art.barcode}):`, error);
                 }
             }
         });
-    }, 100);
+    }, 300);
 }
         
         function downloadBarcodeCatalogue() {
-    const catalogueContainer = document.querySelector('.barcode-catalogue-container');
-    if (!catalogueContainer || catalogueContainer.children.length === 0) {
+    const cataloguePages = document.querySelectorAll('.catalogue-page');
+    if (!cataloguePages || cataloguePages.length === 0) {
         alert('Aucun catalogue à télécharger');
         return;
     }
     
-    // Récupérer le nombre d'articles depuis les éléments DOM
-    const itemCount = catalogueContainer.children.length;
-    
     // Créer une nouvelle fenêtre pour l'impression/téléchargement
     const printWindow = window.open('', '_blank');
+    
+    // Compter le nombre total d'articles
+    let totalArticles = 0;
+    articles.forEach(art => totalArticles++);
+    
     printWindow.document.write(`
         <html>
             <head>
@@ -3184,112 +3357,143 @@
                 <style>
                     body { 
                         font-family: Arial, sans-serif; 
-                        margin: 10px; 
+                        margin: 20px; 
+                        background: white;
+                        color: black;
                     }
-                    .catalogue-grid {
+                    .catalogue-page {
+                        page-break-after: always;
+                        margin-bottom: 30px;
+                        padding: 20px;
+                    }
+                    .catalogue-family-title {
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #333;
+                        margin-bottom: 10px;
+                        border-bottom: 2px solid #333;
+                        padding-bottom: 5px;
+                    }
+                    .catalogue-category-title {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #666;
+                        margin-top: 15px;
+                        margin-bottom: 10px;
+                        border-bottom: 1px solid #ccc;
+                        padding-bottom: 3px;
+                    }
+                    .catalogue-items-grid {
                         display: grid;
-                        grid-template-columns: repeat(2, 1fr);
+                        grid-template-columns: repeat(3, 1fr);
                         gap: 15px;
+                        margin-bottom: 20px;
                     }
                     .catalogue-item {
                         page-break-inside: avoid;
-                        padding: 15px;
-                        border: 1px solid #ccc;
+                        padding: 10px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
                         display: flex;
                         flex-direction: column;
-                        gap: 10px;
-                        height: 250px;
+                        gap: 8px;
+                        background: #f9f9f9;
+                        min-height: 180px;
                     }
-                    .barcode-section {
+                    .catalogue-barcode-section {
                         text-align: center;
-                        padding: 10px;
+                        padding: 8px;
                         background: white;
-                        border: 1px solid #ddd;
+                        border: 1px solid #eee;
                         flex-shrink: 0;
+                        height: 100px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
                     }
-                    .info-grid {
+                    .catalogue-info-grid {
                         display: grid;
                         grid-template-columns: 1fr;
-                        gap: 5px;
+                        gap: 4px;
                         flex-grow: 1;
                     }
-                    .info-item {
-                        margin-bottom: 4px;
+                    .catalogue-info-item {
+                        margin-bottom: 2px;
                     }
-                    .info-label {
-                        font-size: 9px;
+                    .catalogue-info-label {
+                        font-size: 8px;
                         color: #666;
                         margin-bottom: 1px;
                     }
-                    .info-value {
-                        font-size: 11px;
+                    .catalogue-info-value {
+                        font-size: 10px;
                         font-weight: 500;
+                        color: #333;
                     }
-                    .barcode-number {
+                    .catalogue-barcode-number {
                         font-family: 'Courier New', monospace;
-                        font-size: 12px;
+                        font-size: 10px;
                         font-weight: bold;
-                        margin-top: 8px;
+                        margin-top: 5px;
                         word-break: break-all;
+						text-align: center;
+						width: 100%;
+                    }
+                    .catalogue-no-barcode {
+                        font-family: 'Courier New', monospace;
+                        font-size: 10px;
+                        color: #999;
+                        font-weight: bold;
+                        margin-top: 5px;
+                    }
+                    .catalogue-no-barcode-visual {
+                        width: 100%;
+                        height: 60px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background: #f0f0f0;
+                        border-radius: 3px;
+                        border: 1px dashed #ccc;
+                        margin-bottom: 5px;
+                    }
+                    .catalogue-no-barcode-icon {
+                        font-size: 24px;
+                        color: #bbb;
+                    }
+                    .barcode-svg {
+                        width: 100%;
+                        height: 60px;
+                        max-height: 60px;
                     }
                     @media print {
-                        .catalogue-item {
-                            border: 1px solid #ccc;
-                            margin-bottom: 0;
+                        .catalogue-page {
+                            margin: 0;
+                            padding: 15px;
                         }
-                        .catalogue-grid {
+                        .catalogue-items-grid {
                             gap: 10px;
                         }
-                    }
-                    h1 {
-                        font-size: 18px;
-                        margin-bottom: 5px;
+                        .catalogue-item {
+                            border: 1px solid #ccc;
+                            min-height: 160px;
+                        }
                     }
                 </style>
             </head>
             <body>
                 <h1>Catalogue de codes-barres</h1>
-                <div>Généré le ${new Date().toLocaleDateString('fr-FR')} - ${itemCount} articles</div>
+                <div>Généré le ${new Date().toLocaleDateString('fr-FR')} - ${totalArticles} articles</div>
                 <hr style="margin: 10px 0;">
-                <div class="catalogue-grid">
     `);
     
-    // Copier chaque élément du catalogue depuis le DOM
-    const items = catalogueContainer.querySelectorAll('.barcode-catalogue-item');
-    items.forEach((item, index) => {
-        const barcodeSvg = item.querySelector('svg');
-        const barcodeNumber = item.querySelector('.barcode-code-display').textContent;
-        const infoItems = item.querySelectorAll('.barcode-info-item');
-        
-        let infoHtml = '';
-        infoItems.forEach(infoItem => {
-            const label = infoItem.querySelector('.barcode-info-label').textContent;
-            const value = infoItem.querySelector('.barcode-info-value').textContent;
-            infoHtml += `
-                <div class="info-item">
-                    <div class="info-label">${label}</div>
-                    <div class="info-value">${value}</div>
-                </div>
-            `;
-        });
-        
-        const svgData = new XMLSerializer().serializeToString(barcodeSvg);
-        
-        printWindow.document.write(`
-            <div class="catalogue-item">
-                <div class="barcode-section">
-                    <img src="data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}" 
-                         style="max-width: 100%; height: 60px;">
-                    <div class="barcode-number">${barcodeNumber}</div>
-                </div>
-                <div class="info-grid">
-                    ${infoHtml}
-                </div>
-            </div>
-        `);
+    // Copier chaque page du catalogue
+    cataloguePages.forEach(page => {
+        printWindow.document.write(page.innerHTML);
     });
     
-    printWindow.document.write('</div></body></html>');
+    printWindow.document.write('</body></html>');
     printWindow.document.close();
     printWindow.focus();
     
