@@ -1111,6 +1111,78 @@
         .scan-again-btn:active {
             transform: scale(0.95);
         }
+        
+        /* MODIFICATIONS POUR LES BOUTONS D'ACTION RAPIDE (ICÔNES SEULES) */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .action-icon-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            min-height: 60px;
+        }
+        
+        .action-icon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+        
+        .action-icon-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .action-icon-btn.add {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+        }
+        
+        .action-icon-btn.scan {
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+        }
+        
+        .action-icon-btn.remove {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+        }
+        
+        .action-icon-btn.move {
+            background: linear-gradient(135deg, #03dac6 0%, #00bfa5 100%);
+            color: #000;
+        }
+        
+        .action-icon-btn.history {
+            background: linear-gradient(135deg, #2196f3 0%, #0d47a1 100%);
+            color: white;
+        }
+        
+        .action-icon-btn.delete {
+            background: linear-gradient(135deg, #cf6679 0%, #b00020 100%);
+            color: white;
+        }
+        
+        /* Cacher le bouton scanner à nouveau fixe */
+        #detail-scan-again-btn {
+            display: none !important;
+        }
+        
+        /* Masquer les éléments vides dans la grille d'information */
+        .detail-info-item.empty {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -1280,10 +1352,6 @@
             <div class="header-subtitle">Information de l'article</div>
         </div>
         <div class="container" id="detail-container"></div>
-        <!-- Bouton Scanner à nouveau sur la page détail -->
-        <button class="scan-again-btn" id="detail-scan-again-btn" onclick="returnToScanner()">
-            📷 Scanner à nouveau
-        </button>
     </div>
 
     <div id="locations-page" class="page hidden">
@@ -1322,15 +1390,10 @@
             </div>
 
             <div class="export-section">
-                <div class="export-icon">📤</div>
-                <div class="section-title">Exporter l'inventaire</div>
-                <div class="form-group">
-                    <label class="form-label">Adresse e-mail</label>
-                    <input type="email" class="form-input" id="export-email" placeholder="votre@email.com">
-                </div>
-                <button class="btn-primary" onclick="exportToExcel()">📧 Exporter et envoyer</button>
-                <button class="btn-secondary" onclick="downloadExcel()">💾 Télécharger Excel</button>
-            </div>
+				<div class="export-icon">📤</div>
+				<div class="section-title">Exporter l'inventaire</div>
+				<button class="btn-primary" onclick="downloadExcel()">💾 Télécharger Excel</button>
+			</div>
 
             <div class="export-section">
                 <div class="export-icon">📥</div>
@@ -1591,12 +1654,6 @@
                 stopScanner();
             }
             
-            // Masquer le bouton retour scanner
-            document.getElementById('back-to-scanner-btn')?.classList.add('hidden');
-            
-            // Masquer le bouton scanner à nouveau sur la page détail
-            document.getElementById('detail-scan-again-btn')?.classList.add('hidden');
-            
             // Masquer toutes les pages
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             
@@ -1616,15 +1673,6 @@
                         item.classList.add('active');
                     }
                 });
-                
-                // Afficher le bouton scanner à nouveau sur la page détail
-                setTimeout(() => {
-                    const scanAgainBtn = document.getElementById('detail-scan-again-btn');
-                    if (scanAgainBtn) {
-                        scanAgainBtn.classList.remove('hidden');
-                        scanAgainBtn.style.display = 'flex';
-                    }
-                }, 100);
             } else if (page === 'scan') {
                 // Pour la page scan, démarrer le scanner automatiquement
                 setTimeout(() => {
@@ -1813,6 +1861,42 @@
                 </div>
             `).join('') : '<div style="text-align: center; padding: 20px; color: #888;">Aucun historique</div>';
 
+            // Générer les champs d'information uniquement s'ils ne sont pas vides
+            let infoFieldsHtml = '';
+            
+            // Liste des champs à afficher avec leurs valeurs
+            const fields = [
+                { id: 'famille', label: 'Famille', value: article.famille },
+                { id: 'categorie', label: 'Catégorie', value: article.categorie },
+                { id: 'taille', label: 'Taille', value: article.taille },
+                { id: 'longueur', label: 'Longueur', value: article.longueur },
+                { id: 'conditionnement', label: 'Conditionnement', value: article.conditionnement },
+                { id: 'fournisseur', label: 'Fournisseur', value: article.fournisseur },
+                { id: 'chant-ref', label: 'Chantier Réf.', value: article.chantRef }
+            ];
+            
+            // Filtrer les champs non vides
+            const nonEmptyFields = fields.filter(field => field.value && field.value.toString().trim() !== '');
+            
+            // Générer le HTML pour les champs non vides
+            nonEmptyFields.forEach(field => {
+                infoFieldsHtml += `
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">${field.label}</div>
+                        <div class="detail-info-value" id="info-${field.id}">${field.value}</div>
+                    </div>
+                `;
+            });
+            
+            // Si aucun champ n'est rempli, afficher un message
+            if (nonEmptyFields.length === 0) {
+                infoFieldsHtml = `
+                    <div class="detail-info-item" style="grid-column: span 2; text-align: center; padding: 20px;">
+                        <div class="empty-text">Aucune information supplémentaire</div>
+                    </div>
+                `;
+            }
+
             const detailHtml = `
                 <div class="detail-header">
                     <div class="detail-title">${article.name}${article.taille ? ' ' + article.taille : ''}${article.longueur ? ' ' + article.longueur : ''}</div>
@@ -1822,34 +1906,7 @@
                 <div class="detail-section">
                     <div class="section-title">📋 Informations</div>
                     <div class="detail-info-grid" id="article-info-grid">
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Famille</div>
-                            <div class="detail-info-value" id="info-famille">${article.famille || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Catégorie</div>
-                            <div class="detail-info-value" id="info-categorie">${article.categorie || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Taille</div>
-                            <div class="detail-info-value" id="info-taille">${article.taille || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Longueur</div>
-                            <div class="detail-info-value" id="info-longueur">${article.longueur || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Conditionnement</div>
-                            <div class="detail-info-value" id="info-conditionnement">${article.conditionnement || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Fournisseur</div>
-                            <div class="detail-info-value" id="info-fournisseur">${article.fournisseur || '-'}</div>
-                        </div>
-                        <div class="detail-info-item">
-                            <div class="detail-info-label">Chantier Réf.</div>
-                            <div class="detail-info-value" id="info-chant-ref">${article.chantRef || '-'}</div>
-                        </div>
+                        ${infoFieldsHtml}
                     </div>
                     <button class="btn-secondary" onclick="showEditArticleModal('${article.id}')">✏️ Modifier les informations</button>
                 </div>
@@ -1870,12 +1927,13 @@
 
                 <div class="detail-section">
                     <div class="section-title">⚡ Actions rapides</div>
-                    <div class="action-buttons">
-                        <button class="btn-primary" onclick="showStockActionModal('add')">➕ Ajouter au stock</button>
-                        <button class="btn-secondary" onclick="showStockActionModal('remove')">➖ Retirer du stock</button>
-                        <button class="btn-secondary" onclick="showMoveArticleModal()">🔄 Déplacer</button>
-                        <button class="btn-secondary history-btn" onclick="toggleHistory()">📜 Historique</button>
-                        <button class="btn-secondary btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Supprimer</button>
+                    <div class="action-grid">
+                        <button class="action-icon-btn move" onclick="showMoveArticleModal()" title="Déplacer">🔄</button>
+                        <button class="action-icon-btn scan" onclick="returnToScanner()" title="Scanner à nouveau">📷</button>
+                        <button class="action-icon-btn move" onclick="showStockActionModal('add')" title="Ajouter au stock">➕</button>
+                        <button class="action-icon-btn scan" onclick="toggleHistory()" title="Historique">📜</button>
+                        <button class="action-icon-btn delete" onclick="showStockActionModal('remove')" title="Retirer du stock">➖</button>
+                        <button class="action-icon-btn delete" onclick="deleteArticle('${article.id}')" title="Supprimer">🗑️</button>
                     </div>
                 </div>
 
@@ -1890,15 +1948,6 @@
             // Afficher la page de détails sans toucher à la navigation
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
-            
-            // Afficher le bouton scanner à nouveau sur la page détail
-            setTimeout(() => {
-                const scanAgainBtn = document.getElementById('detail-scan-again-btn');
-                if (scanAgainBtn) {
-                    scanAgainBtn.classList.remove('hidden');
-                    scanAgainBtn.style.display = 'flex';
-                }
-            }, 100);
         }
         
         function toggleHistory() {
@@ -2411,22 +2460,6 @@
             handleScannedBarcode(scannedBarcode);
         }
 
-        function exportToExcel() {
-            const email = document.getElementById('export-email').value.trim();
-            if (!email) {
-                alert('Veuillez entrer une adresse e-mail');
-                return;
-            }
-
-            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                alert('Adresse e-mail invalide');
-                return;
-            }
-
-            downloadExcel();
-            alert(`L'inventaire a été exporté.\nUn e-mail sera envoyé à ${email}\n(Fonctionnalité d'envoi à implémenter côté serveur)`);
-        }
-
         function downloadExcel() {
             const sortedArticles = [...articles].sort((a, b) => {
                 if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
@@ -2880,284 +2913,391 @@
             document.getElementById('download-catalogue-btn').style.display = 'none';
         }
         
-        // NOUVELLES FONCTIONS POUR LE CATALOGUE DE CODES-BARRES
         function generateBarcodeCatalogue() {
-            const familleFilter = document.getElementById('barcode-famille-filter').value;
-            
-            // Filtrer les articles
-            let filtered = articles.filter(art => {
-                // Filtre par famille
-                if (familleFilter && art.famille !== familleFilter) return false;
-                // Uniquement les articles avec code-barres
-                if (!art.barcode || art.barcode.trim() === '') return false;
-                return true;
-            });
-            
-            if (filtered.length === 0) {
-                document.querySelector('.container').innerHTML += `
-                    <div class="export-section">
-                        <div style="text-align: center; padding: 20px; color: #888;">
-                            🏷️ Aucun article avec code-barres trouvé
-                        </div>
-                    </div>
-                `;
-                document.getElementById('download-catalogue-btn').style.display = 'none';
-                return;
-            }
-            
-            // Trier par nom
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
-            
-            // Créer un conteneur pour le catalogue
-            let catalogueContainer = document.querySelector('.barcode-catalogue-container');
-            if (!catalogueContainer) {
-                catalogueContainer = document.createElement('div');
-                catalogueContainer.className = 'barcode-catalogue-container';
-                document.querySelector('#import-export-page .container').appendChild(catalogueContainer);
-            } else {
-                catalogueContainer.innerHTML = '';
-            }
-            
-            // Générer les éléments du catalogue
-            filtered.forEach((art, index) => {
-                const item = document.createElement('div');
-                item.className = 'barcode-catalogue-item';
-                item.id = `barcode-item-${index}`;
-                
-                // Partie gauche : Code-barre
-                const barcodeVisual = document.createElement('div');
-                barcodeVisual.className = 'barcode-visual';
-                barcodeVisual.innerHTML = `
-                    <svg id="barcode-svg-${index}" class="barcode-svg"></svg>
-                    <div class="barcode-code-display">${art.barcode}</div>
-                `;
-                
-                // Partie droite : Informations
-                const infoGrid = document.createElement('div');
-                infoGrid.className = 'barcode-info-grid';
-                infoGrid.innerHTML = `
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Famille</div>
-                        <div class="barcode-info-value">${art.famille || '-'}</div>
-                    </div>
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Catégorie</div>
-                        <div class="barcode-info-value">${art.categorie || '-'}</div>
-                    </div>
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Nom</div>
-                        <div class="barcode-info-value">${art.name || '-'}</div>
-                    </div>
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Taille</div>
-                        <div class="barcode-info-value">${art.taille || '-'}</div>
-                    </div>
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Longueur</div>
-                        <div class="barcode-info-value">${art.longueur || '-'}</div>
-                    </div>
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Conditionnement</div>
-                        <div class="barcode-info-value">${art.conditionnement || '-'}</div>
-                    </div>
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Fournisseur</div>
-                        <div class="barcode-info-value">${art.fournisseur || '-'}</div>
-                    </div>
-                    <div class="barcode-info-item">
-                        <div class="barcode-info-label">Chantier Réf.</div>
-                        <div class="barcode-info-value">${art.chantRef || '-'}</div>
-                    </div>
-                `;
-                
-                // Assembler l'élément
-                item.appendChild(barcodeVisual);
-                item.appendChild(infoGrid);
-                catalogueContainer.appendChild(item);
-            });
-            
-            // Afficher le bouton de téléchargement
-            document.getElementById('download-catalogue-btn').style.display = 'block';
-            
-            // Générer les codes-barres avec JsBarcode (format EAN13)
-            setTimeout(() => {
-                filtered.forEach((art, index) => {
-                    try {
-                        JsBarcode(`#barcode-svg-${index}`, art.barcode, {
-                            format: 'EAN13',
-                            width: 2,
-                            height: 80,
-                            displayValue: false, // On affiche le code en-dessous manuellement
-                            background: "#ffffff",
-                            lineColor: "#000000",
-                            margin: 0
-                        });
-                    } catch (error) {
-                        console.error(`Erreur génération code-barre pour ${art.name}:`, error);
-                        // En cas d'erreur, essayer avec CODE128
-                        try {
-                            JsBarcode(`#barcode-svg-${index}`, art.barcode, {
-                                format: 'CODE128',
-                                width: 2,
-                                height: 80,
-                                displayValue: false,
-                                background: "#ffffff",
-                                lineColor: "#000000",
-                                margin: 0
-                            });
-                        } catch (e) {
-                            console.error(`Échec également avec CODE128:`, e);
-                        }
-                    }
-                });
-            }, 100);
+    const familleFilter = document.getElementById('barcode-famille-filter').value;
+    
+    // Filtrer les articles
+    let filtered = articles.filter(art => {
+        // Filtre par famille
+        if (familleFilter && art.famille !== familleFilter) return false;
+        // Uniquement les articles avec code-barres
+        if (!art.barcode || art.barcode.trim() === '') return false;
+        return true;
+    });
+    
+    // Tri par ordre alphabétique : famille, catégorie, nom, taille, longueur, conditionnement
+    filtered.sort((a, b) => {
+        // Famille
+        if (a.famille < b.famille) return -1;
+        if (a.famille > b.famille) return 1;
+        
+        // Catégorie
+        if (a.categorie < b.categorie) return -1;
+        if (a.categorie > b.categorie) return 1;
+        
+        // Nom
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        
+        // Taille
+        if (a.taille < b.taille) return -1;
+        if (a.taille > b.taille) return 1;
+        
+        // Longueur
+        if (a.longueur < b.longueur) return -1;
+        if (a.longueur > b.longueur) return 1;
+        
+        // Conditionnement
+        if (a.conditionnement < b.conditionnement) return -1;
+        if (a.conditionnement > b.conditionnement) return 1;
+        
+        return 0;
+    });
+    
+    if (filtered.length === 0) {
+        // Créer un message d'erreur temporaire
+        const tempMsg = document.createElement('div');
+        tempMsg.innerHTML = `
+            <div class="export-section">
+                <div style="text-align: center; padding: 20px; color: #888;">
+                    🏷️ Aucun article avec code-barres trouvé
+                </div>
+            </div>
+        `;
+        
+        // Retirer l'ancien catalogue s'il existe
+        const oldCatalogue = document.querySelector('.barcode-catalogue-container');
+        if (oldCatalogue) oldCatalogue.remove();
+        
+        // Ajouter le message
+        const container = document.querySelector('#import-export-page .container');
+        const firstSection = container.querySelector('.export-section');
+        container.insertBefore(tempMsg, firstSection.nextSibling);
+        
+        document.getElementById('download-catalogue-btn').style.display = 'none';
+        return;
+    }
+    
+    // Créer ou vider le conteneur pour le catalogue
+    let catalogueContainer = document.querySelector('.barcode-catalogue-container');
+    if (!catalogueContainer) {
+        catalogueContainer = document.createElement('div');
+        catalogueContainer.className = 'barcode-catalogue-container';
+        
+        // Insérer après la première section (celle du catalogue)
+        const container = document.querySelector('#import-export-page .container');
+        const firstSection = container.querySelector('.export-section');
+        container.insertBefore(catalogueContainer, firstSection.nextSibling);
+    } else {
+        catalogueContainer.innerHTML = '';
+    }
+    
+    // Appliquer le style pour 2 articles par ligne
+    catalogueContainer.style.display = 'grid';
+    catalogueContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    catalogueContainer.style.gap = '16px';
+    catalogueContainer.style.marginTop = '16px';
+    
+    // Modifier le style des éléments du catalogue pour qu'ils s'adaptent à 2 par ligne
+    const style = document.createElement('style');
+    style.textContent = `
+        .barcode-catalogue-item {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
         }
         
-        function downloadBarcodeCatalogue() {
-            const catalogueContainer = document.querySelector('.barcode-catalogue-container');
-            if (!catalogueContainer || catalogueContainer.children.length === 0) {
-                alert('Aucun catalogue à télécharger');
-                return;
-            }
-            
-            // Créer une nouvelle fenêtre pour l'impression/téléchargement
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Catalogue de codes-barres</title>
-                        <style>
-                            body { 
-                                font-family: Arial, sans-serif; 
-                                margin: 20px; 
-                            }
-                            .catalogue-item {
-                                page-break-inside: avoid;
-                                margin-bottom: 30px;
-                                padding: 20px;
-                                border: 1px solid #ccc;
-                                display: grid;
-                                grid-template-columns: 250px 1fr;
-                                gap: 20px;
-                                align-items: center;
-                            }
-                            .barcode-section {
-                                text-align: center;
-                                padding: 15px;
-                                background: white;
-                                border: 1px solid #ddd;
-                            }
-                            .info-grid {
-                                display: grid;
-                                grid-template-columns: repeat(2, 1fr);
-                                gap: 10px;
-                            }
-                            .info-item {
-                                margin-bottom: 8px;
-                            }
-                            .info-label {
-                                font-size: 11px;
-                                color: #666;
-                                margin-bottom: 2px;
-                            }
-                            .info-value {
-                                font-size: 14px;
-                                font-weight: 500;
-                            }
-                            .barcode-number {
-                                font-family: 'Courier New', monospace;
-                                font-size: 16px;
-                                font-weight: bold;
-                                margin-top: 10px;
-                            }
-                            @media print {
-                                .catalogue-item {
-                                    border: none;
-                                    margin-bottom: 40px;
-                                }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>Catalogue de codes-barres</h1>
-                        <div>Généré le ${new Date().toLocaleDateString('fr-FR')}</div>
-                        <hr style="margin: 20px 0;">
-            `);
-            
-            // Copier chaque élément du catalogue
-            const items = catalogueContainer.querySelectorAll('.barcode-catalogue-item');
-            items.forEach((item, index) => {
-                const barcodeSvg = item.querySelector('svg');
-                const barcodeNumber = item.querySelector('.barcode-code-display').textContent;
-                const infoItems = item.querySelectorAll('.barcode-info-item');
-                
-                let infoHtml = '';
-                infoItems.forEach(infoItem => {
-                    const label = infoItem.querySelector('.barcode-info-label').textContent;
-                    const value = infoItem.querySelector('.barcode-info-value').textContent;
-                    infoHtml += `
-                        <div class="info-item">
-                            <div class="info-label">${label}</div>
-                            <div class="info-value">${value}</div>
-                        </div>
-                    `;
-                });
-                
-                const svgData = new XMLSerializer().serializeToString(barcodeSvg);
-                
-                printWindow.document.write(`
-                    <div class="catalogue-item">
-                        <div class="barcode-section">
-                            <img src="data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}" 
-                                 style="max-width: 100%; height: auto;">
-                            <div class="barcode-number">${barcodeNumber}</div>
-                        </div>
-                        <div class="info-grid">
-                            ${infoHtml}
-                        </div>
-                    </div>
-                `);
-            });
-            
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.focus();
-            
-            // Proposer le téléchargement ou l'impression
-            setTimeout(() => {
-                if (confirm('Voulez-vous imprimer le catalogue ou le télécharger en PDF ?')) {
-                    printWindow.print();
-                } else {
-                    // Option pour télécharger en PDF (simplifié)
-                    alert('Pour télécharger, utilisez "Imprimer en PDF" dans la fenêtre d\'impression');
-                }
-            }, 500);
+        .barcode-visual {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            flex-shrink: 0;
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', loadInventory);
-            }
-            
-            const advancedSearchInput = document.getElementById('advanced-search-input');
-            if (advancedSearchInput) {
-                advancedSearchInput.addEventListener('input', performAdvancedSearch);
-            }
-            
-            // Support de la touche Entrée pour la saisie manuelle dans le scanner
-            const manualBarcodeInput = document.getElementById('manual-barcode');
-            if (manualBarcodeInput) {
-                manualBarcodeInput.addEventListener('keypress', function(event) {
-                    if (event.key === 'Enter') {
-                        searchByBarcode();
-                    }
+        
+        .barcode-svg {
+            width: 100%;
+            height: auto;
+            max-height: 80px;
+        }
+        
+        .barcode-info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            flex-grow: 1;
+        }
+        
+        .barcode-info-item {
+            margin-bottom: 4px;
+        }
+        
+        .barcode-info-label {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 1px;
+        }
+        
+        .barcode-info-value {
+            font-size: 12px;
+            color: #e0e0e0;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        
+        .barcode-code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 8px;
+            color: #000;
+            font-weight: bold;
+            word-break: break-all;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Générer les éléments du catalogue (2 par ligne)
+    filtered.forEach((art, index) => {
+        const item = document.createElement('div');
+        item.className = 'barcode-catalogue-item';
+        item.id = `barcode-item-${index}`;
+        
+        // Partie supérieure : Code-barre
+        const barcodeVisual = document.createElement('div');
+        barcodeVisual.className = 'barcode-visual';
+        barcodeVisual.innerHTML = `
+            <svg id="barcode-svg-${index}" class="barcode-svg"></svg>
+            <div class="barcode-code-display">${art.barcode}</div>
+        `;
+        
+        // Partie inférieure : Informations
+        const infoGrid = document.createElement('div');
+        infoGrid.className = 'barcode-info-grid';
+        infoGrid.innerHTML = `
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Famille</div>
+                <div class="barcode-info-value">${art.famille || '-'}</div>
+            </div>
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Catégorie</div>
+                <div class="barcode-info-value">${art.categorie || '-'}</div>
+            </div>
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Nom</div>
+                <div class="barcode-info-value">${art.name || '-'}</div>
+            </div>
+            ${art.taille ? `
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Taille</div>
+                <div class="barcode-info-value">${art.taille}</div>
+            </div>
+            ` : ''}
+            ${art.longueur ? `
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Longueur</div>
+                <div class="barcode-info-value">${art.longueur}</div>
+            </div>
+            ` : ''}
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Conditionnement</div>
+                <div class="barcode-info-value">${art.conditionnement || '-'}</div>
+            </div>
+            ${art.fournisseur ? `
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Fournisseur</div>
+                <div class="barcode-info-value">${art.fournisseur}</div>
+            </div>
+            ` : ''}
+            ${art.chantRef ? `
+            <div class="barcode-info-item">
+                <div class="barcode-info-label">Chantier Réf.</div>
+                <div class="barcode-info-value">${art.chantRef}</div>
+            </div>
+            ` : ''}
+        `;
+        
+        // Assembler l'élément
+        item.appendChild(barcodeVisual);
+        item.appendChild(infoGrid);
+        catalogueContainer.appendChild(item);
+    });
+    
+    // Afficher le bouton de téléchargement
+    document.getElementById('download-catalogue-btn').style.display = 'block';
+    
+    // Générer les codes-barres avec JsBarcode
+    setTimeout(() => {
+        filtered.forEach((art, index) => {
+            try {
+                JsBarcode(`#barcode-svg-${index}`, art.barcode, {
+                    format: 'CODE128', // Utiliser CODE128 qui est plus flexible
+                    width: 2,
+                    height: 60,
+                    displayValue: false,
+                    background: "#ffffff",
+                    lineColor: "#000000",
+                    margin: 5
                 });
+            } catch (error) {
+                console.error(`Erreur génération code-barre pour ${art.name}:`, error);
+                // Essayer avec EAN13
+                try {
+                    JsBarcode(`#barcode-svg-${index}`, art.barcode, {
+                        format: 'EAN13',
+                        width: 2,
+                        height: 60,
+                        displayValue: false,
+                        background: "#ffffff",
+                        lineColor: "#000000",
+                        margin: 5
+                    });
+                } catch (e) {
+                    console.error(`Échec également avec EAN13:`, e);
+                }
             }
-            
-            // Démarrer sur la page dashboard
-            navigateTo('dashboard');
         });
+    }, 100);
+}
+        
+        function downloadBarcodeCatalogue() {
+    const catalogueContainer = document.querySelector('.barcode-catalogue-container');
+    if (!catalogueContainer || catalogueContainer.children.length === 0) {
+        alert('Aucun catalogue à télécharger');
+        return;
+    }
+    
+    // Récupérer le nombre d'articles depuis les éléments DOM
+    const itemCount = catalogueContainer.children.length;
+    
+    // Créer une nouvelle fenêtre pour l'impression/téléchargement
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Catalogue de codes-barres</title>
+                <style>
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        margin: 10px; 
+                    }
+                    .catalogue-grid {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 15px;
+                    }
+                    .catalogue-item {
+                        page-break-inside: avoid;
+                        padding: 15px;
+                        border: 1px solid #ccc;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        height: 250px;
+                    }
+                    .barcode-section {
+                        text-align: center;
+                        padding: 10px;
+                        background: white;
+                        border: 1px solid #ddd;
+                        flex-shrink: 0;
+                    }
+                    .info-grid {
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        gap: 5px;
+                        flex-grow: 1;
+                    }
+                    .info-item {
+                        margin-bottom: 4px;
+                    }
+                    .info-label {
+                        font-size: 9px;
+                        color: #666;
+                        margin-bottom: 1px;
+                    }
+                    .info-value {
+                        font-size: 11px;
+                        font-weight: 500;
+                    }
+                    .barcode-number {
+                        font-family: 'Courier New', monospace;
+                        font-size: 12px;
+                        font-weight: bold;
+                        margin-top: 8px;
+                        word-break: break-all;
+                    }
+                    @media print {
+                        .catalogue-item {
+                            border: 1px solid #ccc;
+                            margin-bottom: 0;
+                        }
+                        .catalogue-grid {
+                            gap: 10px;
+                        }
+                    }
+                    h1 {
+                        font-size: 18px;
+                        margin-bottom: 5px;
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Catalogue de codes-barres</h1>
+                <div>Généré le ${new Date().toLocaleDateString('fr-FR')} - ${itemCount} articles</div>
+                <hr style="margin: 10px 0;">
+                <div class="catalogue-grid">
+    `);
+    
+    // Copier chaque élément du catalogue depuis le DOM
+    const items = catalogueContainer.querySelectorAll('.barcode-catalogue-item');
+    items.forEach((item, index) => {
+        const barcodeSvg = item.querySelector('svg');
+        const barcodeNumber = item.querySelector('.barcode-code-display').textContent;
+        const infoItems = item.querySelectorAll('.barcode-info-item');
+        
+        let infoHtml = '';
+        infoItems.forEach(infoItem => {
+            const label = infoItem.querySelector('.barcode-info-label').textContent;
+            const value = infoItem.querySelector('.barcode-info-value').textContent;
+            infoHtml += `
+                <div class="info-item">
+                    <div class="info-label">${label}</div>
+                    <div class="info-value">${value}</div>
+                </div>
+            `;
+        });
+        
+        const svgData = new XMLSerializer().serializeToString(barcodeSvg);
+        
+        printWindow.document.write(`
+            <div class="catalogue-item">
+                <div class="barcode-section">
+                    <img src="data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}" 
+                         style="max-width: 100%; height: 60px;">
+                    <div class="barcode-number">${barcodeNumber}</div>
+                </div>
+                <div class="info-grid">
+                    ${infoHtml}
+                </div>
+            </div>
+        `);
+    });
+    
+    printWindow.document.write('</div></body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Proposer l'impression
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
+}
 
         loadDashboard();
     </script>
