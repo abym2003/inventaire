@@ -8,8 +8,9 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <title>Gestion d'Inventaire</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
-        /* (Tous les styles existants restent identiques) */
         * {
             margin: 0;
             padding: 0;
@@ -129,6 +130,11 @@
             border-radius: 12px;
             color: #e0e0e0;
             font-size: 15px;
+            text-transform: uppercase;
+        }
+
+        .search-input::placeholder {
+            text-transform: none;
         }
 
         .search-input:focus {
@@ -376,11 +382,18 @@
             color: #e0e0e0;
             font-size: 15px;
             font-family: inherit;
+            text-transform: uppercase;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            text-transform: none;
         }
 
         .form-textarea {
             resize: vertical;
             min-height: 80px;
+            text-transform: uppercase;
         }
 
         .form-input:focus,
@@ -426,7 +439,6 @@
             color: #fff;
         }
 
-        /* NOUVEAUX STYLES POUR LE SCANNER FONCTIONNEL */
         .scanner-container {
             position: relative;
             width: 100%;
@@ -804,7 +816,6 @@
             font-weight: 500;
         }
         
-        /* Supprimer les styles qui désactivent les icônes */
         .nav-item.detail-page-active {
             background: transparent;
         }
@@ -814,7 +825,6 @@
             color: #888;
         }
 
-        /* Nouveau style pour les champs en édition */
         .edit-field {
             background: #252525;
             border: 1px solid #bb86fc;
@@ -822,6 +832,7 @@
             border-radius: 6px;
             width: 100%;
             color: #e0e0e0;
+            text-transform: uppercase;
         }
         
         .edit-actions {
@@ -854,7 +865,6 @@
             border-left: 3px solid #bb86fc;
         }
         
-        /* Styles pour le bouton historique (même style que le bouton scanner) */
         .history-btn {
             background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
             color: #000;
@@ -862,7 +872,6 @@
             box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
         }
         
-        /* Conteneur de l'historique */
         .history-container {
             max-height: 0;
             overflow: hidden;
@@ -874,7 +883,6 @@
             margin-top: 12px;
         }
         
-        /* Filtres avancés */
         .advanced-filters {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -949,7 +957,6 @@
             color: #000;
         }
         
-        /* Bouton effacer filtres */
         .clear-filters-btn {
             grid-column: span 2;
             background: #2a2a2a;
@@ -979,7 +986,6 @@
             margin-top: 8px;
         }
         
-        /* Styles pour la génération de codes-barres */
         .barcode-catalogue-container {
             display: flex;
             flex-direction: column;
@@ -1088,7 +1094,6 @@
             margin-bottom: 16px;
         }
 
-        /* Bouton retour scanner */
         .back-to-scanner-btn {
             position: fixed;
             top: 16px;
@@ -1116,7 +1121,6 @@
             box-shadow: 0 6px 16px rgba(187, 134, 252, 0.3);
         }
         
-        /* Nouveau style pour le bouton scanner à nouveau */
         .scan-again-btn {
             position: fixed;
             bottom: 80px;
@@ -1146,7 +1150,6 @@
             transform: scale(0.95);
         }
         
-        /* MODIFICATIONS POUR LES BOUTONS D'ACTION RAPIDE (ICÔNES SEULES) */
         .action-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1208,24 +1211,21 @@
             color: white;
         }
         
-        /* Cacher le bouton scanner à nouveau fixe */
         #detail-scan-again-btn {
             display: none !important;
         }
         
-        /* Masquer les éléments vides dans la grille d'information */
         .detail-info-item.empty {
             display: none;
         }
         
-        /* Styles pour l'affichage du catalogue (3 par ligne) - MODIFIÉ */
         .catalogue-page {
             background: white;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
             break-inside: avoid;
-            display: none; /* CACHÉ PAR DÉFAUT */
+            display: none;
         }
         
         .catalogue-family-title {
@@ -1263,17 +1263,16 @@
             flex-direction: column;
             gap: 8px;
             background: #f9f9f9;
-            min-height: 160px; /* Réduit de 180px à 160px */
+            min-height: 160px;
         }
         
-        /* MODIFICATION : Cadre des codes-barres moins haut */
         .catalogue-barcode-section {
             text-align: center;
             padding: 8px;
             background: white;
             border: 1px solid #eee;
             flex-shrink: 0;
-            height: 80px; /* Réduit de 100px à 80px */
+            height: 80px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -1303,9 +1302,8 @@
             color: #333;
         }
         
-        /* MODIFICATION : Supprimer l'affichage du code-barre en chiffres */
         .catalogue-barcode-number {
-            display: none; /* Caché selon la demande */
+            display: none;
         }
         
         .catalogue-no-barcode {
@@ -1318,7 +1316,7 @@
         
         .catalogue-no-barcode-visual {
             width: 100%;
-            height: 50px; /* Réduit de 60px à 50px */
+            height: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -1333,7 +1331,6 @@
             color: #bbb;
         }
         
-        /* Styles d'impression */
         @media print {
             body {
                 background: white;
@@ -1344,7 +1341,7 @@
                 margin: 0;
                 padding: 15px;
                 break-after: page;
-                display: block !important; /* Afficher lors de l'impression */
+                display: block !important;
             }
             
             .catalogue-items-grid {
@@ -1353,12 +1350,22 @@
             
             .catalogue-item {
                 border: 1px solid #ccc;
-                min-height: 150px; /* Réduit de 160px à 150px */
+                min-height: 150px;
             }
             
             .no-print {
                 display: none !important;
             }
+        }
+        
+        option.modified {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        option.modified::after {
+            content: " ●";
+            color: #ff9800;
         }
     </style>
 </head>
@@ -1457,14 +1464,12 @@
                 <input type="text" class="search-input" id="advanced-search-input" placeholder="🔍 Rechercher par nom, code-barre, famille, catégorie...">
             </div>
 
-            <!-- Nouveaux filtres avancés -->
             <div class="advanced-filters">
                 <div class="filter-dropdown">
                     <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('location')">
                         📍 Lieux
                     </button>
                     <div class="filter-dropdown-content" id="location-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
                     </div>
                 </div>
                 
@@ -1473,7 +1478,6 @@
                         📁 Familles
                     </button>
                     <div class="filter-dropdown-content" id="famille-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
                     </div>
                 </div>
                 
@@ -1482,7 +1486,6 @@
                         🏷️ Catégories
                     </button>
                     <div class="filter-dropdown-content" id="categorie-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
                     </div>
                 </div>
                 
@@ -1491,7 +1494,6 @@
                         🏢 Fournisseurs
                     </button>
                     <div class="filter-dropdown-content" id="fournisseur-filter-dropdown">
-                        <!-- Rempli dynamiquement -->
                     </div>
                 </div>
                 
@@ -1500,7 +1502,6 @@
                 </button>
             </div>
 
-            <!-- Filtres existants pour le stock -->
             <div class="filters">
                 <div class="filter-chip active" data-filter="all" onclick="filterSearchResults('all')">
                     Tous
@@ -1514,7 +1515,6 @@
             </div>
 
             <div class="article-list" id="search-results">
-                <!-- Vide par défaut -->
                 <div class="empty-state">
                     <div class="empty-icon">🔍</div>
                     <div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div>
@@ -1548,7 +1548,6 @@
             <div class="header-subtitle">Gestion des données</div>
         </div>
         <div class="container">
-            <!-- Nouvelle section pour le catalogue de codes-barres - MODIFIÉ -->
             <div class="export-section">
                 <div class="export-icon">🏷️</div>
                 <div class="section-title">Catalogue de codes-barres</div>
@@ -1558,17 +1557,28 @@
                         <option value="">Toutes les familles</option>
                     </select>
                 </div>
-                <!-- SUPPRIMÉ : Bouton "Générer le catalogue" -->
                 <button class="btn-primary" onclick="generateAndDownloadCatalogue()">
                     💾 Télécharger le catalogue
                 </button>
             </div>
 
             <div class="export-section">
-				<div class="export-icon">📤</div>
-				<div class="section-title">Exporter l'inventaire</div>
-				<button class="btn-primary" onclick="downloadExcel()">💾 Télécharger Excel</button>
-			</div>
+                <div class="export-icon">📤</div>
+                <div class="section-title">Exporter l'inventaire</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Filtrer par famille</label>
+                    <select class="form-select" id="excel-famille-filter">
+                        <option value="">Toutes les familles</option>
+                    </select>
+                </div>
+                
+                <button class="btn-primary" onclick="downloadExcel()">
+                    💾 Télécharger Excel
+                </button>
+                
+                <div id="export-info" style="margin-top: 12px; font-size: 13px; text-align: center; display: none;"></div>
+            </div>
 
             <div class="export-section">
                 <div class="export-icon">📥</div>
@@ -1589,12 +1599,9 @@
                 <button class="btn-secondary" onclick="backupData()">Créer une sauvegarde</button>
                 <button class="btn-secondary" onclick="restoreData()">Restaurer une sauvegarde</button>
             </div>
-            
-            <!-- SUPPRIMÉ : Conteneur pour la prévisualisation du catalogue -->
         </div>
     </div>
 
-    <!-- Modal Ajout Article -->
     <div id="add-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1608,15 +1615,15 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Famille *</label>
-                    <input type="text" class="form-input" id="article-famille" required value="boulonnerie">
+                    <input type="text" class="form-input" id="article-famille" required value="BOULONNERIE">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Catégorie *</label>
-                    <input type="text" class="form-input" id="article-categorie" required value="vis">
+                    <input type="text" class="form-input" id="article-categorie" required value="VIS">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Nom de l'article *</label>
-                    <input type="text" class="form-input" id="article-name" required value="hexa">
+                    <input type="text" class="form-input" id="article-name" required value="HEXA">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Taille</label>
@@ -1624,7 +1631,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Longueur</label>
-                    <input type="text" class="form-input" id="article-longueur" placeholder="ex: 20mm">
+                    <input type="text" class="form-input" id="article-longueur" placeholder="ex: 20MM">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Conditionnement *</label>
@@ -1632,12 +1639,11 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Fournisseur</label>
-                    <input type="text" class="form-input" id="article-fournisseur" placeholder="ex: Fournisseur X">
+                    <input type="text" class="form-input" id="article-fournisseur" placeholder="ex: FOURNISSEUR X">
                 </div>
-                <!-- MODIFICATION : Chantier Référence -> Référence -->
                 <div class="form-group">
                     <label class="form-label">Référence</label>
-                    <input type="text" class="form-input" id="article-reference" placeholder="À définir ultérieurement">
+                    <input type="text" class="form-input" id="article-reference" placeholder="À DÉFINIR ULTERIEUREMENT">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Lieu de stockage *</label>
@@ -1648,7 +1654,6 @@
                     <input type="number" class="form-input" id="article-nombre" required min="0" value="1">
                 </div>
                 <button type="submit" class="btn-primary">Enregistrer</button>
-                <!-- Bouton Scanner à nouveau dans le modal -->
                 <button type="button" class="btn-secondary" onclick="restartScannerFromModal()">
                     📷 Scanner à nouveau
                 </button>
@@ -1656,7 +1661,6 @@
         </div>
     </div>
 
-    <!-- Modal Modification Article -->
     <div id="edit-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1697,7 +1701,6 @@
                     <label class="form-label">Fournisseur</label>
                     <input type="text" class="form-input" id="edit-article-fournisseur">
                 </div>
-                <!-- MODIFICATION : Chantier Référence -> Référence -->
                 <div class="form-group">
                     <label class="form-label">Référence</label>
                     <input type="text" class="form-input" id="edit-article-reference">
@@ -1771,7 +1774,6 @@
         </div>
     </div>
 
-    <!-- NAVIGATION EN BAS - RETOUR À LA CONFIGURATION ORIGINALE -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="navigateTo('dashboard')">
             <div class="nav-icon">🏠</div>
@@ -1796,15 +1798,27 @@
     </nav>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <script>
         let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
+		
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    console.log('📱 Application PWA en cours d\'exécution');
+    
+    // Sauvegarder les données régulièrement pour la synchronisation hors ligne
+    setInterval(function() {
+        if (navigator.onLine) {
+            console.log('💾 Sauvegarde automatique...');
+            saveToStorage(); // Votre fonction existante
+        }
+    }, 60000); // Toutes les minutes
+}
         let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
         let history = JSON.parse(localStorage.getItem('inventory_history')) || [];
         let currentArticleId = null;
         let currentStockAction = null;
         
-        // Variables pour le scanner
         let html5QrCode = null;
         let isScannerActive = false;
         let lastScannedCode = null;
@@ -1816,56 +1830,66 @@
             fournisseur: null
         };
 
+        let lastExportTimestamps = JSON.parse(localStorage.getItem('inventory_last_exports')) || {};
+
         if (locations.length === 0) {
             locations = [
-                { id: Date.now(), name: 'Entrepôt principal', description: 'Stockage principal' },
-                { id: Date.now() + 1, name: 'Bureau', description: 'Petit matériel de bureau' },
-                { id: Date.now() + 2, name: 'Atelier', description: 'Outils et équipements' }
+                { id: Date.now(), name: 'ENTREPÔT PRINCIPAL', description: 'STOCKAGE PRINCIPAL' },
+                { id: Date.now() + 1, name: 'BUREAU', description: 'PETIT MATÉRIEL DE BUREAU' },
+                { id: Date.now() + 2, name: 'ATELIER', description: 'OUTILS ET ÉQUIPEMENTS' }
             ];
             saveToStorage();
+        }
+
+        function normalizeColumnName(header) {
+            if (!header || header === '') return '';
+            
+            const headerUpper = header.toUpperCase();
+            
+            if (headerUpper.includes('NOM')) return 'NOM';
+            if (headerUpper.includes('TAILLE')) return 'TAILLE';
+            if (headerUpper.includes('LONGUEUR')) return 'LONGUEUR';
+            if (headerUpper.includes('CDT') || headerUpper.includes('CONDITIONNEMENT')) return 'CDT';
+            if (headerUpper.includes('FOURNISSEUR')) return 'FOURNISSEUR';
+            if (headerUpper.includes('RÉFÉRENCE') || headerUpper.includes('REFERENCE')) return 'REFERENCE';
+            if (headerUpper.includes('TOTAL') && (headerUpper.includes('UNITÉS') || headerUpper.includes('UNITES'))) return 'TOTAL_UNITES';
+            if (headerUpper.includes('TOTAL')) return 'TOTAL';
+            
+            return headerUpper;
         }
 
         function navigateTo(page) {
             console.log('Navigating to:', page);
             
-            // Arrêter le scanner si on quitte la page scan
             if (page !== 'scan' && isScannerActive) {
                 stopScanner();
             }
             
-            // Masquer toutes les pages
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             
-            // Afficher la page demandée
             document.getElementById(`${page}-page`).classList.remove('hidden');
             
-            // Gérer la navigation - TOUJOURS ACTIVER LE BOUTON CORRESPONDANT
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // Activer le bouton correspondant à la page
             if (page === 'detail') {
-                // Pour la page détail, activer l'inventaire car c'est de là qu'on vient
                 document.querySelectorAll('.nav-item').forEach(item => {
                     if (item.onclick && item.onclick.toString().includes(`navigateTo('inventory')`)) {
                         item.classList.add('active');
                     }
                 });
             } else if (page === 'scan') {
-                // Pour la page scan, démarrer le scanner automatiquement
                 setTimeout(() => {
                     startScanner();
                 }, 100);
                 
-                // Activer le bon bouton de navigation (Recherche pour scanner)
                 document.querySelectorAll('.nav-item').forEach(item => {
                     if (item.onclick && item.onclick.toString().includes(`navigateTo('search')`)) {
                         item.classList.add('active');
                     }
                 });
             } else {
-                // Page normale : activer le bouton correspondant
                 document.querySelectorAll('.nav-item').forEach(item => {
                     if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
                         item.classList.add('active');
@@ -1873,7 +1897,6 @@
                 });
             }
             
-            // Charger les données spécifiques à la page
             if (page === 'dashboard') loadDashboard();
             if (page === 'inventory') loadInventory();
             if (page === 'search') loadSearchPage();
@@ -1882,16 +1905,12 @@
         }
 
         function returnToScanner() {
-            // Masquer le conteneur de détails
             document.getElementById('detail-container').innerHTML = '';
-            // Retourner au scanner
             navigateTo('scan');
         }
 
         function restartScannerFromModal() {
-            // Fermer le modal
             closeModal('add-article-modal');
-            // Retourner au scanner
             navigateTo('scan');
         }
 
@@ -1962,7 +1981,6 @@
                 filtered = filtered.filter(art => art.quantities && art.quantities[activeFilter]);
             }
 
-            // MODIFICATION : Trier les articles par ordre alphabétique du nom
             filtered.sort((a, b) => a.name.localeCompare(b.name));
             
             const filtersHtml = `
@@ -2041,10 +2059,8 @@
                 </div>
             `).join('') : '<div style="text-align: center; padding: 20px; color: #888;">Aucun historique</div>';
 
-            // Générer les champs d'information uniquement s'ils ne sont pas vides
             let infoFieldsHtml = '';
             
-            // Liste des champs à afficher avec leurs valeurs
             const fields = [
                 { id: 'famille', label: 'Famille', value: article.famille },
                 { id: 'categorie', label: 'Catégorie', value: article.categorie },
@@ -2055,10 +2071,8 @@
                 { id: 'reference', label: 'Référence', value: article.reference }
             ];
             
-            // Filtrer les champs non vides
             const nonEmptyFields = fields.filter(field => field.value && field.value.toString().trim() !== '');
             
-            // Générer le HTML pour les champs non vides
             nonEmptyFields.forEach(field => {
                 infoFieldsHtml += `
                     <div class="detail-info-item">
@@ -2068,7 +2082,6 @@
                 `;
             });
             
-            // Si aucun champ n'est rempli, afficher un message
             if (nonEmptyFields.length === 0) {
                 infoFieldsHtml = `
                     <div class="detail-info-item" style="grid-column: span 2; text-align: center; padding: 20px;">
@@ -2125,7 +2138,6 @@
                 </div>
             `;
             
-            // Afficher la page de détails sans toucher à la navigation
             navigateTo('detail');
             document.getElementById('detail-container').innerHTML = detailHtml;
         }
@@ -2172,21 +2184,18 @@
             
             if (!article) return;
             
-            // Mettre à jour les champs
             article.barcode = document.getElementById('edit-article-barcode').value.trim();
-            article.famille = document.getElementById('edit-article-famille').value.trim();
-            article.categorie = document.getElementById('edit-article-categorie').value.trim();
-            article.name = document.getElementById('edit-article-name').value.trim();
-            article.taille = document.getElementById('edit-article-taille').value.trim();
-            article.longueur = document.getElementById('edit-article-longueur').value.trim();
+            article.famille = document.getElementById('edit-article-famille').value.trim().toUpperCase();
+            article.categorie = document.getElementById('edit-article-categorie').value.trim().toUpperCase();
+            article.name = document.getElementById('edit-article-name').value.trim().toUpperCase();
+            article.taille = document.getElementById('edit-article-taille').value.trim().toUpperCase();
+            article.longueur = document.getElementById('edit-article-longueur').value.trim().toUpperCase();
             article.conditionnement = parseInt(document.getElementById('edit-article-conditionnement').value);
-            article.fournisseur = document.getElementById('edit-article-fournisseur').value.trim();
-            article.reference = document.getElementById('edit-article-reference').value.trim();
+            article.fournisseur = document.getElementById('edit-article-fournisseur').value.trim().toUpperCase();
+            article.reference = document.getElementById('edit-article-reference').value.trim().toUpperCase();
             
-            // Mettre à jour les quantités existantes avec le nouveau conditionnement
             Object.keys(article.quantities || {}).forEach(locId => {
                 if (article.quantities[locId]) {
-                    // Conserver le nombre de paquets, mais mettre à jour le conditionnement
                     article.quantities[locId].conditionnement = article.conditionnement;
                 }
             });
@@ -2195,10 +2204,7 @@
             addHistory('Modification', article.name, 'Informations mises à jour');
             closeModal('edit-article-modal');
             
-            // Recharger la vue détail
             showArticleDetail(articleId);
-            
-            // Recharger l'inventaire et le dashboard
             loadInventory();
             loadDashboard();
         }
@@ -2255,38 +2261,34 @@
             document.getElementById(modalId).classList.remove('active');
             document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
             
-            // Si on ferme le modal d'ajout d'article et qu'on est sur la page scan, redémarrer le scanner
             if (modalId === 'add-article-modal' && 
                 !document.getElementById('scan-page').classList.contains('hidden')) {
                 setTimeout(() => {
                     startScanner();
-                }, 300); // Petit délai pour laisser le modal se fermer complètement
+                }, 300);
             }
         }
 
         function saveArticle(event) {
             event.preventDefault();
             
-            const name = document.getElementById('article-name').value.trim();
+            const name = document.getElementById('article-name').value.trim().toUpperCase();
             const barcode = document.getElementById('article-barcode').value.trim();
-            const famille = document.getElementById('article-famille').value.trim();
-            const categorie = document.getElementById('article-categorie').value.trim();
-            const taille = document.getElementById('article-taille').value.trim();
-            const longueur = document.getElementById('article-longueur').value.trim();
+            const famille = document.getElementById('article-famille').value.trim().toUpperCase();
+            const categorie = document.getElementById('article-categorie').value.trim().toUpperCase();
+            const taille = document.getElementById('article-taille').value.trim().toUpperCase();
+            const longueur = document.getElementById('article-longueur').value.trim().toUpperCase();
             const conditionnement = parseInt(document.getElementById('article-conditionnement').value);
-            const fournisseur = document.getElementById('article-fournisseur').value.trim();
-            const reference = document.getElementById('article-reference').value.trim();
+            const fournisseur = document.getElementById('article-fournisseur').value.trim().toUpperCase();
+            const reference = document.getElementById('article-reference').value.trim().toUpperCase();
             const locationId = document.getElementById('article-location').value;
             const nombre = parseInt(document.getElementById('article-nombre').value);
 
-            // Vérifier si un article similaire existe déjà (sans tenir compte du code-barre s'il est vide)
             let existingArticle = null;
             
             if (barcode) {
-                // Si un code-barre est fourni, chercher par code-barre
                 existingArticle = articles.find(a => a.barcode === barcode);
             } else {
-                // Sinon, chercher par les autres caractéristiques
                 existingArticle = articles.find(a => 
                     a.name.toLowerCase() === name.toLowerCase() &&
                     a.famille === famille &&
@@ -2300,7 +2302,6 @@
             }
 
             if (existingArticle) {
-                // Article existant trouvé, ajouter la quantité
                 if (!existingArticle.quantities) existingArticle.quantities = {};
                 
                 if (existingArticle.quantities[locationId]) {
@@ -2309,14 +2310,12 @@
                     existingArticle.quantities[locationId] = { nombre, conditionnement };
                 }
 
-                // Mettre à jour le code-barre si fourni et différent
                 if (barcode && existingArticle.barcode !== barcode) {
                     existingArticle.barcode = barcode;
                 }
 
                 addHistory('Ajout', name, `+${nombre} à ${locations.find(l => l.id.toString() === locationId).name}`);
             } else {
-                // Créer un nouvel article
                 const article = {
                     id: Date.now(),
                     name,
@@ -2341,7 +2340,6 @@
             saveToStorage();
             closeModal('add-article-modal');
             
-            // Si on était sur la page scan, retourner dessus et redémarrer le scanner
             if (!document.getElementById('scan-page').classList.contains('hidden')) {
                 navigateTo('scan');
             } else {
@@ -2353,8 +2351,8 @@
         function saveLocation(event) {
             event.preventDefault();
             
-            const name = document.getElementById('location-name').value;
-            const description = document.getElementById('location-description').value;
+            const name = document.getElementById('location-name').value.toUpperCase();
+            const description = document.getElementById('location-description').value.toUpperCase();
 
             locations.push({
                 id: Date.now(),
@@ -2505,20 +2503,16 @@
             loadDashboard();
         }
 
-        // NOUVELLES FONCTIONS POUR LE SCANNER FONCTIONNEL
         async function startScanner() {
             console.log('Démarrage du scanner...');
             
-            // Masquer le résultat et les erreurs
             document.getElementById('scanner-error').style.display = 'none';
             document.getElementById('scan-result').innerHTML = '';
             
-            // Mettre à jour le statut
             document.getElementById('status-text').textContent = 'Scanner en cours...';
             document.getElementById('status-text').style.color = '#03dac6';
             document.getElementById('scanner-status').classList.add('active');
             
-            // Arrêter le scanner s'il est déjà actif
             if (isScannerActive && html5QrCode) {
                 try {
                     await html5QrCode.stop();
@@ -2528,13 +2522,10 @@
                 isScannerActive = false;
             }
             
-            // Attendre un peu avant de redémarrer
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Créer une nouvelle instance du scanner
             html5QrCode = new Html5Qrcode("scanner-reader");
             
-            // Configuration
             const config = {
                 fps: 10,
                 qrbox: { width: 250, height: 150 },
@@ -2543,7 +2534,6 @@
             };
             
             try {
-                // Démarrer le scanner
                 await html5QrCode.start(
                     { facingMode: "environment" },
                     config,
@@ -2563,19 +2553,14 @@
         function onScanSuccess(decodedText) {
             console.log('Code détecté:', decodedText);
             
-            // Sauvegarder le code scanné
             lastScannedCode = decodedText;
             
-            // Arrêter le scanner
             stopScanner();
             
-            // Rechercher automatiquement l'article
             handleScannedBarcode(decodedText);
         }
         
         function onScanError(errorMessage) {
-            // Ignorer les erreurs normales de scanning
-            // Elles sont normales quand aucun code n'est détecté
             console.log('Scan error (normal):', errorMessage);
         }
         
@@ -2605,21 +2590,17 @@
         function handleScannedBarcode(code) {
             console.log('Traitement automatique du code:', code);
             
-            // Rechercher l'article avec ce code-barre
             const article = articles.find(a => a.barcode === code);
             
             if (article) {
                 console.log('Article trouvé:', article.name);
-                // Afficher les détails de l'article
                 showArticleDetail(article.id.toString());
             } else {
                 console.log('Article non trouvé, ouverture du formulaire de création');
-                // Afficher le modal d'ajout d'article avec le code-barres pré-rempli
                 showAddArticleModal();
                 document.getElementById('article-barcode').value = code;
                 document.getElementById('article-name').focus();
                 
-                // Afficher un message informatif
                 document.getElementById('scan-result').innerHTML = `
                     <div class="detail-section">
                         <div class="section-title">Nouvel article détecté</div>
@@ -2640,123 +2621,790 @@
             handleScannedBarcode(scannedBarcode);
         }
 
-        function downloadExcel() {
-            const sortedArticles = [...articles].sort((a, b) => {
-                if (a.famille !== b.famille) return a.famille.localeCompare(b.famille);
-                return a.categorie.localeCompare(b.categorie);
-            });
-
-            const data = [];
-            let lastFamille = '';
-            let lastCategorie = '';
-
-            sortedArticles.forEach(art => {
-                if (art.famille !== lastFamille || art.categorie !== lastCategorie) {
-                    if (data.length > 0) {
-                        data.push({});
-                    }
-                    lastFamille = art.famille;
-                    lastCategorie = art.categorie;
-                }
-
-                Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
-                    const loc = locations.find(l => l.id.toString() === locId);
-                    const total = qty.nombre * qty.conditionnement;
-
-                    data.push({
-                        'Nom': art.name,
-                        'Code-barre': art.barcode || '',
-                        'Famille': art.famille || '',
-                        'Catégorie': art.categorie || '',
-                        'Taille': art.taille || '',
-                        'Longueur': art.longueur || '',
-                        'Conditionnement': art.conditionnement || '',
-                        'Nombre': qty.nombre,
-                        'Total': total,
-                        'Fournisseur': art.fournisseur || '',
-                        'Référence': art.reference || '',
-                        'Lieu': loc ? loc.name : ''
-                    });
-                });
-            });
-
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
-            
-            const fileName = `inventaire_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(wb, fileName);
+        async function exportSingleFamilyExcel(famille) {
+    try {
+        const filteredArticles = famille === 'Sans famille' 
+            ? articles.filter(art => !art.famille || art.famille.trim() === '')
+            : articles.filter(art => art.famille === famille);
+        
+        if (filteredArticles.length === 0) {
+            alert(`Aucun article dans la famille "${famille}"`);
+            return 0;
         }
+        
+        const groupedByCategory = {};
+        
+        filteredArticles.forEach(art => {
+            const categorie = art.categorie || 'Sans catégorie';
+            
+            if (!groupedByCategory[categorie]) {
+                groupedByCategory[categorie] = [];
+            }
+            
+            groupedByCategory[categorie].push(art);
+        });
+        
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Gestion Inventaire';
+        workbook.created = new Date();
+        
+        const borderStyle = {
+            top: { style: 'thin', color: { argb: 'FF000000' } },
+            left: { style: 'thin', color: { argb: 'FF000000' } },
+            bottom: { style: 'thin', color: { argb: 'FF000000' } },
+            right: { style: 'thin', color: { argb: 'FF000000' } }
+        };
+        
+        // Fonction de tri alphanumérique
+        function alphanumericSort(a, b) {
+            // Extraire les parties numériques et textuelles
+            const regex = /(\d+)|(\D+)/g;
+            const aParts = a.match(regex) || [];
+            const bParts = b.match(regex) || [];
+            
+            // Comparer partie par partie
+            for (let i = 0; i < Math.min(aParts.length, bParts.length); i++) {
+                const aPart = aParts[i];
+                const bPart = bParts[i];
+                
+                // Si les deux parties sont numériques, comparer comme des nombres
+                if (!isNaN(aPart) && !isNaN(bPart)) {
+                    const aNum = parseInt(aPart, 10);
+                    const bNum = parseInt(bPart, 10);
+                    if (aNum !== bNum) return aNum - bNum;
+                } 
+                // Sinon, comparer comme des chaînes (insensible à la casse)
+                else {
+                    const compare = aPart.localeCompare(bPart, 'fr', { numeric: true, sensitivity: 'base' });
+                    if (compare !== 0) return compare;
+                }
+            }
+            
+            // Si tout est égal jusqu'ici, la chaîne la plus courte vient en premier
+            return aParts.length - bParts.length;
+        }
+        
+        Object.keys(groupedByCategory).sort(alphanumericSort).forEach(categorie => {
+            const categoryArticles = groupedByCategory[categorie];
+            
+            const worksheet = workbook.addWorksheet(categorie.substring(0, 31).toUpperCase());
+            
+            // Grouper les articles par nom, taille, longueur
+            const groupedArticles = [];
+            
+            categoryArticles.forEach(art => {
+                let existingGroup = groupedArticles.find(g => 
+                    g.nom === art.name && 
+                    g.taille === art.taille && 
+                    g.longueur === art.longueur
+                );
+                
+                if (existingGroup) {
+                    if (!existingGroup.conditionnements[art.conditionnement]) {
+                        existingGroup.conditionnements[art.conditionnement] = {};
+                    }
+                    
+                    Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
+                        if (!existingGroup.conditionnements[art.conditionnement][locId]) {
+                            existingGroup.conditionnements[art.conditionnement][locId] = 0;
+                        }
+                        existingGroup.conditionnements[art.conditionnement][locId] += qty.nombre;
+                    });
+                    
+                } else {
+                    const newGroup = {
+                        nom: art.name,
+                        taille: art.taille || '',
+                        longueur: art.longueur || '',
+                        conditionnements: {},
+                        fournisseur: art.fournisseur || '',
+                        reference: art.reference || ''
+                    };
+                    
+                    newGroup.conditionnements[art.conditionnement] = {};
+                    Object.entries(art.quantities || {}).forEach(([locId, qty]) => {
+                        newGroup.conditionnements[art.conditionnement][locId] = qty.nombre;
+                    });
+                    
+                    groupedArticles.push(newGroup);
+                }
+            });
+            
+            // Trier les articles avec tri alphanumérique
+            groupedArticles.sort((a, b) => {
+                // Trier d'abord par nom
+                const nomCompare = alphanumericSort(a.nom, b.nom);
+                if (nomCompare !== 0) return nomCompare;
+                
+                // Ensuite par taille
+                const tailleCompare = alphanumericSort(a.taille || '', b.taille || '');
+                if (tailleCompare !== 0) return tailleCompare;
+                
+                // Ensuite par longueur
+                const longueurCompare = alphanumericSort(a.longueur || '', b.longueur || '');
+                if (longueurCompare !== 0) return longueurCompare;
+                
+                // Ensuite par conditionnement (numérique)
+                const conditionnementsA = Object.keys(a.conditionnements).sort((x, y) => parseInt(x) - parseInt(y));
+                const conditionnementsB = Object.keys(b.conditionnements).sort((x, y) => parseInt(x) - parseInt(y));
+                if (conditionnementsA[0] && conditionnementsB[0]) {
+                    return parseInt(conditionnementsA[0]) - parseInt(conditionnementsB[0]);
+                }
+                
+                return 0;
+            });
+            
+            const sortedLocations = [...locations].sort((a, b) => alphanumericSort(a.name, b.name));
+            
+            // En-têtes
+            const headers = ['NOM', 'TAILLE', 'LONGUEUR', 'CDT'];
+            sortedLocations.forEach(loc => {
+                headers.push(loc.name.toUpperCase());
+            });
+            headers.push('TOTAL', 'TOTAL (UNITÉS)', 'FOURNISSEUR', 'RÉFÉRENCE');
+            
+            const headerRow = worksheet.addRow(headers);
+            headerRow.eachCell((cell) => {
+                cell.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0070C0' } };
+                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                cell.border = borderStyle;
+            });
+            
+            // Données
+            let currentRow = 2;
+            let previousNom = '';
+            let previousTaille = '';
+            let previousLongueur = '';
+            let colorGroup = false;
+            let currentGroupKey = '';
+            
+            groupedArticles.forEach((item) => {
+                const conditionnements = Object.keys(item.conditionnements).sort((a, b) => parseInt(a) - parseInt(b));
+                
+                // Vérifier si on change de groupe (nom/taille/longueur différent)
+                const groupKey = `${item.nom}|${item.taille}|${item.longueur}`;
+                if (groupKey !== currentGroupKey) {
+                    colorGroup = !colorGroup;
+                    currentGroupKey = groupKey;
+                }
+                
+                conditionnements.forEach((conditionnement) => {
+                    const row = [];
+                    
+                    // NOM
+                    row.push(item.nom.toUpperCase());
+                    
+                    // TAILLE
+                    row.push(item.taille ? item.taille.toUpperCase() : '');
+                    
+                    // LONGUEUR
+                    row.push(item.longueur ? item.longueur.toUpperCase() : '');
+                    
+                    // CONDITIONNEMENT
+                    row.push(parseInt(conditionnement));
+                    
+                    // Quantités par emplacement
+                    let totalQuantity = 0;
+                    sortedLocations.forEach(loc => {
+                        const qty = item.conditionnements[conditionnement][loc.id] || 0;
+                        row.push(qty > 0 ? qty : '');
+                        totalQuantity += qty;
+                    });
+                    
+                    // TOTAL et TOTAL (UNITÉS) comme formules
+                    const firstDataCol = 5; // Colonne E (premier emplacement)
+                    const lastDataCol = firstDataCol + sortedLocations.length - 1;
+                    
+                    const totalFormula = `SUM(${String.fromCharCode(64 + firstDataCol)}${currentRow}:${String.fromCharCode(64 + lastDataCol)}${currentRow})`;
+                    const totalUnitFormula = `D${currentRow}*${String.fromCharCode(64 + lastDataCol + 1)}${currentRow}`;
+                    
+                    row.push({ formula: totalFormula });
+                    row.push({ formula: totalUnitFormula });
+                    
+                    // FOURNISSEUR et RÉFÉRENCE
+                    row.push(item.fournisseur ? item.fournisseur.toUpperCase() : '');
+                    row.push(item.reference ? item.reference.toUpperCase() : '');
+                    
+                    const excelRow = worksheet.addRow(row);
+                    
+                    // Appliquer les styles
+                    excelRow.eachCell((cell, colNumber) => {
+                        cell.border = borderStyle;
+                        
+                        // Colonnes D à TOTAL (UNITÉS) avec couleur de fond alternée
+                        if (colNumber >= 4 && colNumber <= lastDataCol + 2) {
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: colorGroup ? 'FFBB86FC' : 'FF03DAC6' }
+                            };
+                        }
+                        
+                        // Alignement
+                        if (colNumber <= 4) {
+                            cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                        } else if (colNumber <= lastDataCol + 2) {
+                            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                            if (cell.value && typeof cell.value === 'number' && cell.value > 0) {
+                                cell.font = { bold: true };
+                            }
+                        } else {
+                            cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                        }
+                    });
+                    
+                    // Masquer les doublons en blanc
+                    const nomCell = excelRow.getCell(1);
+                    const tailleCell = excelRow.getCell(2);
+                    const longueurCell = excelRow.getCell(3);
+                    
+                    if (previousNom === item.nom.toUpperCase()) {
+                        nomCell.font = { color: { argb: 'FFFFFFFF' } };
+                    }
+                    
+                    if (previousTaille === (item.taille || '').toUpperCase()) {
+                        tailleCell.font = { color: { argb: 'FFFFFFFF' } };
+                    }
+                    
+                    if (previousLongueur === (item.longueur || '').toUpperCase()) {
+                        longueurCell.font = { color: { argb: 'FFFFFFFF' } };
+                    }
+                    
+                    currentRow++;
+                });
+                
+                // Mettre à jour les précédentes valeurs
+                previousNom = item.nom.toUpperCase();
+                previousTaille = (item.taille || '').toUpperCase();
+                previousLongueur = (item.longueur || '').toUpperCase();
+            });
+            
+            // Ajuster les largeurs de colonnes
+            worksheet.columns = [
+                { width: 30 }, // NOM
+                { width: 15 }, // TAILLE
+                { width: 15 }, // LONGUEUR
+                { width: 12 }, // CDT
+                ...sortedLocations.map(() => ({ width: 12 })), // Emplacements
+                { width: 12 }, // TOTAL
+                { width: 15 }, // TOTAL (UNITÉS)
+                { width: 25 }, // FOURNISSEUR
+                { width: 25 }  // RÉFÉRENCE
+            ];
+            
+            // Congeler l'en-tête
+            worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+        });
+        
+        const safeFamille = famille === 'Sans famille' ? 'SANS_FAMILLE' : famille.replace(/\s+/g, '_');
+        const fileName = `INVENTAIRE_${safeFamille}.xlsx`; // SUPPRIMÉ LA DATE
+        
+        try {
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { 
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            });
+            
+            saveAs(blob, fileName);
+            
+            return Object.keys(groupedByCategory).length;
+        } catch (error) {
+            console.error('Erreur lors de la génération du fichier Excel:', error);
+            alert('Erreur lors de la génération du fichier Excel: ' + error.message);
+            return 0;
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'export Excel:', error);
+        alert('Erreur lors de la génération du fichier Excel: ' + error.message);
+        return 0;
+    }
+}
 
-        function importFromExcel(event) {
+        async function downloadExcel() {
+    const famille = document.getElementById('excel-famille-filter').value;
+    
+    if (!famille) {
+        // Exporter toutes les familles séparément
+        const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
+        
+        // Ajouter "Sans famille" si nécessaire
+        const sansFamilleArticles = articles.filter(art => !art.famille || art.famille.trim() === '');
+        if (sansFamilleArticles.length > 0) {
+            familles.push('Sans famille');
+        }
+        
+        if (familles.length === 0) {
+            alert('Aucun article à exporter.');
+            return;
+        }
+        
+        if (!confirm(`Exporter ${familles.length} famille(s) dans des fichiers Excel séparés ?`)) {
+            return;
+        }
+        
+        let exportedCount = 0;
+        
+        // Exporter chaque famille
+        for (const fam of familles) {
+            const result = await exportSingleFamilyExcel(fam);
+            if (result > 0) {
+                exportedCount++;
+                // Mettre à jour le timestamp de dernière exportation
+                lastExportTimestamps[fam] = new Date().toISOString();
+            }
+        }
+        
+        // Sauvegarder les timestamps
+        localStorage.setItem('inventory_last_exports', JSON.stringify(lastExportTimestamps));
+        
+        if (exportedCount > 0) {
+            setTimeout(() => {
+                alert(`✅ Export terminé ! ${exportedCount} fichier(s) Excel généré(s).`);
+                updateExportInfo();
+            }, 1000);
+        }
+        
+    } else {
+        // Exporter une famille spécifique
+        const result = await exportSingleFamilyExcel(famille);
+        
+        if (result > 0) {
+            // Mettre à jour le timestamp de dernière exportation
+            lastExportTimestamps[famille] = new Date().toISOString();
+            localStorage.setItem('inventory_last_exports', JSON.stringify(lastExportTimestamps));
+            
+            setTimeout(() => {
+                alert(`✅ Export de la famille "${famille}" terminé !`);
+                updateExportInfo();
+            }, 500);
+        }
+    }
+}
+
+        async function importFromExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                    if (!confirm(`Importer ${jsonData.length} ligne(s) ? Cela ajoutera ou mettra à jour les articles existants.`)) {
+                    const buffer = e.target.result;
+                    const workbook = new ExcelJS.Workbook();
+                    await workbook.xlsx.load(buffer);
+                    
+                    // Extraire la famille du nom du fichier
+                    const fileName = file.name.toUpperCase();
+                    let famille = '';
+                    
+                    const fileNameParts = fileName.split('_');
+                    if (fileNameParts.length >= 2 && fileNameParts[0] === 'INVENTAIRE') {
+                        famille = fileNameParts[1].replace('.XLSX', '').replace('.XLS', '').replace('.CSV', '');
+                    } else {
+                        famille = fileName.replace('INVENTAIRE_', '').replace('.XLSX', '').replace('.XLS', '').replace('.CSV', '');
+                    }
+                    
+                    if (!famille || famille === '') {
+                        famille = 'SANS FAMILLE';
+                    }
+                    
+                    const allData = [];
+                    
+                    console.log(`Fichier importé: ${fileName}, Famille détectée: ${famille}`);
+                    
+                    // Parcourir TOUTES les feuilles
+                    workbook.eachSheet((worksheet, sheetId) => {
+                        const categorie = worksheet.name.toUpperCase().trim();
+                        
+                        console.log(`=== Traitement de la feuille: ${categorie} (ID: ${sheetId}) ===`);
+                        
+                        const sheetData = [];
+                        
+                        // Obtenir les dimensions de la feuille
+                        const dimensions = worksheet.dimensions;
+                        if (!dimensions) {
+                            console.log(`Feuille "${categorie}" vide, ignorée`);
+                            return;
+                        }
+                        
+                        console.log(`Dimensions: Lignes ${dimensions.top} à ${dimensions.bottom}, Colonnes ${dimensions.left} à ${dimensions.right}`);
+                        
+                        // Lire les en-têtes
+                        const headerRow = worksheet.getRow(1);
+                        const headers = [];
+                        const normalizedHeaders = [];
+                        
+                        // Collecter TOUS les en-têtes, même vides
+                        for (let col = dimensions.left; col <= dimensions.right; col++) {
+                            const cell = headerRow.getCell(col);
+                            let headerValue = '';
+                            
+                            if (cell.value !== null && cell.value !== undefined) {
+                                if (typeof cell.value === 'object') {
+                                    if (cell.value.result !== undefined) {
+                                        headerValue = cell.value.result.toString();
+                                    } else if (cell.value.text !== undefined) {
+                                        headerValue = cell.value.text.toString();
+                                    } else if (cell.value.richText !== undefined) {
+                                        headerValue = cell.value.richText.map(rt => rt.text).join('');
+                                    } else {
+                                        headerValue = cell.value.toString();
+                                    }
+                                } else {
+                                    headerValue = cell.value.toString();
+                                }
+                            }
+                            
+                            headers[col] = headerValue.trim().toUpperCase();
+                            normalizedHeaders[col] = normalizeColumnName(headers[col]);
+                        }
+                        
+                        console.log(`En-têtes trouvés (${headers.filter(h => h && h !== '').length}):`, headers.filter(h => h && h !== ''));
+                        console.log(`En-têtes normalisés:`, normalizedHeaders.filter(h => h && h !== ''));
+                        
+                        // Vérifier les champs essentiels avec les en-têtes normalisés
+                        const hasNom = normalizedHeaders.some(h => h === 'NOM');
+                        if (!hasNom) {
+                            console.log(`Feuille "${categorie}" ignorée : pas de colonne NOM détectée`);
+                            return;
+                        }
+                        
+                        // Parcourir TOUTES les lignes de données
+                        let rowCount = 0;
+                        for (let rowNumber = dimensions.top + 1; rowNumber <= dimensions.bottom; rowNumber++) {
+                            const row = worksheet.getRow(rowNumber);
+                            
+                            // Vérifier si la ligne contient des données
+                            let hasAnyData = false;
+                            for (let col = dimensions.left; col <= dimensions.right; col++) {
+                                const cell = row.getCell(col);
+                                if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
+                                    hasAnyData = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!hasAnyData) {
+                                continue; // Ligne vide, passer à la suivante
+                            }
+                            
+                            const rowData = {};
+                            let hasRequiredData = false;
+                            
+                            // Extraire les données de chaque colonne
+                            for (let colNumber = dimensions.left; colNumber <= dimensions.right; colNumber++) {
+                                const header = normalizedHeaders[colNumber];
+                                if (!header || header === '') continue;
+                                
+                                const cell = row.getCell(colNumber);
+                                let cellValue = '';
+                                
+                                // Extraire la valeur de la cellule
+                                if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
+                                    if (typeof cell.value === 'object') {
+                                        if (cell.value.result !== undefined && cell.value.result !== null) {
+                                            cellValue = cell.value.result.toString();
+                                        } else if (cell.value.text !== undefined) {
+                                            cellValue = cell.value.text.toString();
+                                        } else if (cell.value.richText !== undefined) {
+                                            cellValue = cell.value.richText.map(rt => rt.text).join('');
+                                        } else if (cell.value.formula) {
+                                            try {
+                                                if (cell._value && cell._value.result !== undefined) {
+                                                    cellValue = cell._value.result.toString();
+                                                } else if (cell.result !== undefined) {
+                                                    cellValue = cell.result.toString();
+                                                } else {
+                                                    cellValue = '';
+                                                }
+                                            } catch (e) {
+                                                cellValue = '';
+                                            }
+                                        } else {
+                                            cellValue = cell.value.toString();
+                                        }
+                                    } else {
+                                        cellValue = cell.value.toString();
+                                    }
+                                    
+                                    cellValue = cellValue.trim();
+                                }
+                                
+                                rowData[header] = cellValue;
+                                
+                                // Vérifier si on a au moins le nom (données requises)
+                                if (header === 'NOM' && cellValue && cellValue !== '') {
+                                    hasRequiredData = true;
+                                }
+                            }
+                            
+                            if (hasRequiredData) {
+                                // Ajouter toutes les autres colonnes comme emplacements potentiels
+                                for (let colNumber = dimensions.left; colNumber <= dimensions.right; colNumber++) {
+                                    const normalizedHeader = normalizedHeaders[colNumber];
+                                    const originalHeader = headers[colNumber];
+                                    
+                                    if (!normalizedHeader || normalizedHeader === '' || !originalHeader || originalHeader === '') {
+                                        continue;
+                                    }
+                                    
+                                    // Liste des champs standard normalisés
+                                    const standardFields = ['NOM', 'TAILLE', 'LONGUEUR', 'CDT', 'FOURNISSEUR', 
+                                                          'REFERENCE', 'TOTAL', 'TOTAL_UNITES'];
+                                    
+                                    // Si c'est un champ standard, on l'a déjà traité
+                                    if (standardFields.includes(normalizedHeader)) {
+                                        continue;
+                                    }
+                                    
+                                    // Cette colonne est probablement un emplacement
+                                    const cell = row.getCell(colNumber);
+                                    let cellValue = '';
+                                    
+                                    if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
+                                        if (typeof cell.value === 'object') {
+                                            if (cell.value.result !== undefined && cell.value.result !== null) {
+                                                cellValue = cell.value.result.toString();
+                                            } else {
+                                                cellValue = cell.value.toString();
+                                            }
+                                        } else {
+                                            cellValue = cell.value.toString();
+                                        }
+                                        
+                                        cellValue = cellValue.trim();
+                                        if (cellValue !== '') {
+                                            // Utiliser l'en-tête original pour l'emplacement (pas le normalisé)
+                                            rowData[originalHeader] = cellValue;
+                                        }
+                                    }
+                                }
+                                
+                                // Ajouter les métadonnées
+                                rowData._FAMILLE = famille;
+                                rowData._CATEGORIE = categorie;
+                                
+                                sheetData.push(rowData);
+                                rowCount++;
+                                
+                                // Afficher les premières lignes pour débogage
+                                if (rowCount <= 3) {
+                                    console.log(`Ligne ${rowNumber} ajoutée:`, { 
+                                        nom: rowData.NOM, 
+                                        taille: rowData.TAILLE, 
+                                        longueur: rowData.LONGUEUR,
+                                        cdt: rowData.CDT,
+                                        fournisseur: rowData.FOURNISSEUR,
+                                        reference: rowData.REFERENCE
+                                    });
+                                }
+                            }
+                        }
+                        
+                        console.log(`Feuille "${categorie}" : ${sheetData.length} articles trouvés`);
+                        allData.push(...sheetData);
+                    });
+                    
+                    console.log(`Total des articles à importer: ${allData.length}`);
+                    
+                    if (allData.length === 0) {
+                        alert('Aucune donnée valide trouvée dans le fichier Excel.');
                         return;
                     }
-
-                    jsonData.forEach(row => {
-                        if (!row['Nom']) return;
-
-                        const name = row['Nom'];
-                        const locationName = row['Lieu'];
-                        const location = locations.find(l => l.name === locationName);
-                        if (!location) return;
-
-                        let article = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
-
-                        if (article) {
-                            if (!article.quantities[location.id]) {
-                                article.quantities[location.id] = {
-                                    nombre: parseInt(row['Nombre']) || 0,
-                                    conditionnement: parseInt(row['Conditionnement']) || 1
-                                };
-                            } else {
-                                article.quantities[location.id].nombre += parseInt(row['Nombre']) || 0;
+                    
+                    // Afficher un aperçu des données
+                    console.log("Aperçu des données:", allData.slice(0, 5));
+                    
+                    if (!confirm(`Importer ${allData.length} article(s) ?\nFamille: ${famille}\n\nLes quantités seront remplacées pour les emplacements spécifiés.`)) {
+                        return;
+                    }
+                    
+                    let importedCount = 0;
+                    let updatedCount = 0;
+                    let newLocationsCount = 0;
+                    let errors = [];
+                    
+                    // Traitement des données
+                    allData.forEach((row, index) => {
+                        try {
+                            // Extraire les données de base
+                            const nom = (row.NOM || '').toString().trim().toUpperCase();
+                            const famille = row._FAMILLE || '';
+                            const categorie = row._CATEGORIE || '';
+                            const taille = (row.TAILLE || '').toString().trim().toUpperCase();
+                            const longueur = (row.LONGUEUR || '').toString().trim().toUpperCase();
+                            
+                            // Conditionnement
+                            let conditionnement = 1;
+                            const cdtValue = row.CDT || row.CONDITIONNEMENT || '1';
+                            if (cdtValue && cdtValue !== '') {
+                                const cleanCdt = cdtValue.toString().replace(/,/g, '.').replace(/\s/g, '');
+                                conditionnement = parseInt(cleanCdt) || 1;
                             }
-                        } else {
-                            article = {
-                                id: Date.now() + Math.random(),
-                                name,
-                                barcode: row['Code-barre'] || '',
-                                famille: row['Famille'] || '',
-                                categorie: row['Catégorie'] || '',
-                                taille: row['Taille'] || '',
-                                longueur: row['Longueur'] || '',
-                                conditionnement: parseInt(row['Conditionnement']) || 1,
-                                fournisseur: row['Fournisseur'] || '',
-                                reference: row['Référence'] || '',
-                                quantities: {
-                                    [location.id]: {
-                                        nombre: parseInt(row['Nombre']) || 0,
-                                        conditionnement: parseInt(row['Conditionnement']) || 1
+                            
+                            const fournisseur = (row.FOURNISSEUR || '').toString().trim().toUpperCase();
+                            const reference = (row.REFERENCE || row.RÉFÉRENCE || '').toString().trim().toUpperCase();
+                            
+                            if (!nom) {
+                                errors.push(`Ligne ${index + 2}: Nom manquant`);
+                                return;
+                            }
+                            
+                            // Extraire les quantités par emplacement
+                            const locationQuantities = {};
+                            const standardFields = ['NOM', 'TAILLE', 'LONGUEUR', 'CDT', 'CONDITIONNEMENT', 
+                                                  'TOTAL', 'TOTAL_UNITES', 'TOTAL (UNITÉS)', 'FOURNISSEUR', 
+                                                  'REFERENCE', 'RÉFÉRENCE', '_FAMILLE', '_CATEGORIE'];
+                            
+                            Object.keys(row).forEach(key => {
+                                // Ignorer les champs standard
+                                if (standardFields.includes(key) || key.startsWith('_')) {
+                                    return;
+                                }
+                                
+                                const rawValue = row[key];
+                                if (rawValue && rawValue !== '') {
+                                    let quantity = 0;
+                                    
+                                    if (typeof rawValue === 'string') {
+                                        const cleanValue = rawValue.toString().replace(/,/g, '.').replace(/\s/g, '');
+                                        quantity = parseFloat(cleanValue);
+                                    } else if (typeof rawValue === 'number') {
+                                        quantity = rawValue;
                                     }
-                                },
-                                createdAt: new Date().toISOString()
-                            };
-                            articles.push(article);
+                                    
+                                    if (!isNaN(quantity) && quantity > 0) {
+                                        const locationName = key.toUpperCase();
+                                        
+                                        // Chercher ou créer l'emplacement
+                                        let location = locations.find(l => l.name === locationName);
+                                        if (!location) {
+                                            location = {
+                                                id: Date.now() + Math.random(),
+                                                name: locationName,
+                                                description: ''
+                                            };
+                                            locations.push(location);
+                                            newLocationsCount++;
+                                        }
+                                        
+                                        locationQuantities[location.id] = { 
+                                            nombre: Math.floor(quantity),
+                                            conditionnement: conditionnement 
+                                        };
+                                    }
+                                }
+                            });
+                            
+                            // Chercher l'article existant
+                            let existingArticle = articles.find(art => {
+                                // Critère principal : nom, famille, catégorie
+                                if (art.name !== nom || art.famille !== famille || art.categorie !== categorie) {
+                                    return false;
+                                }
+                                
+                                // Critères secondaires optionnels
+                                if (taille && art.taille !== taille) return false;
+                                if (longueur && art.longueur !== longueur) return false;
+                                if (conditionnement && art.conditionnement !== conditionnement) return false;
+                                
+                                return true;
+                            });
+                            
+                            if (existingArticle) {
+                                // MISE À JOUR d'un article existant
+                                existingArticle.taille = taille || existingArticle.taille;
+                                existingArticle.longueur = longueur || existingArticle.longueur;
+                                existingArticle.fournisseur = fournisseur || existingArticle.fournisseur;
+                                existingArticle.reference = reference || existingArticle.reference;
+                                existingArticle.conditionnement = conditionnement;
+                                
+                                // Fusionner les quantités (pas remplacer complètement)
+                                if (Object.keys(locationQuantities).length > 0) {
+                                    if (!existingArticle.quantities) {
+                                        existingArticle.quantities = {};
+                                    }
+                                    
+                                    Object.keys(locationQuantities).forEach(locId => {
+                                        if (existingArticle.quantities[locId]) {
+                                            // Si l'emplacement existe déjà, mettre à jour la quantité
+                                            existingArticle.quantities[locId].nombre = locationQuantities[locId].nombre;
+                                            existingArticle.quantities[locId].conditionnement = conditionnement;
+                                        } else {
+                                            // Sinon, ajouter le nouvel emplacement
+                                            existingArticle.quantities[locId] = {
+                                                nombre: locationQuantities[locId].nombre,
+                                                conditionnement: conditionnement
+                                            };
+                                        }
+                                    });
+                                }
+                                
+                                updatedCount++;
+                                
+                            } else {
+                                // NOUVEL ARTICLE
+                                const newArticle = {
+                                    id: Date.now() + Math.random(),
+                                    name: nom,
+                                    barcode: '',
+                                    famille: famille,
+                                    categorie: categorie,
+                                    taille: taille,
+                                    longueur: longueur,
+                                    conditionnement: conditionnement,
+                                    fournisseur: fournisseur,
+                                    reference: reference,
+                                    quantities: locationQuantities,
+                                    createdAt: new Date().toISOString()
+                                };
+                                
+                                articles.push(newArticle);
+                                importedCount++;
+                            }
+                            
+                        } catch (error) {
+                            console.error(`Erreur ligne ${index + 2}:`, error);
+                            errors.push(`Ligne ${index + 2}: ${error.message}`);
                         }
                     });
-
+                    
+                    // Sauvegarder les données
                     saveToStorage();
-                    addHistory('Import', `${jsonData.length} lignes`, 'depuis Excel');
-                    alert('Import réussi !');
+                    
+                    // Afficher le résumé
+                    let message = `✅ Import terminé !\n\n`;
+                    message += `📊 Statistiques :\n`;
+                    message += `├─ 📥 Nouveaux articles : ${importedCount}\n`;
+                    message += `├─ ✏️ Articles mis à jour : ${updatedCount}\n`;
+                    if (newLocationsCount > 0) {
+                        message += `├─ 📍 Nouveaux emplacements : ${newLocationsCount}\n`;
+                    }
+                    if (errors.length > 0) {
+                        message += `├─ ⚠️ Erreurs : ${errors.length}\n`;
+                    }
+                    message += `└─ 📈 Total articles dans l'inventaire : ${articles.length}`;
+                    
+                    if (errors.length > 0) {
+                        message += `\n\nErreurs détaillées (5 premières) :\n${errors.slice(0, 5).join('\n')}`;
+                        if (errors.length > 5) {
+                            message += `\n... et ${errors.length - 5} autres erreurs`;
+                        }
+                    }
+                    
+                    alert(message);
+                    
+                    // Recharger les vues
                     loadInventory();
                     loadDashboard();
-
+                    loadImportExport();
+                    
                 } catch (error) {
-                    alert('Erreur lors de l\'import: ' + error.message);
+                    console.error('Erreur lors de l\'import:', error);
+                    alert('Erreur lors de l\'import : ' + error.message);
                 }
             };
+            
             reader.readAsArrayBuffer(file);
         }
 
@@ -2834,13 +3482,136 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
 
+        function formatExportDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function checkFamilyModifications(famille, lastExportTimestamp) {
+            if (!lastExportTimestamp) return true;
+            
+            const familyArticles = articles.filter(art => art.famille === famille);
+            
+            return familyArticles.some(art => {
+                const recentHistory = history.filter(h => 
+                    h.articleName === art.name && 
+                    new Date(h.date) > new Date(lastExportTimestamp)
+                );
+                
+                const articleCreatedAfterExport = art.createdAt && 
+                    new Date(art.createdAt) > new Date(lastExportTimestamp);
+                
+                return recentHistory.length > 0 || articleCreatedAfterExport;
+            });
+        }
+
+        function updateExportInfo() {
+            const selectedFamille = document.getElementById('excel-famille-filter').value;
+            const exportInfoDiv = document.getElementById('export-info');
+            
+            if (!selectedFamille) {
+                const families = [...new Set(articles.map(a => a.famille).filter(Boolean))];
+                let modifiedCount = 0;
+                
+                families.forEach(famille => {
+                    const lastExport = lastExportTimestamps[famille];
+                    if (checkFamilyModifications(famille, lastExport)) {
+                        modifiedCount++;
+                    }
+                });
+                
+                const sansFamilleArticles = articles.filter(art => !art.famille || art.famille.trim() === '');
+                if (sansFamilleArticles.length > 0) {
+                    const lastExport = lastExportTimestamps['Sans famille'];
+                    if (checkFamilyModifications('Sans famille', lastExport)) {
+                        modifiedCount++;
+                    }
+                }
+                
+                const totalFiles = families.length + (sansFamilleArticles.length > 0 ? 1 : 0);
+                
+                if (modifiedCount > 0) {
+                    exportInfoDiv.innerHTML = `
+                        <div style="color: #ff9800; background: rgba(255, 152, 0, 0.1); 
+                                   padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 152, 0, 0.3);">
+                            ⚠️ ${modifiedCount} famille(s) modifiée(s) depuis la dernière exportation
+                            <div style="font-size: 12px; margin-top: 4px; color: #e0e0e0;">
+                                <strong>Note :</strong> ${totalFiles} fichier(s) Excel séparé(s) seront générés
+                            </div>
+                        </div>
+                    `;
+                    exportInfoDiv.style.display = 'block';
+                } else if (totalFiles > 0) {
+                    exportInfoDiv.innerHTML = `
+                        <div style="color: #4caf50; background: rgba(76, 175, 80, 0.1); 
+                                   padding: 8px; border-radius: 8px; border: 1px solid rgba(76, 175, 80, 0.3);">
+                            ✓ Aucune modification depuis la dernière exportation
+                            <div style="font-size: 12px; margin-top: 4px; color: #e0e0e0;">
+                                <strong>Note :</strong> ${totalFiles} fichier(s) Excel séparé(s) seront générés
+                            </div>
+                        </div>
+                    `;
+                    exportInfoDiv.style.display = 'block';
+                } else {
+                    exportInfoDiv.style.display = 'none';
+                }
+            } else {
+                const lastExport = lastExportTimestamps[selectedFamille];
+                const hasModifications = checkFamilyModifications(selectedFamille, lastExport);
+                
+                const familyArticles = selectedFamille === 'Sans famille' 
+                    ? articles.filter(art => !art.famille || art.famille.trim() === '')
+                    : articles.filter(art => art.famille === selectedFamille);
+                
+                if (familyArticles.length === 0) {
+                    exportInfoDiv.innerHTML = `
+                        <div style="color: #cf6679; background: rgba(207, 102, 121, 0.1); 
+                                   padding: 8px; border-radius: 8px; border: 1px solid rgba(207, 102, 121, 0.3);">
+                            ⚠️ Aucun article dans cette famille
+                        </div>
+                    `;
+                    exportInfoDiv.style.display = 'block';
+                    return;
+                }
+                
+                if (hasModifications) {
+                    exportInfoDiv.innerHTML = `
+                        <div style="color: #ff9800; background: rgba(255, 152, 0, 0.1); 
+                                   padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 152, 0, 0.3);">
+                            ⚠️ Cette famille a été modifiée depuis la dernière exportation
+                            ${lastExport ? `<div style="font-size: 12px; margin-top: 4px; color: #e0e0e0;">Dernière export: ${formatExportDate(lastExport)}</div>` : ''}
+                            <div style="font-size: 12px; margin-top: 4px; color: #e0e0e0;">
+                                <strong>Fichier :</strong> INVENTAIRE_${selectedFamille.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx
+                            </div>
+                        </div>
+                    `;
+                    exportInfoDiv.style.display = 'block';
+                } else {
+                    exportInfoDiv.innerHTML = `
+                        <div style="color: #4caf50; background: rgba(76, 175, 80, 0.1); 
+                                   padding: 8px; border-radius: 8px; border: 1px solid rgba(76, 175, 80, 0.3);">
+                            ✓ Aucune modification depuis la dernière exportation
+                            ${lastExport ? `<div style="font-size: 12px; margin-top: 4px; color: #e0e0e0;">Dernière export: ${formatExportDate(lastExport)}</div>` : ''}
+                            <div style="font-size: 12px; margin-top: 4px; color: #e0e0e0;">
+                                <strong>Fichier :</strong> INVENTAIRE_${selectedFamille.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx
+                            </div>
+                        </div>
+                    `;
+                    exportInfoDiv.style.display = 'block';
+                }
+            }
+        }
+
         function loadSearchPage() {
             const searchInput = document.getElementById('advanced-search-input');
             
-            // Initialiser les filtres
             initializeFilters();
             
-            // Afficher l'état vide initial
             document.getElementById('search-results').innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">🔍</div>
@@ -2850,12 +3621,10 @@
         }
         
         function initializeFilters() {
-            // Collecter toutes les valeurs uniques pour chaque filtre
             const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
             const categories = [...new Set(articles.map(a => a.categorie).filter(Boolean))];
             const fournisseurs = [...new Set(articles.map(a => a.fournisseur).filter(Boolean))];
             
-            // Remplir les dropdowns
             fillFilterDropdown('famille', familles);
             fillFilterDropdown('categorie', categories);
             fillFilterDropdown('fournisseur', fournisseurs);
@@ -2881,16 +3650,13 @@
         }
         
         function toggleFilterDropdown(type) {
-            // Fermer tous les autres dropdowns
             document.querySelectorAll('.filter-dropdown-content').forEach(d => {
                 d.classList.remove('show');
             });
             
-            // Basculer l'état actuel
             const dropdown = document.getElementById(`${type}-filter-dropdown`);
             dropdown.classList.toggle('show');
             
-            // Fermer en cliquant à l'extérieur
             setTimeout(() => {
                 document.addEventListener('click', function closeDropdown(e) {
                     if (!dropdown.contains(e.target) && 
@@ -2905,21 +3671,17 @@
         function selectFilter(type, value) {
             currentFilters[type] = currentFilters[type] === value ? null : value;
             
-            // Mettre à jour l'apparence du bouton
             const btn = document.querySelector(`.filter-dropdown-btn[onclick*="${type}"]`);
             if (currentFilters[type]) {
                 btn.classList.add('active');
-                // Ajouter un indicateur visuel
                 btn.innerHTML = `${getFilterIcon(type)} ${getFilterDisplayName(type, value)}`;
             } else {
                 btn.classList.remove('active');
                 btn.innerHTML = `${getFilterIcon(type)} ${getFilterLabel(type)}`;
             }
             
-            // Fermer le dropdown
             document.getElementById(`${type}-filter-dropdown`).classList.remove('show');
             
-            // Lancer la recherche
             performAdvancedSearch();
         }
         
@@ -2959,7 +3721,6 @@
                 fournisseur: null
             };
             
-            // Réinitialiser les boutons
             document.querySelectorAll('.filter-dropdown-btn').forEach(btn => {
                 btn.classList.remove('active');
                 const type = btn.onclick.toString().match(/'(\w+)'/)[1];
@@ -2974,7 +3735,6 @@
             const activeFilter = document.querySelector('#search-page .filter-chip[data-filter].active')?.dataset.filter;
             
             let filtered = articles.filter(art => {
-                // Filtre par recherche texte
                 const matchesText = 
                     art.name.toLowerCase().includes(searchTerm) ||
                     (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
@@ -2985,7 +3745,6 @@
                 
                 if (!matchesText) return false;
                 
-                // Filtre par stock
                 const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + (q.nombre * q.conditionnement), 0);
                 
                 if (activeFilter === 'low') {
@@ -2994,24 +3753,19 @@
                     if (totalQty > 0) return false;
                 }
                 
-                // Filtre par lieu
                 if (currentFilters.location) {
                     if (!art.quantities || !art.quantities[currentFilters.location]) return false;
                 }
                 
-                // Filtre par famille
                 if (currentFilters.famille && art.famille !== currentFilters.famille) return false;
                 
-                // Filtre par catégorie
                 if (currentFilters.categorie && art.categorie !== currentFilters.categorie) return false;
                 
-                // Filtre par fournisseur
                 if (currentFilters.fournisseur && art.fournisseur !== currentFilters.fournisseur) return false;
                 
                 return true;
             });
             
-            // Trier par ordre alphabétique
             filtered.sort((a, b) => a.name.localeCompare(b.name));
             
             displaySearchResults(filtered);
@@ -3083,19 +3837,34 @@
         }
 
         function loadImportExport() {
-            // Remplir le filtre par famille pour le catalogue
             const familles = [...new Set(articles.map(a => a.famille).filter(Boolean))];
-            const select = document.getElementById('barcode-famille-filter');
-            select.innerHTML = '<option value="">Toutes les familles</option>' +
+            
+            const catalogueSelect = document.getElementById('barcode-famille-filter');
+            catalogueSelect.innerHTML = '<option value="">Toutes les familles</option>' +
                 familles.map(f => `<option value="${f}">${f}</option>`).join('');
+            
+            const excelSelect = document.getElementById('excel-famille-filter');
+            excelSelect.innerHTML = '<option value="">Toutes les familles</option>' +
+                familles.map(famille => {
+                    const lastExport = lastExportTimestamps[famille];
+                    const hasModifications = checkFamilyModifications(famille, lastExport);
+                    
+                    const modificationIndicator = hasModifications ? 
+                        '<span style="color: #ff9800; margin-left: 5px;">● Modifié</span>' : 
+                        '';
+                    
+                    return `<option value="${famille}" class="${hasModifications ? 'modified' : ''}">${famille}${modificationIndicator}</option>`;
+                }).join('');
+            
+            excelSelect.addEventListener('change', updateExportInfo);
+            
+            updateExportInfo();
         }
         
         function generateAndDownloadCatalogue() {
             const familleFilter = document.getElementById('barcode-famille-filter').value;
             
-            // Filtrer les articles
             let filtered = articles.filter(art => {
-                // Filtre par famille
                 if (familleFilter && art.famille !== familleFilter) return false;
                 return true;
             });
@@ -3105,7 +3874,6 @@
                 return;
             }
             
-            // Grouper les articles par famille et catégorie
             const groupedByFamily = {};
             
             filtered.forEach(art => {
@@ -3123,14 +3891,12 @@
                 groupedByFamily[famille][categorie].push(art);
             });
             
-            // Trier les familles, catégories et articles
             const sortedFamilies = Object.keys(groupedByFamily).sort();
             
             sortedFamilies.forEach(famille => {
                 const categories = Object.keys(groupedByFamily[famille]).sort();
                 categories.forEach(categorie => {
                     groupedByFamily[famille][categorie].sort((a, b) => {
-                        // Tri par ordre alphabétique : nom, taille, longueur, conditionnement
                         if (a.name < b.name) return -1;
                         if (a.name > b.name) return 1;
                         
@@ -3148,10 +3914,8 @@
                 });
             });
             
-            // Créer une nouvelle fenêtre pour l'impression/téléchargement
             const printWindow = window.open('', '_blank');
             
-            // Compter le nombre total d'articles
             let totalArticles = 0;
             filtered.forEach(art => totalArticles++);
             
@@ -3295,7 +4059,6 @@
                         <hr style="margin: 10px 0;">
             `);
             
-            // Générer chaque page du catalogue
             sortedFamilies.forEach((famille, familleIndex) => {
                 const categories = Object.keys(groupedByFamily[famille]).sort();
                 
@@ -3314,18 +4077,15 @@
                         <div class="catalogue-items-grid">
                     `);
                     
-                    // Diviser les articles en groupes de 3 pour la disposition
                     for (let i = 0; i < articlesInCategory.length; i += 3) {
                         const rowArticles = articlesInCategory.slice(i, i + 3);
                         
-                        // Assurer qu'il y a toujours 3 éléments dans la ligne
                         while (rowArticles.length < 3) {
-                            rowArticles.push(null); // Article vide pour remplir
+                            rowArticles.push(null);
                         }
                         
                         rowArticles.forEach((art, indexInRow) => {
                             if (!art) {
-                                // Article vide pour remplir la grille
                                 printWindow.document.write(`
                                     <div class="catalogue-item" style="visibility: hidden;"></div>
                                 `);
@@ -3335,11 +4095,8 @@
                             const hasBarcode = art.barcode && art.barcode.trim() !== '';
                             const barcodeId = `catalogue-barcode-svg-${art.id}-${familleIndex}-${i}-${indexInRow}`;
                             
-                            // MODIFICATION : Nouvelle présentation des détails
-                            // Ligne 1: Nom + Taille + Longueur
                             const ligne1 = `${art.name}${art.taille ? ' ' + art.taille : ''}${art.longueur ? ' ' + art.longueur : ''}`;
                             
-                            // Ligne 2: Cdt + Conditionnement | Fournisseur | Ref: + Référence
                             let ligne2 = `Cdt ${art.conditionnement || '-'}`;
                             if (art.fournisseur) {
                                 ligne2 += `  ${art.fournisseur}`;
@@ -3362,21 +4119,15 @@
                                     </div>
                                     <div class="catalogue-info-grid">
                                         <div class="catalogue-info-item">
-                                            <!--<div class="catalogue-info-label">Article</div>-->
                                             <div class="catalogue-info-value" style="font-weight: bold; font-size: 12px;">
                                                 ${ligne1}
                                             </div>
                                         </div>
                                         <div class="catalogue-info-item">
-                                            <!--<div class="catalogue-info-label">Détails</div>-->
                                             <div class="catalogue-info-value" style="font-size: 12px;">
                                                 ${ligne2}
                                             </div>
                                         </div>
-                                       <!-- <div class="catalogue-info-item">
-                                            <div class="catalogue-info-label">Catégorie</div>
-                                            <div class="catalogue-info-value">${art.categorie || '-'}</div>
-                                        </div>-->
                                     </div>
                                 </div>
                             `);
@@ -3394,20 +4145,16 @@
             printWindow.document.write('</body></html>');
             printWindow.document.close();
             
-            // Générer les codes-barres après que le document est chargé
             setTimeout(() => {
                 filtered.forEach(art => {
                     if (art.barcode && art.barcode.trim() !== '') {
                         try {
-                            // Détection du format de code-barres
-                            let format = 'CODE128'; // Par défaut
+                            let format = 'CODE128';
                             
-                            // Vérifier si c'est un EAN13 (13 chiffres exactement)
                             if (/^\d{13}$/.test(art.barcode)) {
                                 format = 'EAN13';
                             }
                             
-                            // Trouver tous les éléments SVG pour cet article
                             const svgElements = printWindow.document.querySelectorAll(`[id^="catalogue-barcode-svg-${art.id}"]`);
                             
                             svgElements.forEach(svgElement => {
@@ -3416,7 +4163,7 @@
                                         format: format,
                                         width: format === 'EAN13' ? 1.5 : 2,
                                         height: 40,
-                                        displayValue: true, //  selon la demande
+                                        displayValue: true,
                                         background: "#ffffff",
                                         lineColor: "#000000",
                                         margin: 5,
@@ -3436,22 +4183,124 @@
                     }
                 });
                 
-                // Proposer l'impression après un court délai
                 setTimeout(() => {
                     printWindow.print();
                 }, 500);
             }, 300);
         }
 
-        loadDashboard();
+        function initializeUppercaseConversion() {
+            document.addEventListener('input', function(event) {
+                if (event.target.matches('input[type="text"], input[type="search"], textarea')) {
+                    if (!event.target.id.includes('barcode') && 
+                        !event.target.id.includes('manual-barcode')) {
+                        event.target.value = event.target.value.toUpperCase();
+                    }
+                }
+            });
+            
+            document.addEventListener('blur', function(event) {
+                if (event.target.matches('input[type="text"], input[type="search"], textarea')) {
+                    if (!event.target.id.includes('barcode') && 
+                        !event.target.id.includes('manual-barcode')) {
+                        event.target.value = event.target.value.toUpperCase();
+                    }
+                }
+            }, true);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUppercaseConversion();
+            
+            document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+                if (!input.id.includes('barcode') && 
+                    !input.id.includes('manual-barcode') &&
+                    input.value) {
+                    input.value = input.value.toUpperCase();
+                }
+            });
+            
+            loadDashboard();
+        });
     </script>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('Service Worker registered'))
-                .catch(err => console.error('Service Worker error:', err));
+   <script>
+    // Enregistrement du Service Worker pour la PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js')
+                .then(function(registration) {
+                    console.log('✅ Service Worker enregistré avec succès:', registration.scope);
+                    
+                    // Vérifier s'il y a une mise à jour en attente
+                    if (registration.waiting) {
+                        console.log('🔄 Nouvelle version du Service Worker en attente');
+                        notifyUserAboutUpdate();
+                    }
+                    
+                    // Écouter les mises à jour
+                    registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        console.log('📥 Nouveau Service Worker en cours d\'installation');
+                        
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🔄 Nouvelle version disponible !');
+                                notifyUserAboutUpdate();
+                            }
+                        });
+                    });
+                })
+                .catch(function(error) {
+                    console.log('❌ Échec de l\'enregistrement du Service Worker:', error);
+                });
+        });
+        
+        // Écouter les messages du Service Worker
+        navigator.serviceWorker.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'CACHE_UPDATED') {
+                console.log('🔄 Cache mis à jour:', event.data.payload);
+            }
+        });
+        
+        // Gérer la déconnexion
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+            console.log('🔄 Contrôleur du Service Worker changé');
+            window.location.reload();
+        });
+    }
+    
+    // Fonction pour notifier l'utilisateur d'une mise à jour
+    function notifyUserAboutUpdate() {
+        if (confirm('Une nouvelle version de l\'application est disponible. Voulez-vous recharger pour l\'installer ?')) {
+            // Envoyer un message au Service Worker pour sauter l'attente
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    action: 'skipWaiting'
+                });
+            }
+            window.location.reload();
         }
-    </script>
+    }
+    
+    // Vérifier la connexion réseau
+    window.addEventListener('online', function() {
+        console.log('🌐 Connecté à Internet');
+        // Synchroniser les données si nécessaire
+        syncOfflineData();
+    });
+    
+    window.addEventListener('offline', function() {
+        console.log('📴 Mode hors ligne');
+        alert('Vous êtes hors ligne. Les modifications seront synchronisées lorsque vous serez reconnecté.');
+    });
+    
+    // Fonction de synchronisation (à personnaliser selon vos besoins)
+    function syncOfflineData() {
+        console.log('🔄 Synchronisation des données...');
+        // Ici, vous pouvez ajouter la logique de synchronisation
+        // Par exemple : sauvegarder les modifications locales vers le serveur
+    }
+</script>
 </body>
 </html>
