@@ -1,13 +1,13 @@
-const CACHE_NAME = 'inventaire-v1.0.0';
-const DYNAMIC_CACHE = 'inventaire-dynamic-v1.0.0';
+const CACHE_NAME = 'inventaire-v1.0.1';
+const DYNAMIC_CACHE = 'inventaire-dynamic-v1.0.1';
 
 // Fichiers à mettre en cache lors de l'installation
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/manifest.json',
+  '/inventaire/',
+  '/inventaire/index.html',
+  '/inventaire/icon-192.png',
+  '/inventaire/icon-512.png',
+  '/inventaire/manifest.json',
   // CDN externes
   'https://unpkg.com/html5-qrcode',
   'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
@@ -23,7 +23,14 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('📦 Service Worker: Mise en cache des fichiers');
-        return cache.addAll(urlsToCache);
+        // Mettre en cache les fichiers un par un pour éviter les erreurs
+        return Promise.allSettled(
+          urlsToCache.map(url => {
+            return cache.add(url).catch(err => {
+              console.warn('⚠️ Impossible de mettre en cache:', url, err);
+            });
+          })
+        );
       })
       .then(() => {
         console.log('✅ Service Worker: Installation réussie');
@@ -64,8 +71,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Ignorer les requêtes vers des domaines externes (sauf CDN)
   const url = new URL(event.request.url);
+  
+  // Liste des domaines de confiance pour les CDN
   const trustedDomains = [
     'unpkg.com',
     'cdn.jsdelivr.net',
@@ -73,8 +81,9 @@ self.addEventListener('fetch', event => {
   ];
   
   const isTrustedDomain = trustedDomains.some(domain => url.hostname.includes(domain));
-  const isSameOrigin = url.origin === location.origin;
+  const isSameOrigin = url.origin === self.location.origin;
   
+  // Ignorer les requêtes vers des domaines non fiables
   if (!isSameOrigin && !isTrustedDomain) {
     return;
   }
@@ -111,8 +120,13 @@ self.addEventListener('fetch', event => {
           .catch(error => {
             console.error('❌ Fetch error:', error);
             
-            // Retourner une page hors ligne personnalisée si disponible
-            return caches.match('/index.html');
+            // Si c'est une navigation, retourner la page principale
+            if (event.request.mode === 'navigate') {
+              return caches.match('/inventaire/index.html');
+            }
+            
+            // Essayer de retourner depuis le cache
+            return caches.match(event.request);
           });
       })
   );
@@ -144,8 +158,8 @@ self.addEventListener('push', event => {
   
   const options = {
     body: event.data ? event.data.text() : 'Nouvelle notification',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/inventaire/icon-192.png',
+    badge: '/inventaire/icon-192.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -164,6 +178,6 @@ self.addEventListener('notificationclick', event => {
   event.notification.close();
   
   event.waitUntil(
-    clients.openWindow('/')
+    clients.openWindow('/inventaire/')
   );
 });
