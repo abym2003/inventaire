@@ -3,13 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
+    
+    <!-- Theme Color -->
     <meta name="theme-color" content="#bb86fc">
+    <meta name="msapplication-TileColor" content="#bb86fc">
+    
+    <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+    
+    <!-- Apple Web App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Inventaire">
+    
+    <!-- Description -->
+    <meta name="description" content="Application de gestion d'inventaire avec scanner de codes-barres">
+    
+    <!-- Keywords -->
+    <meta name="keywords" content="inventaire, gestion, stock, code-barre, scanner">
+    
     <title>Gestion d'Inventaire</title>
+    
+    <!-- Vos scripts CDN existants -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -4301,6 +4325,67 @@ if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         // Ici, vous pouvez ajouter la logique de synchronisation
         // Par exemple : sauvegarder les modifications locales vers le serveur
     }
+</script>
+<script>
+    // Gestion de l'installation PWA
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('💾 Événement beforeinstallprompt déclenché');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Afficher un bouton d'installation personnalisé (optionnel)
+        showInstallPromotion();
+    });
+    
+    function showInstallPromotion() {
+        // Créer un bouton d'installation si vous le souhaitez
+        const installButton = document.createElement('button');
+        installButton.textContent = '📱 Installer l\'application';
+        installButton.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #bb86fc 0%, #9965f4 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.4);
+            cursor: pointer;
+            z-index: 10000;
+        `;
+        
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`👤 Choix de l'utilisateur: ${outcome}`);
+            
+            deferredPrompt = null;
+            installButton.remove();
+        });
+        
+        document.body.appendChild(installButton);
+        
+        // Masquer après 10 secondes
+        setTimeout(() => {
+            installButton.style.opacity = '0';
+            setTimeout(() => installButton.remove(), 300);
+        }, 10000);
+    }
+    
+    window.addEventListener('appinstalled', () => {
+        console.log('✅ PWA installée avec succès');
+        deferredPrompt = null;
+    });
 </script>
 </body>
 </html>

@@ -1,14 +1,13 @@
 {
   "name": "Gestion d'Inventaire",
   "short_name": "Inventaire",
-  "description": "Application de gestion d'inventaire avec scan de codes-barres",
+  "description": "Application de gestion d'inventaire avec scanner de codes-barres",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#bb86fc",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "icons": [
-    
     {
       "src": "icon-192.png",
       "sizes": "192x192",
@@ -18,24 +17,36 @@
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "productivity", "utilities"],
+  "categories": ["productivity", "business"],
+  "screenshots": [],
   "shortcuts": [
     {
-      "name": "Scanner un article",
+      "name": "Scanner",
       "short_name": "Scanner",
-      "description": "Ouvrir le scanner de codes-barres",
-      "url": "/index.html?page=scan",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "description": "Scanner un code-barre",
+      "url": "/index.html#scan",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
-      "name": "Ajouter un article",
-      "short_name": "Ajouter",
-      "description": "Ajouter un nouvel article",
-      "url": "/index.html?page=add",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "name": "Inventaire",
+      "short_name": "Inventaire",
+      "description": "Voir l'inventaire",
+      "url": "/index.html#inventory",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
