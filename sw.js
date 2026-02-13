@@ -1,71 +1,183 @@
-const CACHE_NAME = 'inventaire-cache-v1';
+const CACHE_NAME = 'inventaire-v1.0.1';
+const DYNAMIC_CACHE = 'inventaire-dynamic-v1.0.1';
+
+// Fichiers à mettre en cache lors de l'installation
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/inventaire/',
+  '/inventaire/index.html',
+  '/inventaire/icon-192.png',
+  '/inventaire/icon-512.png',
+  '/inventaire/manifest.json',
+  // CDN externes
+  'https://unpkg.com/html5-qrcode',
   'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
   'https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js',
-  'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js',
-  'https://unpkg.com/html5-qrcode'
+  'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'
 ];
 
-// Installation du service worker
+// Installation du Service Worker
 self.addEventListener('install', event => {
+  console.log('📦 Service Worker: Installation en cours...');
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Cache ouvert');
-        return cache.addAll(urlsToCache);
+        console.log('📦 Service Worker: Mise en cache des fichiers');
+        // Mettre en cache les fichiers un par un pour éviter les erreurs
+        return Promise.allSettled(
+          urlsToCache.map(url => {
+            return cache.add(url).catch(err => {
+              console.warn('⚠️ Impossible de mettre en cache:', url, err);
+            });
+          })
+        );
       })
+      .then(() => {
+        console.log('✅ Service Worker: Installation réussie');
+        return self.skipWaiting();
+      })
+      .catch(error => {
+        console.error('❌ Service Worker: Erreur lors de l\'installation', error);
+      })
+  );
+});
+
+// Activation du Service Worker
+self.addEventListener('activate', event => {
+  console.log('🔄 Service Worker: Activation en cours...');
+  
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          // Supprimer les anciens caches
+          if (cacheName !== CACHE_NAME && cacheName !== DYNAMIC_CACHE) {
+            console.log('🗑️ Service Worker: Suppression de l\'ancien cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      console.log('✅ Service Worker: Activation réussie');
+      return self.clients.claim();
+    })
   );
 });
 
 // Interception des requêtes
 self.addEventListener('fetch', event => {
+  // Ignorer les requêtes non-GET
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  const url = new URL(event.request.url);
+  
+  // Liste des domaines de confiance pour les CDN
+  const trustedDomains = [
+    'unpkg.com',
+    'cdn.jsdelivr.net',
+    'cdnjs.cloudflare.com'
+  ];
+  
+  const isTrustedDomain = trustedDomains.some(domain => url.hostname.includes(domain));
+  const isSameOrigin = url.origin === self.location.origin;
+  
+  // Ignorer les requêtes vers des domaines non fiables
+  if (!isSameOrigin && !isTrustedDomain) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        // Retourne la ressource en cache si elle existe
-        if (response) {
-          return response;
+      .then(cachedResponse => {
+        // Si le fichier est en cache, le retourner
+        if (cachedResponse) {
+          console.log('📦 Cache hit:', event.request.url);
+          return cachedResponse;
         }
 
-        // Sinon, fait la requête réseau et met en cache la réponse
-        return fetch(event.request).then(
-          networkResponse => {
-            // Vérifie si la réponse est valide
-            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
+        // Sinon, faire la requête réseau
+        console.log('🌐 Network request:', event.request.url);
+        return fetch(event.request)
+          .then(response => {
+            // Ne pas mettre en cache les réponses invalides
+            if (!response || response.status !== 200 || response.type === 'error') {
+              return response;
             }
 
-            // Clone la réponse pour la stocker dans le cache
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME)
+            // Cloner la réponse
+            const responseToCache = response.clone();
+
+            // Mettre en cache dynamiquement
+            caches.open(DYNAMIC_CACHE)
               .then(cache => {
                 cache.put(event.request, responseToCache);
               });
 
-            return networkResponse;
-          }
-        );
+            return response;
+          })
+          .catch(error => {
+            console.error('❌ Fetch error:', error);
+            
+            // Si c'est une navigation, retourner la page principale
+            if (event.request.mode === 'navigate') {
+              return caches.match('/inventaire/index.html');
+            }
+            
+            // Essayer de retourner depuis le cache
+            return caches.match(event.request);
+          });
       })
   );
 });
 
-// Nettoyage des anciens caches lors de l'activation
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+// Écouter les messages du client
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    console.log('⏭️ Service Worker: Saut de l\'attente demandé');
+    self.skipWaiting();
+  }
+});
+
+// Synchronisation en arrière-plan (optionnel)
+self.addEventListener('sync', event => {
+  console.log('🔄 Background sync:', event.tag);
+  
+  if (event.tag === 'sync-inventory') {
+    event.waitUntil(
+      // Logique de synchronisation ici
+      Promise.resolve()
+    );
+  }
+});
+
+// Notifications Push (optionnel)
+self.addEventListener('push', event => {
+  console.log('📬 Push notification reçue');
+  
+  const options = {
+    body: event.data ? event.data.text() : 'Nouvelle notification',
+    icon: '/inventaire/icon-192.png',
+    badge: '/inventaire/icon-192.png',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    }
+  };
+  
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    self.registration.showNotification('Gestion d\'Inventaire', options)
+  );
+});
+
+// Gestion des clics sur les notifications
+self.addEventListener('notificationclick', event => {
+  console.log('🔔 Notification cliquée');
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.openWindow('/inventaire/')
   );
 });
