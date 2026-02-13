@@ -3208,6 +3208,16 @@
         // Note: Certaines fonctions peuvent nécessiter des adaptations mineures
         // pour fonctionner avec les nouvelles données (familles, catégories, etc.)
         // Ces adaptations ont été faites dans les fonctions principales ci-dessus
-    </script>
+    
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').then(function(registration) {
+        console.log('ServiceWorker enregistré avec succès : ', registration.scope);
+      }, function(err) {
+        console.log('Échec de l\'enregistrement du ServiceWorker : ', err);
+      });
+    });
+  }
+</script>
 </body>
 </html>

@@ -2,52 +2,23 @@
   "name": "Gestion d'Inventaire",
   "short_name": "Inventaire",
   "description": "Application de gestion d'inventaire avec scanner de codes-barres",
-  "start_url": "/inventaire/",
-  "scope": "/inventaire/",
+  "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#121212",
+  "orientation": "portrait",
   "theme_color": "#bb86fc",
-  "orientation": "portrait-primary",
+  "background_color": "#121212",
   "icons": [
     {
-      "src": "/inventaire/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/inventaire/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "categories": ["productivity", "business"],
-  "screenshots": [],
-  "shortcuts": [
-    {
-      "name": "Scanner",
-      "short_name": "Scanner",
-      "description": "Scanner un code-barre",
-      "url": "/inventaire/#scan",
-      "icons": [
-        {
-          "src": "/inventaire/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Inventaire",
-      "short_name": "Inventaire",
-      "description": "Voir l'inventaire",
-      "url": "/inventaire/#inventory",
-      "icons": [
-        {
-          "src": "/inventaire/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
     }
   ]
 }
