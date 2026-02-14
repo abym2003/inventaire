@@ -1,10 +1,10 @@
 const CACHE_NAME = 'inventaire-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
   'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
   'https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js',
@@ -12,11 +12,14 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', function(event) {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
         console.log('Cache ouvert');
-        return cache.addAll(urlsToCache);
+        return cache.addAll(urlsToCache).catch(err => {
+          console.error('Erreur lors de la mise en cache:', err);
+        });
       })
   );
 });
@@ -40,7 +43,9 @@ self.addEventListener('fetch', function(event) {
               });
             return response;
           }
-        );
+        ).catch(function() {
+          return caches.match('./index.html');
+        });
       })
   );
 });
@@ -56,6 +61,6 @@ self.addEventListener('activate', function(event) {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
