@@ -49,6 +49,7 @@
             overflow-x: hidden;
         }
 
+        /* Header modifié pour inclure le bouton menu */
         .header {
             background: #1e1e1e;
             padding: 16px 20px;
@@ -56,6 +57,17 @@
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .header-title {
+            flex: 1;
         }
 
         .header h1 {
@@ -68,6 +80,29 @@
             font-size: 12px;
             color: #888;
             margin-top: 4px;
+        }
+
+        /* Bouton menu hamburger */
+        .header-menu-btn {
+            background: none;
+            border: none;
+            color: #bb86fc;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0 8px;
+            line-height: 1;
+            transition: all 0.2s;
+            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-menu-btn:active {
+            background: rgba(187, 134, 252, 0.1);
+            transform: scale(0.95);
         }
 
         .container {
@@ -280,51 +315,64 @@
             transform: scale(0.9);
         }
 
-        .bottom-nav {
+        /* Menu déroulant (speed dial) positionné sous le header */
+        .speed-dial {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1e1e1e;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-            border-top: 1px solid #333;
-            z-index: 1000;
-        }
-
-        .nav-item {
+            top: 80px; /* juste sous le header (70-80px selon la hauteur du header) */
+            right: 20px;
             display: flex;
             flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            transform: scale(0);
+            transform-origin: top right;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .speed-dial.open {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .speed-dial-item {
+            display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 12px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 40px;
+            padding: 12px 20px;
+            color: #e0e0e0;
+            font-size: 16px;
             cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 12px;
-            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            background: rgba(30, 30, 30, 0.95);
         }
 
-        .nav-item.active {
+        .speed-dial-item:hover {
             background: #2a2a2a;
+            transform: translateX(-4px);
+            border-color: #bb86fc;
         }
 
-        .nav-icon {
+        .speed-dial-item:active {
+            transform: scale(0.98);
+        }
+
+        .speed-dial-icon {
             font-size: 24px;
-            color: #888;
+            width: 32px;
+            text-align: center;
         }
 
-        .nav-item.active .nav-icon {
-            color: #bb86fc;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            color: #888;
-        }
-
-        .nav-item.active .nav-label {
-            color: #bb86fc;
+        .speed-dial-label {
+            flex: 1;
         }
 
         .modal {
@@ -1393,7 +1441,7 @@
             color: #ff9800;
         }
 
-        /* Nouvelles styles pour la gestion des familles */
+        /* Styles pour la gestion des familles */
         .field-config-item {
             background: #121212;
             padding: 12px;
@@ -1559,16 +1607,22 @@
         }
 
         .new-category-input .btn-secondary {
-    width: auto; /* ou initial, pour annuler le width: 100% */
-    flex-shrink: 0; /* Empêche le bouton de rétrécir */
-}
+            width: auto;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
+    <!-- Page Tableau de bord -->
     <div id="dashboard-page" class="page">
         <div class="header">
-            <h1>📦 Gestion d'Inventaire</h1>
-            <div class="header-subtitle">Tableau de bord</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>📦 Gestion d'Inventaire</h1>
+                    <div class="header-subtitle">Tableau de bord</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container">
             <div class="stats-grid">
@@ -1598,10 +1652,16 @@
         </div>
     </div>
 
+    <!-- Page Inventaire -->
     <div id="inventory-page" class="page hidden">
         <div class="header">
-            <h1>📋 Inventaire</h1>
-            <div class="header-subtitle">Liste des articles</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>📋 Inventaire</h1>
+                    <div class="header-subtitle">Liste des articles</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container">
             <div class="search-container">
@@ -1615,10 +1675,16 @@
         <button class="fab" onclick="showAddArticleModal()">+</button>
     </div>
 
+    <!-- Page Scanner -->
     <div id="scan-page" class="page hidden">
         <div class="header">
-            <h1>📷 Scanner</h1>
-            <div class="header-subtitle">Scanner un code-barre</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>📷 Scanner</h1>
+                    <div class="header-subtitle">Scanner un code-barre</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container">
             <div class="scanner-status" id="scanner-status">
@@ -1649,10 +1715,16 @@
         </div>
     </div>
     
+    <!-- Page Recherche avancée -->
     <div id="search-page" class="page hidden">
         <div class="header">
-            <h1>🔍 Recherche Avancée</h1>
-            <div class="header-subtitle">Trouver des articles rapidement</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>🔍 Recherche Avancée</h1>
+                    <div class="header-subtitle">Trouver des articles rapidement</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container">
             <div class="search-container">
@@ -1718,18 +1790,30 @@
         </div>
     </div>
 
+    <!-- Page Détail article -->
     <div id="detail-page" class="page hidden">
         <div class="header">
-            <h1>📦 Détails</h1>
-            <div class="header-subtitle">Information de l'article</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>📦 Détails</h1>
+                    <div class="header-subtitle">Information de l'article</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container" id="detail-container"></div>
     </div>
 
+    <!-- Page Emplacements -->
     <div id="locations-page" class="page hidden">
         <div class="header">
-            <h1>📍 Emplacements</h1>
-            <div class="header-subtitle">Gestion des lieux</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>📍 Emplacements</h1>
+                    <div class="header-subtitle">Gestion des lieux</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container">
             <div id="locations-list"></div>
@@ -1737,11 +1821,16 @@
         <button class="fab" onclick="showAddLocationModal()">+</button>
     </div>
 
-    <!-- Nouvelle page pour la gestion des familles -->
+    <!-- Page Familles -->
     <div id="familles-page" class="page hidden">
         <div class="header">
-            <h1>📁 Familles</h1>
-            <div class="header-subtitle">Gestion des familles d'articles</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>📁 Familles</h1>
+                    <div class="header-subtitle">Gestion des familles d'articles</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container">
             <div id="familles-list"></div>
@@ -1749,10 +1838,16 @@
         <button class="fab" onclick="showAddFamilleModal()">+</button>
     </div>
 
+    <!-- Page Import/Export -->
     <div id="import-export-page" class="page hidden">
         <div class="header">
-            <h1>📊 Import/Export</h1>
-            <div class="header-subtitle">Gestion des données</div>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>📊 Import/Export</h1>
+                    <div class="header-subtitle">Gestion des données</div>
+                </div>
+                <button class="header-menu-btn" onclick="toggleMenu()">☰</button>
+            </div>
         </div>
         <div class="container">
             <div class="export-section">
@@ -1809,7 +1904,35 @@
         </div>
     </div>
 
-    <!-- Modal pour ajouter/modifier une famille -->
+    <!-- Menu déroulant (speed dial) -->
+<div id="speed-dial" class="speed-dial">
+    <div class="speed-dial-item" onclick="navigateTo('dashboard')">
+        <span class="speed-dial-icon">🏠</span>
+        <span class="speed-dial-label">Accueil</span>
+    </div>
+    <div class="speed-dial-item" onclick="navigateTo('locations')">
+        <span class="speed-dial-icon">📍</span>
+        <span class="speed-dial-label">Emplacements</span>
+    </div>
+    <div class="speed-dial-item" onclick="navigateTo('inventory')">
+        <span class="speed-dial-icon">📋</span>
+        <span class="speed-dial-label">Inventaire</span>
+    </div>
+    <div class="speed-dial-item" onclick="navigateTo('search')">
+        <span class="speed-dial-icon">🔍</span>
+        <span class="speed-dial-label">Recherche</span>
+    </div>
+    <div class="speed-dial-item" onclick="navigateTo('familles')">
+        <span class="speed-dial-icon">📁</span>
+        <span class="speed-dial-label">Familles</span>
+    </div>
+    <div class="speed-dial-item" onclick="navigateTo('import-export')">
+        <span class="speed-dial-icon">📊</span>
+        <span class="speed-dial-label">Export</span>
+    </div>
+</div>
+
+    <!-- Modals (inchangées) -->
     <div id="add-famille-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1825,9 +1948,7 @@
                 
                 <div class="category-management">
                     <div class="section-title">Catégories de cette famille</div>
-                    <div id="categories-list">
-                        <!-- Les catégories seront ajoutées ici dynamiquement -->
-                    </div>
+                    <div id="categories-list"></div>
                     <div class="new-category-input">
                         <input type="text" class="form-input" id="new-category-name" placeholder="Nom de la nouvelle catégorie">
                         <button type="button" class="btn-secondary" onclick="addCategoryToFamille()">+ Ajouter</button>
@@ -1836,9 +1957,7 @@
                 
                 <div class="detail-section">
                     <div class="section-title">Champs personnalisés (communs à toutes les catégories)</div>
-                    <div id="custom-fields-list">
-                        <!-- Les champs personnalisés seront ajoutés ici -->
-                    </div>
+                    <div id="custom-fields-list"></div>
                     <button type="button" class="btn-secondary" onclick="addCustomField()">+ Ajouter un champ</button>
                 </div>
                 
@@ -1847,7 +1966,6 @@
         </div>
     </div>
 
-    <!-- Modal pour ajouter un article avec sélection de famille -->
     <div id="add-article-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1892,7 +2010,6 @@
                         <input type="text" class="form-input" id="article-name" required>
                     </div>
                     
-                    <!-- Champs personnalisés dynamiques -->
                     <div id="article-custom-fields"></div>
                     
                     <div class="form-group">
@@ -2031,33 +2148,27 @@
         </div>
     </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="navigateTo('dashboard')">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Accueil</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('inventory')">
-            <div class="nav-icon">📋</div>
-            <div class="nav-label">Inventaire</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('search')">
-            <div class="nav-icon">🔍</div>
-            <div class="nav-label">Recherche</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('familles')">
-            <div class="nav-icon">📁</div>
-            <div class="nav-label">Familles</div>
-        </div>
-        <div class="nav-item" onclick="navigateTo('import-export')">
-            <div class="nav-icon">📊</div>
-            <div class="nav-label">Export</div>
-        </div>
-    </nav>
-
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <script>
+        // ===== NOUVELLES FONCTIONS POUR LE MENU DÉROULANT =====
+        function toggleMenu() {
+            document.getElementById('speed-dial').classList.toggle('open');
+        }
+        
+        function closeMenu() {
+            document.getElementById('speed-dial').classList.remove('open');
+        }
+
+        // Fermer le menu si on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-menu-btn') && !e.target.closest('.speed-dial')) {
+                closeMenu();
+            }
+        });
+
+        // ===== FONCTIONS EXISTANTES (inchangées) =====
         let articles = JSON.parse(localStorage.getItem('inventory_articles')) || [];
         let locations = JSON.parse(localStorage.getItem('inventory_locations')) || [];
         let familles = JSON.parse(localStorage.getItem('inventory_familles')) || [];
@@ -2134,7 +2245,7 @@
             saveToStorage();
         }
 
-        // Navigation
+        // Navigation (modifiée pour fermer le menu)
         function navigateTo(page) {
             console.log('Navigating to:', page);
             
@@ -2145,32 +2256,10 @@
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById(`${page}-page`).classList.remove('hidden');
             
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            if (page === 'detail') {
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    if (item.onclick && item.onclick.toString().includes(`navigateTo('inventory')`)) {
-                        item.classList.add('active');
-                    }
-                });
-            } else if (page === 'scan') {
+            if (page === 'scan') {
                 setTimeout(() => {
                     startScanner();
                 }, 100);
-                
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    if (item.onclick && item.onclick.toString().includes(`navigateTo('search')`)) {
-                        item.classList.add('active');
-                    }
-                });
-            } else {
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    if (item.onclick && item.onclick.toString().includes(`navigateTo('${page}')`)) {
-                        item.classList.add('active');
-                    }
-                });
             }
             
             if (page === 'dashboard') loadDashboard();
@@ -2179,6 +2268,9 @@
             if (page === 'locations') loadLocations();
             if (page === 'familles') loadFamilles();
             if (page === 'import-export') loadImportExport();
+
+            // Fermer le menu après navigation
+            closeMenu();
         }
 
         // Dashboard
@@ -2241,7 +2333,6 @@
             document.getElementById('famille-modal-title').textContent = 'Modifier la Famille';
             document.getElementById('edit-famille-nom').value = famille.nom;
             
-            // Afficher les catégories existantes
             const categoriesList = document.getElementById('categories-list');
             categoriesList.innerHTML = '';
             
@@ -2257,7 +2348,6 @@
                 });
             }
             
-            // Initialiser les champs personnalisés
             const customFieldsList = document.getElementById('custom-fields-list');
             customFieldsList.innerHTML = '';
             
@@ -2280,8 +2370,6 @@
             }
             
             const categoriesList = document.getElementById('categories-list');
-            
-            // Vérifier si la catégorie existe déjà
             const existingCategories = Array.from(categoriesList.querySelectorAll('.category-name'))
                 .map(el => el.textContent);
             
@@ -2370,14 +2458,12 @@
                 return;
             }
             
-            // Récupérer les catégories
             const categoriesList = document.getElementById('categories-list');
             const categoryElements = categoriesList.querySelectorAll('.category-item');
             const categories = Array.from(categoryElements).map(item => 
                 item.querySelector('.category-name').textContent
             );
             
-            // Récupérer les champs personnalisés
             const fieldItems = document.querySelectorAll('.field-config-item');
             const champsPersonnalises = [];
             
@@ -2399,7 +2485,6 @@
             });
             
             if (currentFamilleId) {
-                // Modification
                 const famille = familles.find(f => f.id === currentFamilleId);
                 if (famille) {
                     famille.nom = nom;
@@ -2407,7 +2492,6 @@
                     famille.champsPersonnalises = champsPersonnalises;
                 }
             } else {
-                // Création
                 const newFamille = {
                     id: Date.now(),
                     nom,
@@ -2447,17 +2531,14 @@
             const modal = document.getElementById('add-article-modal');
             const familleSelect = document.getElementById('article-famille-select');
             
-            // Remplir la liste des familles
             familleSelect.innerHTML = '<option value="">Sélectionnez une famille</option>' +
                 familles.map(fam => `<option value="${fam.id}">${fam.nom}</option>`).join('');
             
-            // Initialiser la sélection des emplacements
             const locationSelect = document.getElementById('article-location');
             locationSelect.innerHTML = locations.map(loc => 
                 `<option value="${loc.id}">${loc.name}</option>`
             ).join('');
             
-            // Réinitialiser les étapes
             goToStep(1);
             
             modal.classList.add('active');
@@ -2477,10 +2558,8 @@
             const categorieSelect = document.getElementById('article-categorie-select');
             const customFieldsContainer = document.getElementById('article-custom-fields');
             
-            // Afficher le nom de la famille en lecture seule
             document.getElementById('article-famille-display').value = famille ? famille.nom : '';
             
-            // Remplir le select des catégories
             categorieSelect.innerHTML = '<option value="">Sélectionnez une catégorie</option>';
             if (famille && famille.categories) {
                 famille.categories.forEach(cat => {
@@ -2488,7 +2567,6 @@
                 });
             }
             
-            // Afficher les champs personnalisés de la famille
             customFieldsContainer.innerHTML = '';
             if (famille && famille.champsPersonnalises) {
                 famille.champsPersonnalises.sort((a, b) => a.ordre - b.ordre).forEach(champ => {
@@ -2531,20 +2609,19 @@
                 return;
             }
 
-            // Récupérer les valeurs des champs personnalisés
             const customValues = {};
             if (famille && famille.champsPersonnalises) {
-                famille.champsPersonnalises.forEach(champ => {
+                for (const champ of famille.champsPersonnalises) {
                     const input = document.getElementById(`custom-${champ.id}`);
                     if (input) {
                         const value = champ.type === 'nombre' ? parseFloat(input.value) || 0 : input.value.trim().toUpperCase();
                         if (champ.obligatoire && !value && value !== 0) {
                             alert(`Le champ "${champ.label}" est obligatoire`);
-                            throw new Error('Champ obligatoire manquant');
+                            return;
                         }
                         customValues[champ.label] = value;
                     }
-                });
+                }
             }
 
             let existingArticle = null;
@@ -2617,7 +2694,6 @@
             document.getElementById('edit-article-reference').value = article.reference || '';
             document.getElementById('edit-article-seuil-bas').value = article.seuil_bas || 0;
             
-            // Afficher les champs personnalisés
             const customFieldsContainer = document.getElementById('edit-article-custom-fields');
             customFieldsContainer.innerHTML = '';
             
@@ -2655,21 +2731,20 @@
             article.reference = document.getElementById('edit-article-reference').value.trim().toUpperCase();
             article.seuil_bas = parseInt(document.getElementById('edit-article-seuil-bas').value);
             
-            // Mettre à jour les champs personnalisés
             const famille = familles.find(f => f.nom === article.famille);
             if (famille && famille.champsPersonnalises) {
                 if (!article.customValues) article.customValues = {};
-                famille.champsPersonnalises.forEach(champ => {
+                for (const champ of famille.champsPersonnalises) {
                     const input = document.getElementById(`edit-custom-${champ.id}`);
                     if (input) {
                         const value = champ.type === 'nombre' ? parseFloat(input.value) || 0 : input.value.trim().toUpperCase();
                         if (champ.obligatoire && !value && value !== 0) {
                             alert(`Le champ "${champ.label}" est obligatoire`);
-                            throw new Error('Champ obligatoire manquant');
+                            return;
                         }
                         article.customValues[champ.label] = value;
                     }
-                });
+                }
             }
             
             saveToStorage();
@@ -2692,7 +2767,6 @@
             const locs = Object.entries(article.quantities || {}).filter(([_, q]) => q.nombre > 0);
             const articleHistory = history.filter(h => h.articleName === article.name).slice(0, 10);
             
-            // Vérifier le stock faible
             const isLowStock = totalQty <= (article.seuil_bas || 0) && totalQty > 0;
             const isVeryLowStock = totalQty === 0;
             
@@ -2727,7 +2801,6 @@
                 `;
             });
             
-            // Ajouter les champs personnalisés
             if (article.customValues) {
                 Object.entries(article.customValues).forEach(([key, value]) => {
                     if (value !== undefined && value !== '' && value !== null) {
@@ -2796,13 +2869,11 @@
             document.getElementById('detail-container').innerHTML = detailHtml;
         }
 
-        // Modifier l'affichage des articles pour inclure les indicateurs de stock faible
         function displayArticles(filtered) {
             const listHtml = filtered.map(art => {
                 const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + q.nombre, 0);
                 const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
                 
-                // Vérifier le stock faible
                 const isLowStock = totalQty <= (art.seuil_bas || 0) && totalQty > 0;
                 const isVeryLowStock = totalQty === 0;
                 
@@ -2832,7 +2903,609 @@
             document.getElementById('article-list').innerHTML = listHtml;
         }
 
-        // Modifier l'export Excel pour refléter la nouvelle structure
+        function loadInventory() {
+            const locationFilters = document.getElementById('location-filters');
+            const uniqueLocations = [...new Set(articles.flatMap(art => 
+                Object.keys(art.quantities || {})
+            ))].map(id => locations.find(l => l.id.toString() === id)).filter(Boolean);
+            
+            locationFilters.innerHTML = '<div class="filter-chip active" data-filter="all" onclick="filterByLocation(\'all\')">Tous</div>' +
+                uniqueLocations.map(loc => 
+                    `<div class="filter-chip" data-filter="${loc.id}" onclick="filterByLocation('${loc.id}')">${loc.name}</div>`
+                ).join('');
+            
+            displayArticles(articles);
+        }
+
+        function filterByLocation(locationId) {
+            document.querySelectorAll('#location-filters .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.dataset.filter === locationId || (locationId === 'all' && chip.dataset.filter === 'all')) {
+                    chip.classList.add('active');
+                }
+            });
+            
+            const filtered = locationId === 'all' 
+                ? articles 
+                : articles.filter(art => art.quantities && art.quantities[locationId]);
+            
+            displayArticles(filtered);
+        }
+
+        function loadLocations() {
+            const listHtml = locations.map(loc => {
+                const articleCount = articles.filter(art => 
+                    art.quantities && art.quantities[loc.id] && art.quantities[loc.id].nombre > 0
+                ).length;
+                
+                return `
+                    <div class="location-list-item" onclick="showLocationArticles('${loc.id}')">
+                        <div class="location-info">
+                            <div class="location-title">${loc.name}</div>
+                            <div class="location-count">${articleCount} article(s)</div>
+                            ${loc.description ? `<div class="location-count">${loc.description}</div>` : ''}
+                        </div>
+                        <div class="location-actions">
+                            <button class="icon-btn" onclick="event.stopPropagation(); editLocation('${loc.id}')">✏️</button>
+                            <button class="icon-btn" onclick="event.stopPropagation(); deleteLocation('${loc.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="empty-state"><div class="empty-icon">📍</div><div class="empty-text">Aucun emplacement défini</div></div>';
+            
+            document.getElementById('locations-list').innerHTML = listHtml;
+        }
+
+        function showLocationArticles(locationId) {
+            const location = locations.find(l => l.id.toString() === locationId);
+            if (!location) return;
+            
+            const locationArticles = articles.filter(art => 
+                art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
+            );
+            
+            const articlesHtml = locationArticles.map(art => `
+                <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                    <div class="article-header">
+                        <div class="article-name">${art.name}</div>
+                        <div class="article-quantity">${art.quantities[locationId].nombre}</div>
+                    </div>
+                    ${art.famille ? `<div class="article-meta">${art.famille} / ${art.categorie}</div>` : ''}
+                </div>
+            `).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Aucun article dans cet emplacement</div></div>';
+            
+            document.getElementById('detail-container').innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-title">📍 ${location.name}</div>
+                    ${location.description ? `<div class="detail-code">${location.description}</div>` : ''}
+                </div>
+                <div class="detail-section">
+                    <div class="section-title">Articles dans cet emplacement</div>
+                    <div class="article-list">${articlesHtml}</div>
+                </div>
+                <button class="btn-secondary" onclick="navigateTo('locations')">← Retour aux emplacements</button>
+            `;
+            
+            navigateTo('detail');
+        }
+
+        function showAddLocationModal() {
+            document.getElementById('location-name').value = '';
+            document.getElementById('location-description').value = '';
+            document.getElementById('add-location-modal').classList.add('active');
+        }
+
+        function saveLocation(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('location-name').value.trim().toUpperCase();
+            const description = document.getElementById('location-description').value.trim().toUpperCase();
+            
+            if (!name) {
+                alert('Le nom de l\'emplacement est requis');
+                return;
+            }
+            
+            locations.push({
+                id: Date.now(),
+                name,
+                description
+            });
+            
+            saveToStorage();
+            closeModal('add-location-modal');
+            loadLocations();
+            loadInventory();
+            loadDashboard();
+        }
+
+        function editLocation(locationId) {
+            const location = locations.find(l => l.id.toString() === locationId);
+            if (!location) return;
+            
+            document.getElementById('location-name').value = location.name;
+            document.getElementById('location-description').value = location.description || '';
+            
+            const modal = document.getElementById('add-location-modal');
+            modal.querySelector('.modal-title').textContent = 'Modifier l\'emplacement';
+            
+            const form = modal.querySelector('form');
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                
+                location.name = document.getElementById('location-name').value.trim().toUpperCase();
+                location.description = document.getElementById('location-description').value.trim().toUpperCase();
+                
+                saveToStorage();
+                closeModal('add-location-modal');
+                loadLocations();
+                loadInventory();
+                
+                form.onsubmit = saveLocation;
+                modal.querySelector('.modal-title').textContent = 'Nouvel Emplacement';
+            };
+            
+            modal.classList.add('active');
+        }
+
+        function deleteLocation(locationId) {
+            const location = locations.find(l => l.id.toString() === locationId);
+            if (!location) return;
+            
+            const articlesInLocation = articles.filter(art => 
+                art.quantities && art.quantities[locationId] && art.quantities[locationId].nombre > 0
+            );
+            
+            if (articlesInLocation.length > 0) {
+                if (!confirm(`Cet emplacement contient ${articlesInLocation.length} article(s). Voulez-vous vraiment le supprimer ? Les articles seront transférés vers "Non rangé".`)) {
+                    return;
+                }
+                
+                articles.forEach(art => {
+                    if (art.quantities && art.quantities[locationId]) {
+                        delete art.quantities[locationId];
+                    }
+                });
+            }
+            
+            locations = locations.filter(l => l.id.toString() !== locationId);
+            saveToStorage();
+            loadLocations();
+            loadInventory();
+            loadDashboard();
+        }
+
+        function showMoveArticleModal() {
+            if (!currentArticleId) return;
+            
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+            
+            const fromSelect = document.getElementById('move-from');
+            const toSelect = document.getElementById('move-to');
+            
+            const availableLocations = Object.keys(article.quantities || {}).filter(id => article.quantities[id].nombre > 0);
+            
+            fromSelect.innerHTML = availableLocations.map(id => {
+                const loc = locations.find(l => l.id.toString() === id);
+                return loc ? `<option value="${id}">${loc.name} (${article.quantities[id].nombre})</option>` : '';
+            }).join('');
+            
+            toSelect.innerHTML = locations.map(loc => 
+                `<option value="${loc.id}">${loc.name}</option>`
+            ).join('');
+            
+            document.getElementById('move-quantity').max = Math.max(...availableLocations.map(id => article.quantities[id].nombre), 0);
+            document.getElementById('move-quantity').value = 1;
+            
+            document.getElementById('move-article-modal').classList.add('active');
+        }
+
+        function moveArticle(event) {
+            event.preventDefault();
+            
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+            
+            const fromId = document.getElementById('move-from').value;
+            const toId = document.getElementById('move-to').value;
+            const quantity = parseInt(document.getElementById('move-quantity').value);
+            
+            if (!article.quantities[fromId] || article.quantities[fromId].nombre < quantity) {
+                alert('Quantité insuffisante');
+                return;
+            }
+            
+            article.quantities[fromId].nombre -= quantity;
+            
+            if (article.quantities[fromId].nombre === 0) {
+                delete article.quantities[fromId];
+            }
+            
+            if (!article.quantities[toId]) {
+                article.quantities[toId] = { nombre: 0 };
+            }
+            article.quantities[toId].nombre += quantity;
+            
+            const fromLoc = locations.find(l => l.id.toString() === fromId);
+            const toLoc = locations.find(l => l.id.toString() === toId);
+            
+            addHistory('Déplacement', article.name, `${quantity} de ${fromLoc.name} vers ${toLoc.name}`);
+            
+            saveToStorage();
+            closeModal('move-article-modal');
+            showArticleDetail(currentArticleId);
+        }
+
+        function showStockActionModal(action) {
+            if (!currentArticleId) return;
+            
+            currentStockAction = action;
+            const modal = document.getElementById('stock-action-modal');
+            const title = document.getElementById('stock-action-title');
+            const btn = document.getElementById('stock-action-btn');
+            
+            if (action === 'add') {
+                title.textContent = 'Ajouter au stock';
+                btn.textContent = 'Ajouter';
+            } else {
+                title.textContent = 'Retirer du stock';
+                btn.textContent = 'Retirer';
+            }
+            
+            const locationSelect = document.getElementById('stock-location');
+            locationSelect.innerHTML = locations.map(loc => 
+                `<option value="${loc.id}">${loc.name}</option>`
+            ).join('');
+            
+            modal.classList.add('active');
+        }
+
+        function performStockAction(event) {
+            event.preventDefault();
+            
+            const article = articles.find(a => a.id.toString() === currentArticleId);
+            if (!article) return;
+            
+            const locationId = document.getElementById('stock-location').value;
+            const quantity = parseInt(document.getElementById('stock-quantity').value);
+            
+            if (!article.quantities) article.quantities = {};
+            
+            if (currentStockAction === 'add') {
+                if (!article.quantities[locationId]) {
+                    article.quantities[locationId] = { nombre: 0 };
+                }
+                article.quantities[locationId].nombre += quantity;
+                addHistory('Ajout stock', article.name, `+${quantity} à ${locations.find(l => l.id.toString() === locationId).name}`);
+            } else {
+                if (!article.quantities[locationId] || article.quantities[locationId].nombre < quantity) {
+                    alert('Quantité insuffisante');
+                    return;
+                }
+                article.quantities[locationId].nombre -= quantity;
+                if (article.quantities[locationId].nombre === 0) {
+                    delete article.quantities[locationId];
+                }
+                addHistory('Retrait stock', article.name, `-${quantity} de ${locations.find(l => l.id.toString() === locationId).name}`);
+            }
+            
+            saveToStorage();
+            closeModal('stock-action-modal');
+            showArticleDetail(currentArticleId);
+        }
+
+        function deleteArticle(articleId) {
+            const article = articles.find(a => a.id.toString() === articleId);
+            if (!article) return;
+            
+            if (!confirm(`Supprimer définitivement l'article "${article.name}" ?`)) return;
+            
+            articles = articles.filter(a => a.id.toString() !== articleId);
+            addHistory('Suppression', article.name);
+            
+            saveToStorage();
+            navigateTo('inventory');
+            loadInventory();
+            loadDashboard();
+        }
+
+        function toggleHistory() {
+            const container = document.getElementById('article-history-container');
+            container.classList.toggle('expanded');
+        }
+
+        function returnToScanner() {
+            navigateTo('scan');
+        }
+
+        // Fonctions de recherche avancée
+        function loadSearchPage() {
+            loadFilterDropdowns();
+            document.getElementById('advanced-search-input').value = '';
+            document.getElementById('search-results').innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Utilisez la recherche ou les filtres pour trouver des articles</div></div>';
+        }
+
+        function loadFilterDropdowns() {
+            const uniqueLocations = [...new Set(articles.flatMap(art => 
+                Object.keys(art.quantities || {})
+            ))].map(id => locations.find(l => l.id.toString() === id)).filter(Boolean);
+            
+            const locationDropdown = document.getElementById('location-filter-dropdown');
+            locationDropdown.innerHTML = '<div class="filter-option" onclick="selectFilter(\'location\', null)">Tous</div>' +
+                uniqueLocations.map(loc => 
+                    `<div class="filter-option ${currentFilters.location === loc.id ? 'selected' : ''}" onclick="selectFilter('location', '${loc.id}')">${loc.name}</div>`
+                ).join('');
+            
+            const familleDropdown = document.getElementById('famille-filter-dropdown');
+            familleDropdown.innerHTML = '<div class="filter-option" onclick="selectFilter(\'famille\', null)">Toutes</div>' +
+                familles.map(fam => 
+                    `<div class="filter-option ${currentFilters.famille === fam.nom ? 'selected' : ''}" onclick="selectFilter('famille', '${fam.nom}')">${fam.nom}</div>`
+                ).join('');
+            
+            const categories = [...new Set(articles.map(art => art.categorie).filter(Boolean))];
+            const categorieDropdown = document.getElementById('categorie-filter-dropdown');
+            categorieDropdown.innerHTML = '<div class="filter-option" onclick="selectFilter(\'categorie\', null)">Toutes</div>' +
+                categories.map(cat => 
+                    `<div class="filter-option ${currentFilters.categorie === cat ? 'selected' : ''}" onclick="selectFilter('categorie', '${cat}')">${cat}</div>`
+                ).join('');
+            
+            const fournisseurs = [...new Set(articles.map(art => art.fournisseur).filter(Boolean))];
+            const fournisseurDropdown = document.getElementById('fournisseur-filter-dropdown');
+            fournisseurDropdown.innerHTML = '<div class="filter-option" onclick="selectFilter(\'fournisseur\', null)">Tous</div>' +
+                fournisseurs.map(four => 
+                    `<div class="filter-option ${currentFilters.fournisseur === four ? 'selected' : ''}" onclick="selectFilter('fournisseur', '${four}')">${four}</div>`
+                ).join('');
+        }
+
+        function toggleFilterDropdown(type) {
+            const dropdown = document.getElementById(`${type}-filter-dropdown`);
+            dropdown.classList.toggle('show');
+        }
+
+        function selectFilter(type, value) {
+            currentFilters[type] = value;
+            loadFilterDropdowns();
+            performSearch();
+        }
+
+        function clearAllFilters() {
+            currentFilters = {
+                location: null,
+                famille: null,
+                categorie: null,
+                fournisseur: null
+            };
+            loadFilterDropdowns();
+            document.getElementById('advanced-search-input').value = '';
+            performSearch();
+        }
+
+        function filterSearchResults(filter) {
+            document.querySelectorAll('#search-page .filters .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            performSearch();
+        }
+
+        function performSearch() {
+            const searchTerm = document.getElementById('advanced-search-input').value.toLowerCase();
+            
+            let filtered = articles;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(art => 
+                    art.name.toLowerCase().includes(searchTerm) ||
+                    (art.barcode && art.barcode.toLowerCase().includes(searchTerm)) ||
+                    (art.famille && art.famille.toLowerCase().includes(searchTerm)) ||
+                    (art.categorie && art.categorie.toLowerCase().includes(searchTerm)) ||
+                    (art.fournisseur && art.fournisseur.toLowerCase().includes(searchTerm)) ||
+                    (art.reference && art.reference.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (currentFilters.location) {
+                filtered = filtered.filter(art => 
+                    art.quantities && art.quantities[currentFilters.location] && art.quantities[currentFilters.location].nombre > 0
+                );
+            }
+            
+            if (currentFilters.famille) {
+                filtered = filtered.filter(art => art.famille === currentFilters.famille);
+            }
+            
+            if (currentFilters.categorie) {
+                filtered = filtered.filter(art => art.categorie === currentFilters.categorie);
+            }
+            
+            if (currentFilters.fournisseur) {
+                filtered = filtered.filter(art => art.fournisseur === currentFilters.fournisseur);
+            }
+            
+            const activeFilter = document.querySelector('#search-page .filters .filter-chip.active')?.dataset.filter || 'all';
+            
+            if (activeFilter === 'low') {
+                filtered = filtered.filter(art => {
+                    const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + q.nombre, 0);
+                    return totalQty <= (art.seuil_bas || 0) && totalQty > 0;
+                });
+            } else if (activeFilter === 'zero') {
+                filtered = filtered.filter(art => {
+                    const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + q.nombre, 0);
+                    return totalQty === 0;
+                });
+            }
+            
+            const resultsHtml = filtered.map(art => {
+                const totalQty = Object.values(art.quantities || {}).reduce((s, q) => s + q.nombre, 0);
+                const locs = Object.entries(art.quantities || {}).filter(([_, q]) => q.nombre > 0);
+                
+                const isLowStock = totalQty <= (art.seuil_bas || 0) && totalQty > 0;
+                const isVeryLowStock = totalQty === 0;
+                
+                return `
+                    <div class="article-card" onclick="showArticleDetail('${art.id}')">
+                        <div class="article-header">
+                            <div>
+                                <div class="article-name">
+                                    ${art.name}
+                                    ${isLowStock ? '<span class="stock-low-indicator" title="Stock faible"></span>' : ''}
+                                    ${isVeryLowStock ? '<span class="stock-low-indicator stock-very-low-indicator" title="Stock très faible"></span>' : ''}
+                                </div>
+                                ${art.famille ? `<div class="article-meta">📁 ${art.famille} / ${art.categorie}</div>` : ''}
+                            </div>
+                            <div class="article-quantity">${totalQty}</div>
+                        </div>
+                        <div class="article-locations">
+                            ${locs.map(([locId, qty]) => {
+                                const loc = locations.find(l => l.id.toString() === locId);
+                                return loc ? `<span class="location-badge">${loc.name}: ${qty.nombre}</span>` : '';
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Aucun article trouvé</div></div>';
+            
+            document.getElementById('search-results').innerHTML = resultsHtml;
+        }
+
+        // Fonctions d'import/export
+        function loadImportExport() {
+            const familleSelects = ['barcode-famille-filter', 'excel-famille-filter'];
+            
+            familleSelects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.innerHTML = '<option value="">Toutes les familles</option>' +
+                        familles.map(fam => `<option value="${fam.nom}">${fam.nom}</option>`).join('');
+                }
+            });
+        }
+
+        async function generateAndDownloadCatalogue() {
+            const familleFilter = document.getElementById('barcode-famille-filter').value;
+            
+            let filteredArticles = articles;
+            if (familleFilter) {
+                filteredArticles = articles.filter(art => art.famille === familleFilter);
+            }
+            
+            if (filteredArticles.length === 0) {
+                alert('Aucun article à exporter');
+                return;
+            }
+            
+            const groupedByFamille = {};
+            filteredArticles.forEach(art => {
+                const famille = art.famille || 'Sans famille';
+                if (!groupedByFamille[famille]) {
+                    groupedByFamille[famille] = {};
+                }
+                const categorie = art.categorie || 'Sans catégorie';
+                if (!groupedByFamille[famille][categorie]) {
+                    groupedByFamille[famille][categorie] = [];
+                }
+                groupedByFamille[famille][categorie].push(art);
+            });
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Catalogue codes-barres</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .famille { margin-bottom: 30px; page-break-after: always; }
+                        .famille h1 { color: #333; border-bottom: 2px solid #333; padding-bottom: 5px; }
+                        .categorie { margin: 20px 0; }
+                        .categorie h2 { color: #666; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
+                        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+                        .item { border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #f9f9f9; }
+                        .barcode { background: white; padding: 10px; text-align: center; border: 1px solid #eee; }
+                        .barcode svg { max-width: 100%; height: auto; }
+                        .info { margin-top: 10px; font-size: 12px; }
+                        .info div { margin: 3px 0; }
+                        .label { font-weight: bold; color: #555; }
+                        @media print {
+                            .famille { page-break-after: always; }
+                            .grid { break-inside: avoid; }
+                        }
+                    </style>
+                </head>
+                <body>
+            `);
+            
+            for (const [famille, categories] of Object.entries(groupedByFamille)) {
+                printWindow.document.write(`<div class="famille"><h1>${famille}</h1>`);
+                
+                for (const [categorie, articles] of Object.entries(categories)) {
+                    printWindow.document.write(`<div class="categorie"><h2>${categorie}</h2><div class="grid">`);
+                    
+                    articles.forEach(art => {
+                        printWindow.document.write('<div class="item">');
+                        printWindow.document.write('<div class="barcode">');
+                        
+                        if (art.barcode) {
+                            printWindow.document.write(`<svg id="barcode-${art.id}"></svg>`);
+                            printWindow.document.write(`<script>
+                                JsBarcode("#barcode-${art.id}", "${art.barcode}", {
+                                    format: "CODE128",
+                                    width: 2,
+                                    height: 50,
+                                    displayValue: true
+                                });
+                            <\/script>`);
+                        } else {
+                            printWindow.document.write('<div style="height:50px; display:flex; align-items:center; justify-content:center; background:#f0f0f0; border:2px dashed #999;">Pas de code</div>');
+                        }
+                        
+                        printWindow.document.write('</div>');
+                        printWindow.document.write('<div class="info">');
+                        printWindow.document.write(`<div><span class="label">Nom:</span> ${art.name}</div>`);
+                        if (art.fournisseur) printWindow.document.write(`<div><span class="label">Fournisseur:</span> ${art.fournisseur}</div>`);
+                        if (art.reference) printWindow.document.write(`<div><span class="label">Réf:</span> ${art.reference}</div>`);
+                        if (art.barcode) printWindow.document.write(`<div><span class="label">Code:</span> ${art.barcode}</div>`);
+                        printWindow.document.write('</div></div>');
+                    });
+                    
+                    printWindow.document.write('</div></div>');
+                }
+                
+                printWindow.document.write('</div>');
+            }
+            
+            printWindow.document.write(`
+                <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+                <script>
+                    setTimeout(() => {
+                        window.print();
+                    }, 500);
+                <\/script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+        }
+
+        async function downloadExcel() {
+            const familleFilter = document.getElementById('excel-famille-filter').value;
+            
+            if (familleFilter) {
+                await exportSingleFamilyExcel(familleFilter);
+            } else {
+                for (const famille of familles) {
+                    await exportSingleFamilyExcel(famille.nom);
+                }
+                const sansFamille = articles.filter(art => !art.famille || art.famille.trim() === '');
+                if (sansFamille.length > 0) {
+                    await exportSingleFamilyExcel('Sans famille');
+                }
+            }
+        }
+
         async function exportSingleFamilyExcel(famille) {
             try {
                 const filteredArticles = famille === 'Sans famille' 
@@ -2872,19 +3545,15 @@
                     
                     const worksheet = workbook.addWorksheet(categorie.substring(0, 31).toUpperCase());
                     
-                    // Obtenir tous les champs personnalisés uniques pour cette famille
                     const familleData = familles.find(f => f.nom === famille);
                     const customFields = familleData ? (familleData.champsPersonnalises || []) : [];
                     
-                    // En-têtes
                     const headers = ['NOM', 'CATÉGORIE', 'CODE-BARRE', 'FOURNISSEUR', 'RÉFÉRENCE', 'SEUIL BAS'];
                     
-                    // Ajouter les champs personnalisés
                     customFields.sort((a, b) => a.ordre - b.ordre).forEach(champ => {
                         headers.push(champ.label.toUpperCase());
                     });
                     
-                    // Ajouter les emplacements
                     const sortedLocations = [...locations].sort((a, b) => a.name.localeCompare(b.name));
                     sortedLocations.forEach(loc => {
                         headers.push(loc.name.toUpperCase());
@@ -2900,14 +3569,12 @@
                         cell.border = borderStyle;
                     });
                     
-                    // Données
                     let currentRow = 2;
                     let previousNom = '';
                     
                     categoryArticles.sort((a, b) => a.name.localeCompare(b.name)).forEach((art) => {
                         const row = [];
                         
-                        // NOM - ajouter un saut de ligne si le nom change
                         if (previousNom !== art.name.toUpperCase() && previousNom !== '') {
                             worksheet.addRow([]);
                             currentRow++;
@@ -2921,13 +3588,11 @@
                         row.push(art.reference || '');
                         row.push(art.seuil_bas || 0);
                         
-                        // Ajouter les champs personnalisés
                         customFields.sort((a, b) => a.ordre - b.ordre).forEach(champ => {
                             const value = art.customValues && art.customValues[champ.label] ? art.customValues[champ.label] : '';
                             row.push(value);
                         });
                         
-                        // Quantités par emplacement
                         let totalQuantity = 0;
                         sortedLocations.forEach(loc => {
                             const qty = art.quantities && art.quantities[loc.id] ? art.quantities[loc.id].nombre : 0;
@@ -2939,14 +3604,12 @@
                         
                         const excelRow = worksheet.addRow(row);
                         
-                        // Appliquer les styles
                         excelRow.eachCell((cell, colNumber) => {
                             cell.border = borderStyle;
                             
-                            // Mettre en rouge si le stock est inférieur ou égal au seuil bas
                             if (colNumber === headers.length && cell.value && typeof cell.value === 'number') {
                                 const totalQuantity = cell.value;
-                                const seuilBasCol = 6; // Colonne F (SEUIL BAS)
+                                const seuilBasCol = 6;
                                 const seuilBas = excelRow.getCell(seuilBasCol).value || 0;
                                 if (totalQuantity <= seuilBas && totalQuantity > 0) {
                                     cell.font = { bold: true, color: { argb: 'FFFF9800' } };
@@ -2955,7 +3618,6 @@
                                 }
                             }
                             
-                            // Alignement
                             if (colNumber <= 6 + customFields.length) {
                                 cell.alignment = { vertical: 'middle', horizontal: 'left' };
                             } else {
@@ -2969,14 +3631,13 @@
                         currentRow++;
                     });
                     
-                    // Ajuster les largeurs de colonnes
                     const columnWidths = [
-                        { width: 30 }, // NOM
-                        { width: 20 }, // CATÉGORIE
-                        { width: 20 }, // CODE-BARRE
-                        { width: 20 }, // FOURNISSEUR
-                        { width: 20 }, // RÉFÉRENCE
-                        { width: 12 }, // SEUIL BAS
+                        { width: 30 },
+                        { width: 20 },
+                        { width: 20 },
+                        { width: 20 },
+                        { width: 20 },
+                        { width: 12 },
                     ];
                     
                     customFields.forEach(() => {
@@ -2987,11 +3648,10 @@
                         columnWidths.push({ width: 12 });
                     });
                     
-                    columnWidths.push({ width: 12 }); // TOTAL
+                    columnWidths.push({ width: 12 });
                     
                     worksheet.columns = columnWidths;
                     
-                    // Congeler l'en-tête
                     worksheet.views = [{ state: 'frozen', ySplit: 1 }];
                 });
                 
@@ -3019,72 +3679,155 @@
             }
         }
 
-        // Fonctions utilitaires
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
             
-            if (modalId === 'add-article-modal' && 
-                !document.getElementById('scan-page').classList.contains('hidden')) {
-                setTimeout(() => {
-                    startScanner();
-                }, 300);
-            }
-        }
-
-        function getActionIcon(action) {
-            const icons = {
-                'Ajout': '➕',
-                'Suppression': '🗑️',
-                'Déplacement': '🔄',
-                'Ajout stock': '📥',
-                'Retrait stock': '📤',
-                'Import': '📥',
-                'Modification': '✏️'
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const workbook = new ExcelJS.Workbook();
+                    await workbook.xlsx.load(e.target.result);
+                    
+                    let importedCount = 0;
+                    
+                    workbook.eachSheet((worksheet, sheetId) => {
+                        const headers = [];
+                        worksheet.getRow(1).eachCell((cell, colNumber) => {
+                            headers[colNumber] = cell.text;
+                        });
+                        
+                        worksheet.eachRow((row, rowNumber) => {
+                            if (rowNumber === 1) return;
+                            
+                            const name = row.getCell(1).text;
+                            if (!name) return;
+                            
+                            const categorie = row.getCell(2).text || '';
+                            const barcode = row.getCell(3).text || '';
+                            const fournisseur = row.getCell(4).text || '';
+                            const reference = row.getCell(5).text || '';
+                            const seuil_bas = parseInt(row.getCell(6).text) || 0;
+                            
+                            let article = articles.find(a => a.name === name && a.categorie === categorie);
+                            
+                            const customValues = {};
+                            for (let i = 7; i <= headers.length - locations.length - 1; i++) {
+                                const header = headers[i];
+                                if (header) {
+                                    customValues[header] = row.getCell(i).text || '';
+                                }
+                            }
+                            
+                            if (!article) {
+                                const famille = familles.find(f => f.nom === sheet.name)?.nom || 'Sans famille';
+                                
+                                article = {
+                                    id: Date.now() + Math.random(),
+                                    name,
+                                    barcode,
+                                    famille,
+                                    categorie,
+                                    fournisseur,
+                                    reference,
+                                    seuil_bas,
+                                    customValues,
+                                    quantities: {},
+                                    createdAt: new Date().toISOString()
+                                };
+                                articles.push(article);
+                            } else {
+                                article.barcode = barcode || article.barcode;
+                                article.fournisseur = fournisseur || article.fournisseur;
+                                article.reference = reference || article.reference;
+                                article.seuil_bas = seuil_bas;
+                                article.customValues = { ...article.customValues, ...customValues };
+                            }
+                            
+                            const startCol = headers.length - locations.length;
+                            for (let i = 0; i < locations.length; i++) {
+                                const colIndex = startCol + i;
+                                const locName = headers[colIndex];
+                                const location = locations.find(l => l.name === locName);
+                                
+                                if (location) {
+                                    const qty = parseInt(row.getCell(colIndex).text) || 0;
+                                    if (qty > 0) {
+                                        if (!article.quantities[location.id]) {
+                                            article.quantities[location.id] = { nombre: 0 };
+                                        }
+                                        article.quantities[location.id].nombre += qty;
+                                    }
+                                }
+                            }
+                            
+                            importedCount++;
+                        });
+                    });
+                    
+                    saveToStorage();
+                    alert(`${importedCount} articles importés avec succès !`);
+                    loadInventory();
+                    loadDashboard();
+                    
+                } catch (error) {
+                    console.error('Erreur lors de l\'import:', error);
+                    alert('Erreur lors de l\'import du fichier: ' + error.message);
+                }
             };
-            return icons[action] || '📝';
+            
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
         }
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diff = now - date;
+        function backupData() {
+            const data = {
+                articles,
+                locations,
+                familles,
+                history,
+                lastExportTimestamps
+            };
             
-            if (diff < 60000) return 'À l\'instant';
-            if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
-            if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
-            
-            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            saveAs(blob, `inventaire_backup_${new Date().toISOString().slice(0,10)}.json`);
         }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Convertir automatiquement en majuscules
-            document.addEventListener('input', function(event) {
-                if (event.target.matches('input[type="text"], input[type="search"], textarea')) {
-                    if (!event.target.id.includes('barcode') && 
-                        !event.target.id.includes('manual-barcode')) {
-                        event.target.value = event.target.value.toUpperCase();
-                    }
-                }
-            });
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
             
-            document.addEventListener('blur', function(event) {
-                if (event.target.matches('input[type="text"], input[type="search"], textarea')) {
-                    if (!event.target.id.includes('barcode') && 
-                        !event.target.id.includes('manual-barcode')) {
-                        event.target.value = event.target.value.toUpperCase();
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (data.articles) articles = data.articles;
+                        if (data.locations) locations = data.locations;
+                        if (data.familles) familles = data.familles;
+                        if (data.history) history = data.history;
+                        if (data.lastExportTimestamps) lastExportTimestamps = data.lastExportTimestamps;
+                        
+                        saveToStorage();
+                        alert('Données restaurées avec succès !');
+                        loadDashboard();
+                        navigateTo('dashboard');
+                    } catch (error) {
+                        alert('Erreur lors de la restauration: ' + error.message);
                     }
-                }
-            }, true);
+                };
+                
+                reader.readAsText(file);
+            };
             
-            loadDashboard();
-        });
+            input.click();
+        }
 
-        // Les autres fonctions (startScanner, stopScanner, handleScannedBarcode, etc.)
-        // sont conservées sans modification car elles ne sont pas directement concernées par les nouvelles fonctionnalités
-
-        // Scanner functions
+        // Fonctions scanner
         async function startScanner() {
             console.log('Démarrage du scanner...');
             
@@ -3202,22 +3945,77 @@
             handleScannedBarcode(scannedBarcode);
         }
 
-        // Les autres fonctions existantes (loadInventory, saveLocation, moveArticle, etc.) 
-        // sont conservées sans modification
+        // Fonctions utilitaires
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.querySelectorAll(`#${modalId} form`).forEach(form => form.reset());
+            
+            if (modalId === 'add-article-modal' && 
+                !document.getElementById('scan-page').classList.contains('hidden')) {
+                setTimeout(() => {
+                    startScanner();
+                }, 300);
+            }
+        }
 
-        // Note: Certaines fonctions peuvent nécessiter des adaptations mineures
-        // pour fonctionner avec les nouvelles données (familles, catégories, etc.)
-        // Ces adaptations ont été faites dans les fonctions principales ci-dessus
-    
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').then(function(registration) {
-        console.log('ServiceWorker enregistré avec succès : ', registration.scope);
-      }, function(err) {
-        console.log('Échec de l\'enregistrement du ServiceWorker : ', err);
-      });
-    });
-  }
-</script>
+        function getActionIcon(action) {
+            const icons = {
+                'Ajout': '➕',
+                'Suppression': '🗑️',
+                'Déplacement': '🔄',
+                'Ajout stock': '📥',
+                'Retrait stock': '📤',
+                'Import': '📥',
+                'Modification': '✏️'
+            };
+            return icons[action] || '📝';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'À l\'instant';
+            if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+            if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
+            
+            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('input', function(event) {
+                if (event.target.matches('input[type="text"], input[type="search"], textarea')) {
+                    if (!event.target.id.includes('barcode') && 
+                        !event.target.id.includes('manual-barcode')) {
+                        event.target.value = event.target.value.toUpperCase();
+                    }
+                }
+            });
+            
+            document.addEventListener('blur', function(event) {
+                if (event.target.matches('input[type="text"], input[type="search"], textarea')) {
+                    if (!event.target.id.includes('barcode') && 
+                        !event.target.id.includes('manual-barcode')) {
+                        event.target.value = event.target.value.toUpperCase();
+                    }
+                }
+            }, true);
+            
+            loadDashboard();
+        });
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker enregistré avec succès : ', registration.scope);
+                }, function(err) {
+                    console.log('Échec de l\'enregistrement du ServiceWorker : ', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
