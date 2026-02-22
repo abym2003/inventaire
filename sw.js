@@ -1,66 +1,44 @@
-const CACHE_NAME = 'inventaire-v1';
+const CACHE_NAME = 'armoires-cache-v1';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
-  'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
-  'https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js',
-  'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'
+  'index.html',
+  'manifest.json',
+  'icons/icon-72x72.png',
+  'icons/icon-96x96.png',
+  'icons/icon-128x128.png',
+  'icons/icon-144x144.png',
+  'icons/icon-152x152.png',
+  'icons/icon-192x192.png',
+  'icons/icon-384x384.png',
+  'icons/icon-512x512.png'
 ];
 
-self.addEventListener('install', function(event) {
-  self.skipWaiting();
+// Installation du service worker : mise en cache des fichiers statiques
+self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Cache ouvert');
-        return cache.addAll(urlsToCache).catch(err => {
-          console.error('Erreur lors de la mise en cache:', err);
-        });
-      })
+      .then(cache => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener('fetch', function(event) {
+// Activation : nettoyage des anciens caches
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      );
+    })
+  );
+});
+
+// Interception des requêtes : stratégie Cache First
+self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then(function(response) {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).then(
-          function(response) {
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            var responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
-            return response;
-          }
-        ).catch(function() {
-          return caches.match('./index.html');
-        });
+      .then(response => {
+        // Retourne le cache s'il existe, sinon va sur le réseau
+        return response || fetch(event.request);
       })
-  );
-});
-
-self.addEventListener('activate', function(event) {
-  var cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
   );
 });
